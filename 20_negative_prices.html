@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lesson 20 — Negative prices · Nordic Power School</title>
+<style>
+  :root{
+    --frost:#EEF3F7; --panel:#FFFFFF; --ink:#13202E; --slate:#5A6A7A;
+    --line:#D3DDE6; --deep:#0E1F33; --volt:#10B5C9; --volt-ink:#0A7E8E;
+    --ember:#E0913A; --ember-ink:#B16A12; --warm:#C2603F; --ok:#2FA980; --bad:#DD6457;
+    --mono: ui-monospace,"SF Mono","Cascadia Code",Consolas,"Roboto Mono",monospace;
+    --sans: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--frost);color:var(--ink);font-family:var(--sans);font-size:17px;line-height:1.62;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:860px;margin:0 auto;padding:0 24px}
+  header{position:sticky;top:0;z-index:20;background:rgba(238,243,247,.9);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+  .bar{display:flex;justify-content:space-between;align-items:center;height:52px;font-size:13px;letter-spacing:.04em;text-transform:uppercase}
+  .bar b{font-weight:700} .bar .r{font-family:var(--mono);color:var(--slate)}
+  .hero{padding:60px 0 26px}
+  .eyebrow{font-family:var(--mono);font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--volt-ink);margin-bottom:16px}
+  h1{font-size:clamp(32px,5.6vw,54px);line-height:1.03;letter-spacing:-.02em;margin:0 0 16px;font-weight:780}
+  .lead{font-size:clamp(18px,2.4vw,22px);color:var(--slate);max-width:42ch;margin:0}
+  .byline{margin-top:20px;font-size:14px;color:var(--slate)} .byline b{color:var(--ink)}
+  section{padding:36px 0;border-top:1px solid var(--line)}
+  .snum{font-family:var(--mono);font-size:13px;color:var(--volt-ink);letter-spacing:.1em}
+  h2{font-size:clamp(23px,3.3vw,32px);line-height:1.12;letter-spacing:-.015em;margin:6px 0 12px;font-weight:740}
+  p{margin:0 0 16px} .muted{color:var(--slate)}
+  .say{border-left:2px solid var(--volt);padding:2px 0 2px 18px;margin:18px 0}
+  .caution{border-left:2px solid var(--ember);padding:2px 0 2px 18px;margin:18px 0;color:var(--ember-ink);font-size:15px}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px;margin:20px 0}
+  .stage{position:relative;border-radius:12px;overflow:hidden}
+  .cover{position:absolute;inset:0;background:linear-gradient(180deg,var(--deep),#0a1726);color:#cfe;display:flex;flex-direction:column;gap:14px;align-items:center;justify-content:center;text-align:center;padding:24px;transition:opacity .5s;z-index:4}
+  .cover.gone{opacity:0;pointer-events:none} .cover .q{font-size:16px;max-width:34ch;color:#dCEbF0}
+  .controls{display:flex;flex-wrap:wrap;gap:18px;margin-top:14px}
+  .ctl{display:flex;flex-direction:column;gap:6px;min-width:200px;flex:1}
+  .ctl label{font-family:var(--mono);font-size:12.5px;color:var(--slate);display:flex;justify-content:space-between} .ctl label b{color:var(--ink)}
+  #wind{accent-color:var(--volt)} #dem{accent-color:var(--ink)} #exp{accent-color:var(--ember)} input[type=range]{width:100%}
+  .readout{display:flex;flex-wrap:wrap;gap:8px 24px;align-items:baseline;margin-top:14px;border-top:1px dashed var(--line);padding-top:14px;font-family:var(--mono);font-size:13.5px;color:var(--slate)}
+  .readout b{color:var(--ink)} .readout .big{font-size:24px;font-weight:600}
+  .tag{font-family:var(--mono);font-size:11.5px;letter-spacing:.05em;text-transform:uppercase;border-radius:999px;padding:5px 11px}
+  .tag.neg{background:#fbeae7;color:#b23a2c} .tag.pos{background:#e3f6ee;color:#1c7a59}
+  .choices{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0}
+  .choice{font-family:var(--mono);font-size:14px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 16px;cursor:pointer;color:var(--ink);transition:.15s}
+  .choice:hover{border-color:var(--volt)} .choice[aria-pressed=true]{background:var(--deep);color:#fff;border-color:var(--deep)}
+  .verdict{font-size:15px;margin-top:4px;min-height:1.4em} .verdict.ok{color:var(--ok)} .verdict.bad{color:var(--bad)}
+  .disc{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px}
+  .d{border:1px solid var(--line);border-radius:12px;padding:14px 16px;background:#fff;font-size:14.5px} .d b{color:var(--volt-ink)}
+  .rule{background:var(--deep);color:#eaf6f8;border-radius:14px;padding:24px;margin-top:8px}
+  .rule h3{margin:0 0 10px;font-size:20px;color:#fff} .rule p{color:#bcd6dc;margin:0 0 10px} .rule p:last-child{margin:0} .rule .k{color:var(--volt);font-family:var(--mono)}
+  footer{padding:48px 0;color:var(--slate);font-size:13px;border-top:1px solid var(--line)}
+  :focus-visible{outline:2px solid var(--volt);outline-offset:2px}
+  @media (max-width:640px){ .disc{grid-template-columns:1fr} }
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header><div class="wrap bar"><b>Nordic Power School</b><span class="r">Lesson 20 · Deep dive</span></div></header>
+
+<main class="wrap">
+  <div class="hero">
+    <div class="eyebrow">Lesson 20 · Negative prices</div>
+    <h1>When power<br>pays to flow.</h1>
+    <p class="lead">Sometimes the clearing price falls below zero &mdash; generators paying to keep producing. It looks broken. It&rsquo;s the merit order working exactly as designed, just below the line.</p>
+    <p class="byline">with <b>Elizabeth Cecilia</b>. The fastest-growing hour on the curve, and a direct consequence of subsidy and inflexibility.</p>
+  </div>
+
+  <section>
+    <div class="snum">01</div>
+    <h2>Why a bid goes below zero</h2>
+    <p>A rational generator bids what it&rsquo;s willing to be paid to run &mdash; usually positive. But two kinds of plant will bid <b>below zero</b>, paying to keep going:</p>
+    <p><b>Subsidised renewables</b> earn a payment per megawatt-hour produced &mdash; a certificate or contract on top of the market price. As long as that subsidy is larger than the negative price, running still pays, so they&rsquo;ll bid down to minus their subsidy rather than stop. <b>Must-run plant</b> &mdash; a CHP unit obliged to deliver heat, a nuclear block costly and slow to cycle &mdash; will pay a little to avoid the larger cost of shutting down and restarting.</p>
+    <p>Stack those below zero and you have a supply curve that starts in negative territory.</p>
+  </section>
+
+  <section>
+    <div class="snum">02</div>
+    <h2>The stack below zero</h2>
+    <p>Here is that stack: subsidised wind and must-run sit beneath the zero line, the flexible and thermal units above. Demand &mdash; plus whatever can be exported &mdash; decides where it clears.</p>
+    <p class="say"><b>Predict first:</b> a windy, mild Sunday night &mdash; wind flooding in, demand at its lowest, and the export cables already full. Where does the price clear?</p>
+    <div class="choices" id="negChoices" role="group" aria-label="Where the price clears on a windy mild Sunday night">
+      <button class="choice" data-v="neg">Below zero</button>
+      <button class="choice" data-v="zero">Around zero</button>
+      <button class="choice" data-v="high">Up in the thermal range</button>
+    </div>
+    <div class="verdict" id="negVerdict"></div>
+
+    <div class="panel">
+      <div class="stage">
+        <svg viewBox="0 0 720 320" width="100%" id="stackSvg" role="img" aria-label="Supply stack extended below zero with the clearing point"></svg>
+        <div class="cover" id="negCover"><div class="q">Predict above to build the stack and clear the night.</div></div>
+      </div>
+      <div class="controls">
+        <div class="ctl"><label>Subsidised wind <b><span id="windVal">8</span> GW</b></label><input id="wind" type="range" min="2" max="9" step="1" value="8"></div>
+        <div class="ctl"><label>Demand <b><span id="demVal">7</span> GW</b></label><input id="dem" type="range" min="5" max="30" step="1" value="7"></div>
+        <div class="ctl"><label>Export relief <b><span id="expVal">0</span> GW</b></label><input id="exp" type="range" min="0" max="6" step="1" value="0"></div>
+      </div>
+      <div class="readout">
+        <span class="tag neg" id="negTag">price below zero</span>
+        <span><span class="muted">clears at</span> <span class="big" id="clearP">−€18</span>/MWh</span>
+        <span class="muted" id="marginNote">marginal: subsidised wind</span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="snum">03</div>
+    <h2>The recipe, and the relief valve</h2>
+    <p>Negative prices need a specific coincidence: <b>high renewable output</b>, <b>low demand</b> (night, weekend, mild weather), <b>inflexible supply</b> that won&rsquo;t switch off, and <b>no way out</b> &mdash; the interconnectors already full, so the surplus can&rsquo;t be exported to a hungrier zone. Slide export relief up and watch the clear climb back above zero: a cable with room is the surplus&rsquo;s escape, which is why a congested border (Lesson 17) is so often where the deepest negatives appear.</p>
+  </section>
+
+  <section>
+    <div class="snum">04</div>
+    <h2>What a negative price is telling you</h2>
+    <p>It&rsquo;s a system shouting that it has <b>too much inflexible supply and nowhere to put it</b> &mdash; and paying anyone who can help. A negative price is an invitation: it pays storage to <b>charge</b>, pays flexible demand to <b>switch on</b>, and eventually pays wind to <b>curtail</b>. Every negative hour is the market pricing the value of flexibility the system wishes it had.</p>
+    <div class="disc">
+      <div class="d"><b>More common each year.</b> As subsidised renewables grow and demand stays inflexible, negative hours multiply &mdash; reading them is now part of the job.</div>
+      <div class="d"><b>Spill, in market form.</b> This is Lesson 16&rsquo;s reservoir hitting the brim, generalised: surplus energy that costs to get rid of.</div>
+    </div>
+    <p class="caution">This explains how and why prices go negative &mdash; not advice on trading negative hours or bidding strategy. What to do with a negative price is a decision the school doesn&rsquo;t make.</p>
+  </section>
+
+  <section>
+    <div class="snum">05</div>
+    <h2>The rule, in one breath</h2>
+    <div class="rule">
+      <h3>Prices go negative when inflexible, subsidised supply outruns demand and can&rsquo;t escape.</h3>
+      <p>Subsidised renewables bid down to minus their subsidy; must-run pays to avoid shutdown; and when low demand clears in that region with the export cables full, the price falls below zero. It isn&rsquo;t a glitch &mdash; it&rsquo;s the merit order paying for <span class="k">flexibility</span> the system doesn&rsquo;t have.</p>
+      <p class="muted" style="color:#9fc0cb">Deep dive complete. Back to the dashboard whenever you want today&rsquo;s read.</p>
+    </div>
+  </section>
+<nav class="lessonseq" style="max-width:860px;margin:0 auto;padding:30px 24px 0;display:flex;justify-content:space-between;gap:16px;font-family:var(--mono);font-size:13px;border-top:1px solid var(--line)"><a href="16_hydro_water_value.html" style="color:var(--volt-ink);text-decoration:none;max-width:48%">&larr; Builds on &middot; Hydro &amp; the water value</a><a href="06_reading_the_replay.html" style="color:var(--volt-ink);text-decoration:none;max-width:48%;text-align:right">Next &middot; Reading the replay &rarr;</a></nav>
+
+            <footer class="wrap">Nordic Power School · Lesson 20 — education only. No bids, no trades, no dispatch.</footer>
+</main>
+
+<script>
+(function(){
+  "use strict";
+  const $=s=>document.querySelector(s);
+  const C={wind:"#10B5C9",must:"#7FB7C4",hydro:"#2FA980",gas:"#E0913A",peak:"#C2603F",line:"#D3DDE6",slate:"#5A6A7A",ink:"#13202E",bad:"#DD6457",ok:"#2FA980"};
+  const wind=$("#wind"), dem=$("#dem"), exp=$("#exp");
+  function stack(){const w=(+wind.value)*1000;return [
+    {bid:-18,mw:w,c:C.wind,label:"subsidised wind"},
+    {bid:-3,mw:4000,c:C.must,label:"must-run (CHP, nuclear)"},
+    {bid:22,mw:5000,c:C.hydro,label:"hydro / flex"},
+    {bid:55,mw:4000,c:C.gas,label:"gas"},
+    {bid:95,mw:4000,c:C.peak,label:"peakers"}];}
+  function clearing(){const eff=((+dem.value)+(+exp.value))*1000;let cum=0;for(const b of stack()){cum+=b.mw;if(eff<=cum)return {price:b.bid,label:b.label};}return {price:95,label:"peakers"};}
+
+  const svg=$("#stackSvg"), X0=44,X1=706,Y0=18,Y1=250;
+  function draw(){
+    const S=stack(), total=S.reduce((a,b)=>a+b.mw,0), eff=((+dem.value)+(+exp.value))*1000;
+    const xf=mw=>X0+mw/Math.max(total,eff)*(X1-X0);
+    const PMIN=-30,PMAX=100, yf=p=>Y1-(p-PMIN)/(PMAX-PMIN)*(Y1-Y0);
+    let s="";
+    // price axis + zero line
+    [-30,0,40,80].forEach(p=>{const y=yf(p);const z=(p===0);s+=`<line x1="${X0}" y1="${y}" x2="${X1}" y2="${y}" stroke="${z?C.ink:C.line}" stroke-width="${z?1.4:1}" opacity="${z?1:0.5}"/><text x="${X0-6}" y="${y+3}" text-anchor="end" font-family="ui-monospace,monospace" font-size="10.5" fill="${z?C.ink:C.slate}">€${p}</text>`;});
+    // negative region shading
+    s+=`<rect x="${X0}" y="${yf(0)}" width="${X1-X0}" height="${Y1-yf(0)}" fill="${C.bad}" opacity="0.05"/>`;
+    // blocks
+    let cum=0;
+    S.forEach(b=>{const x0=xf(cum),x1=xf(cum+b.mw);const yb=yf(b.bid),y0=yf(0);
+      const yy=Math.min(yb,y0), hh=Math.abs(yb-y0);
+      s+=`<rect x="${x0}" y="${yy}" width="${Math.max(0,x1-x0-1)}" height="${hh}" fill="${b.c}" opacity="0.8"/>`;
+      if(x1-x0>54)s+=`<text x="${(x0+x1)/2}" y="${b.bid<0?y0+13:yb-5}" text-anchor="middle" font-family="ui-monospace,monospace" font-size="10" fill="${b.bid<0?'#fff':C.ink}">€${b.bid}</text>`;
+      cum+=b.mw;});
+    // demand line
+    const dx=xf(eff);
+    s+=`<line x1="${dx}" y1="${Y0}" x2="${dx}" y2="${Y1}" stroke="${C.ink}" stroke-width="1.6" stroke-dasharray="5 4"/>`;
+    s+=`<text x="${dx}" y="${Y0+12}" text-anchor="${dx>X1-80?'end':'middle'}" font-family="ui-monospace,monospace" font-size="10.5" fill="${C.ink}">demand+export</text>`;
+    // clearing marker
+    const cl=clearing();
+    s+=`<circle cx="${dx}" cy="${yf(cl.price)}" r="5" fill="${cl.price<0?C.bad:C.ok}" stroke="#fff" stroke-width="1.5"/>`;
+    s+=`<text x="${(X0+X1)/2}" y="${Y1+22}" text-anchor="middle" font-family="ui-monospace,monospace" font-size="10.5" fill="${C.slate}">supply, cheapest → dearest (MW)</text>`;
+    svg.innerHTML=s;
+    // readout
+    $("#windVal").textContent=wind.value; $("#demVal").textContent=dem.value; $("#expVal").textContent=exp.value;
+    const neg=cl.price<0, tag=$("#negTag");
+    if(neg){tag.className="tag neg";tag.textContent="price below zero";}else{tag.className="tag pos";tag.textContent="price above zero";}
+    $("#clearP").textContent=(cl.price<0?"−€":"€")+Math.abs(cl.price);
+    $("#marginNote").textContent="marginal: "+cl.label;
+  }
+  [wind,dem,exp].forEach(el=>el.addEventListener("input",draw));
+  draw();
+
+  $("#negChoices").addEventListener("click",e=>{
+    const b=e.target.closest(".choice"); if(!b) return;
+    document.querySelectorAll("#negChoices .choice").forEach(x=>x.setAttribute("aria-pressed","false"));
+    b.setAttribute("aria-pressed","true");
+    wind.value=8; dem.value=7; exp.value=0; draw();
+    const v=$("#negVerdict");
+    if(b.dataset.v==="neg"){v.className="verdict ok";v.textContent="Right — low demand clears inside the subsidised-wind block, with no export to escape. The price prints −€18.";}
+    else{v.className="verdict bad";v.textContent="Low demand clears down in the subsidised-wind block and the cables are full — it prints −€18, below zero.";}
+    $("#negCover").classList.add("gone");
+  });
+})();
+</script>
+</body>
+</html>

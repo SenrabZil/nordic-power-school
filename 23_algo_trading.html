@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lesson 23 — Algorithmic trading · Nordic Power School</title>
+<style>
+  :root{
+    --frost:#EEF3F7; --panel:#FFFFFF; --ink:#13202E; --slate:#5A6A7A;
+    --line:#D3DDE6; --deep:#0E1F33; --volt:#10B5C9; --volt-ink:#0A7E8E;
+    --ember:#E0913A; --ember-ink:#B16A12; --warm:#C2603F; --warm-ink:#A8472A; --ok:#2FA980; --bad:#DD6457;
+    --mono: ui-monospace,"SF Mono","Cascadia Code",Consolas,"Roboto Mono",monospace;
+    --sans: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--frost);color:var(--ink);font-family:var(--sans);font-size:17px;line-height:1.62;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:860px;margin:0 auto;padding:0 24px}
+  header{position:sticky;top:0;z-index:20;background:rgba(238,243,247,.9);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+  .bar{display:flex;justify-content:space-between;align-items:center;height:52px;font-size:13px;letter-spacing:.04em;text-transform:uppercase}
+  .bar b{font-weight:700} .bar .r{font-family:var(--mono);color:var(--slate)}
+  .hero{padding:60px 0 26px}
+  .eyebrow{font-family:var(--mono);font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--volt-ink);margin-bottom:16px}
+  h1{font-size:clamp(32px,5.6vw,54px);line-height:1.03;letter-spacing:-.02em;margin:0 0 16px;font-weight:780}
+  .lead{font-size:clamp(18px,2.4vw,22px);color:var(--slate);max-width:48ch;margin:0}
+  .byline{margin-top:20px;font-size:14px;color:var(--slate)} .byline b{color:var(--ink)}
+  section{padding:36px 0;border-top:1px solid var(--line)}
+  .snum{font-family:var(--mono);font-size:13px;color:var(--volt-ink);letter-spacing:.1em}
+  h2{font-size:clamp(23px,3.3vw,32px);line-height:1.12;letter-spacing:-.015em;margin:6px 0 12px;font-weight:740}
+  p{margin:0 0 16px} .muted{color:var(--slate)}
+  .say{border-left:2px solid var(--volt);padding:2px 0 2px 18px;margin:18px 0}
+  .caution{border-left:2px solid var(--ember);padding:8px 0 8px 18px;margin:18px 0;color:var(--ember-ink);font-size:15px}
+  .fam{margin:14px 0;padding-left:16px;border-left:2px solid var(--line)}
+  .fam b{color:var(--ink)}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px;margin:18px 0}
+  .stage{position:relative;border-radius:12px;overflow:hidden;background:#fff;min-height:60px}
+  .answer{padding:18px 20px;font-size:15.5px;color:var(--ink)}
+  .answer b{color:var(--ink)}
+  .cover{position:absolute;inset:0;background:linear-gradient(180deg,var(--deep),#0a1726);color:#cfe;display:flex;align-items:center;justify-content:center;text-align:center;padding:20px;transition:opacity .5s;z-index:4}
+  .cover.gone{opacity:0;pointer-events:none} .cover .q{font-size:15px;max-width:42ch;color:#dCEbF0}
+  .cap{font-family:var(--mono);font-size:12px;color:var(--slate);margin-top:10px}
+  .cap b{color:var(--ink)}
+  .choices{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0}
+  .choice{font-family:var(--mono);font-size:14px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 16px;cursor:pointer;color:var(--ink);transition:.15s}
+  .choice:hover{border-color:var(--volt)} .choice[aria-pressed=true]{background:var(--deep);color:#fff;border-color:var(--deep)}
+  .verdict{font-size:15px;margin-top:4px;min-height:1.4em} .verdict.ok{color:var(--ok)} .verdict.bad{color:var(--bad)}
+  .xref{font-size:14px;color:var(--slate)} .xref a{color:var(--volt-ink);text-decoration:none;border-bottom:1px solid var(--line)} .xref a:hover{border-color:var(--volt)}
+  .rule{background:var(--deep);color:#eaf6f8;border-radius:14px;padding:24px;margin-top:8px}
+  .rule h3{margin:0 0 10px;font-size:20px;color:#fff} .rule p{color:#bcd6dc;margin:0 0 10px} .rule p:last-child{margin:0} .rule .k{color:var(--volt);font-family:var(--mono)}
+  footer{padding:48px 0;color:var(--slate);font-size:13px;border-top:1px solid var(--line)}
+  :focus-visible{outline:2px solid var(--volt);outline-offset:2px}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header><div class="wrap bar"><b>Nordic Power School</b><span class="r">Lesson 23 · Deep dive</span></div></header>
+
+<main class="wrap">
+  <div class="hero">
+    <div class="eyebrow">Lesson 23 · Algorithmic trading</div>
+    <h1>The machines<br>in the market.</h1>
+    <p class="lead">Most of the order flow in the fast Nordic markets is now placed and managed by software, not by hand. This lesson is about what that machinery is, where it lives, and what it does to the prices you&rsquo;ve learned to read.</p>
+    <p class="byline">with <b>Elizabeth Cecilia</b>. How it works, and how it bends the market &mdash; never how to build one.</p>
+  </div>
+  <p class="buildson" style="font-family:var(--mono);font-size:12.5px;color:var(--slate);margin:0 0 26px;letter-spacing:.02em">Builds on &middot; <a href="05_balancing_imbalance.html" style="color:var(--volt-ink);text-decoration:none">05 Balancing & imbalance</a> &middot; <a href="18_intraday_market.html" style="color:var(--volt-ink);text-decoration:none">18 Intraday</a></p>
+
+
+  <section>
+    <div class="snum">01</div>
+    <h2>Who&rsquo;s actually trading now?</h2>
+    <p>A decade ago a power trader watched screens and clicked. Today, in the markets closest to delivery, most orders are submitted, modified and cancelled by software running unattended &mdash; far faster, and far more often, than any person could manage.</p>
+    <p>The reason is the rest of this course. More wind and solar means more forecast revisions, which means more reasons to re-trade after the day-ahead auction has closed. Finer products &mdash; the move to 15-minute periods &mdash; multiply the number of contracts in play. Pan-European coupling links dozens of zones at once. The volume and speed of decisions outran human hands, so the execution was handed to machines. The <i>judgement</i> &mdash; the strategy, the limits, the switch &mdash; still belongs to people.</p>
+    <p class="caution">This lesson explains how that machinery works and what it does to the market. It is <b>not</b> a guide to building or running a trading algorithm, and nothing in it is a strategy, a signal, or advice to trade. As always in this school, we&rsquo;re here to read the market, not to act in it.</p>
+  </section>
+
+  <section>
+    <div class="snum">02</div>
+    <h2>Anatomy of an algorithm</h2>
+    <p>Strip away the mystique and a trading algorithm is three parts joined in a loop: a <b>feed</b> of data coming in, a <b>logic</b> that decides what to do with it, and an <b>order</b> action going out &mdash; after which it watches its own fills and the changing market and goes round again.</p>
+    <div class="panel"><svg viewBox="0 0 680 170" width="100%" id="dAnatomy" role="img" aria-label="An algorithm as feed, logic and order joined in a feedback loop"></svg>
+      <div class="cap">The same loop runs from the simplest rule to the most complex model &mdash; only the <b>logic</b> box changes.</div></div>
+    <p>The simplest logic is a rule a human could state in a sentence: <i>if</i> this condition holds, place that order. The most complex re-solves an entire portfolio optimisation every few seconds. Either way the difference from manual trading isn&rsquo;t intelligence &mdash; it&rsquo;s that the loop runs on its own, inside limits a person set in advance.</p>
+    <p class="say"><b>Elizabeth:</b> the word &ldquo;algo&rdquo; sounds exotic, but it&rsquo;s just a decision written down precisely enough that a computer can follow it without you standing there. The judgement still came from a human &mdash; once.</p>
+  </section>
+
+  <section>
+    <div class="snum">03</div>
+    <h2>Where the algorithms live</h2>
+    <p>Nordic power trades in three arenas, and automation isn&rsquo;t spread evenly across them.</p>
+    <p class="say"><b>Predict first:</b> of day-ahead, intraday and balancing, which arena runs the most on automation?</p>
+    <div class="choices" data-reveal="covArena" role="group" aria-label="Which arena is most automated">
+      <button class="choice" data-v="da">Day-ahead</button>
+      <button class="choice" data-v="intraday">Intraday (continuous)</button>
+      <button class="choice" data-v="equal">They&rsquo;re about equal</button>
+    </div>
+    <div class="verdict" data-for="covArena"></div>
+    <div class="panel"><div class="stage"><svg viewBox="0 0 680 150" width="100%" id="dArenas" role="img" aria-label="A timeline from day-ahead through intraday to real-time balancing, with the later arenas marked machine-paced"></svg><div class="cover" id="covArena"><div class="q">Make the call to reveal the three arenas.</div></div></div>
+      <div class="cap">The closer to delivery, the more the machines: day-ahead is one careful auction; intraday and balancing run on automation.</div></div>
+    <p><b>Day-ahead</b> is a single blind auction each day, clearing around midday for the next day &mdash; you can prepare a bid curve carefully, at human pace. <b>Intraday</b> (the pan-European SIDC) is a continuous order book open through the day right up to near delivery, complemented by three daily auctions; this is the arena that rewards speed and runs heavily on software. <b>Balancing</b> is real time, on the European platforms the TSOs operate &mdash; the most automated and the closest to delivery of all.</p>
+    <p class="muted" style="font-size:14.5px">For scale: continuous intraday across Europe ran on the order of seventy-five million trades in a single quarter of 2025, and the three intraday auctions have operated since June 2024 on 15-minute products.</p>
+  </section>
+
+  <section>
+    <div class="snum">04</div>
+    <h2>The families of algorithm</h2>
+    <p>&ldquo;Algo&rdquo; isn&rsquo;t one thing. A handful of broad families do most of the work, and a single desk&rsquo;s system often blends several.</p>
+    <div class="fam"><b>Execution algos</b> take a position a human decided on and slice it into smaller orders over time, so a large trade doesn&rsquo;t move the price against itself.</div>
+    <div class="fam"><b>Market-making algos</b> quote both a buy and a sell price continuously, earning the spread between them and providing the liquidity that others trade against.</div>
+    <div class="fam"><b>Arbitrage algos</b> spot the same megawatt priced differently in two places or two timeframes &mdash; day-ahead versus intraday, one zone versus its neighbour &mdash; and trade the gap until it closes.</div>
+    <div class="fam"><b>Forecast-driven algos</b> ingest each new weather, load or outage update and re-price positions the instant the fundamentals shift &mdash; the cues from across this course, read by machine.</div>
+    <div class="fam"><b>Asset-optimisation algos</b> steer a physical asset &mdash; a battery above all, also hydro or flexible demand &mdash; deciding when to charge, hold or deliver across all three arenas, within the market rules.</div>
+    <p class="say"><b>Elizabeth:</b> notice that none of these invents information. They react to the same forecasts, flows and outages you&rsquo;ve been learning to read &mdash; they just react faster, and never blink.</p>
+  </section>
+
+  <section>
+    <div class="snum">05</div>
+    <h2>Why seconds matter</h2>
+    <p>Power isn&rsquo;t equities, where edges are measured in microseconds. But in the continuous intraday book, a few seconds is a real advantage &mdash; and that, more than anything, is why the work is automated.</p>
+    <p class="say"><b>Predict first:</b> a wind forecast is revised downward at 13:02. When do intraday prices first move?</p>
+    <div class="choices" data-reveal="covSpeed" role="group" aria-label="When intraday prices move">
+      <button class="choice" data-v="auction">At the next auction</button>
+      <button class="choice" data-v="seconds">Within minutes &mdash; often seconds</button>
+      <button class="choice" data-v="delivery">Not until delivery</button>
+    </div>
+    <div class="verdict" data-for="covSpeed"></div>
+    <div class="panel"><div class="stage"><div class="answer"><b>Within minutes &mdash; usually seconds.</b> The moment a forecast is published, every participant&rsquo;s view of residual load shifts at the same time. In the continuous book the fastest systems re-quote before slower hands have finished reading the update, so the price has already moved by the time a person looks. The information is public; the only question is who has re-priced first.</div><div class="cover" id="covSpeed"><div class="q">Make the call to reveal the answer.</div></div></div></div>
+    <p class="say"><b>Elizabeth:</b> speed here isn&rsquo;t about being clever &mdash; it&rsquo;s about not being last. You and the machine read the same public number; the machine has simply finished reading it sooner.</p>
+  </section>
+
+  <section>
+    <div class="snum">06</div>
+    <h2>Effect: liquidity and efficiency</h2>
+    <p>Two effects are mostly to the good. <b>Liquidity:</b> market-making algos quote almost continuously, so there is nearly always a price to trade against, and spreads are tighter than a human-only book would hold. <b>Efficiency:</b> new information &mdash; a forecast revision, an outage, a change in cross-border flow &mdash; reaches the price within seconds, and arbitrage algos pull prices in different markets and zones toward one another until the gaps close.</p>
+    <div class="panel"><svg viewBox="0 0 680 130" width="100%" id="dConverge" role="img" aria-label="Two prices in different markets converging as arbitrage closes the gap"></svg>
+      <div class="cap">Two venues, one product: arbitrage algos trade the gap until the prices meet.</div></div>
+    <p>The net is a market that absorbs news quickly and, on a normal day, prices it consistently across venues. The same speed that does this is also what makes the rare day sharper &mdash; which is the next section.</p>
+  </section>
+
+  <section>
+    <div class="snum">07</div>
+    <h2>Effect: volatility, the double edge</h2>
+    <p>The honest answer to &ldquo;do the machines calm the market or stir it up?&rdquo; is the one people least like.</p>
+    <p class="say"><b>Predict first:</b> do algorithms make power prices more volatile, or less?</p>
+    <div class="choices" data-reveal="covVol" role="group" aria-label="More or less volatile">
+      <button class="choice" data-v="less">Less &mdash; arbitrage smooths</button>
+      <button class="choice" data-v="more">More &mdash; herding amplifies</button>
+      <button class="choice" data-v="both">Both &mdash; it depends</button>
+    </div>
+    <div class="verdict" data-for="covVol"></div>
+    <div class="panel"><div class="stage"><div class="answer"><b>Both &mdash; and which one shows up depends on the day.</b> On an ordinary day, deep automated market-making and fast arbitrage damp small dislocations: a brief spike is sold into and fades. But algorithms reading the same public signal tend to react the same way at the same instant. In a thin book &mdash; overnight, or just before gate closure &mdash; those correlated reactions can gap the price hard. Automation calms the routine and can sharpen the exceptional.</div><div class="cover" id="covVol"><div class="q">Make the call to reveal the answer.</div></div></div></div>
+    <p class="caution">This is why &ldquo;the algos will smooth it&rdquo; is never a safe assumption. The same speed that settles a normal day can accelerate a bad one &mdash; and a mis-coded or runaway algorithm can do real damage before anyone reacts. Hence the rules in the next section.</p>
+  </section>
+
+  <section>
+    <div class="snum">08</div>
+    <h2>Batteries, flexibility and the 15-minute world</h2>
+    <p>Since the market moved to 15-minute products, a delivery day holds ninety-six periods, each tradable across several venues &mdash; well past what a person can manage by hand. So the flexible assets that thrive on that granularity (batteries above all, plus hydro and demand response) are increasingly steered by optimisation algos that value-stack across day-ahead, intraday and balancing.</p>
+    <p>That matters for everything else in this course. Those automated, flexible assets are now often the marginal price-setter in the intraday and balancing arenas &mdash; which means automated flexibility is starting to shape the very curves the rest of the school teaches you to read.</p>
+    <p class="xref">Builds on <a href="13_bess_value_stacking.html">Lesson 13 · BESS value-stacking</a>, <a href="18_intraday_market.html">Lesson 18 · Intraday</a> and <a href="19_imbalance_settlement.html">Lesson 19 · Imbalance settlement</a>.</p>
+  </section>
+
+  <section>
+    <div class="snum">09</div>
+    <h2>The rules of the game</h2>
+    <p>Automated trading is regulated, not a free-for-all. Under <b>REMIT II</b> &mdash; the revised EU regulation on wholesale-energy market integrity, in force since 7 May 2024 &mdash; algorithmic trading is defined as software that decides the individual parameters of an order (whether to place it, when, at what price and quantity, and how to manage it afterwards) with little or no human intervention, high-frequency trading included.</p>
+    <p>With that come duties. A firm must notify its regulator &mdash; the EU agency ACER and its national authority &mdash; that it trades this way; it must design its algorithms to be resilient and not to disrupt the market; and it must keep records of how they behave. Market manipulation &mdash; layering or spoofing the order book, withholding capacity to move a price &mdash; is prohibited whether a human or a machine does it. A machine does not dilute responsibility; the person who built it and switched it on still owns the conduct.</p>
+    <p class="say"><b>Elizabeth:</b> the regulator&rsquo;s question is never &ldquo;was it the algo?&rdquo; It&rsquo;s &ldquo;who built it, who turned it on, and could they stop it?&rdquo; Resilience and a working kill switch aren&rsquo;t paperwork &mdash; they&rsquo;re the price of automating.</p>
+  </section>
+
+  <section>
+    <div class="snum">10</div>
+    <div class="rule">
+      <h3>A machine trades faster; the market still clears the same way</h3>
+      <p>Algorithms don&rsquo;t repeal the physics or the merit order. They read the same cues you&rsquo;ve been learning &mdash; <span class="k">forecasts, outages, flows, the clock</span> &mdash; only faster, more often, and without sleeping.</p>
+      <p>Most of the time they make the fast markets more liquid and more efficient. When every model reads one signal the same way, they can make a thin moment sharper. Understand what they&rsquo;re reacting to and an automated market is still legible.</p>
+      <p>The machine is fast. The fundamentals are unchanged.</p>
+    </div>
+  </section>
+</main>
+<nav class="lessonseq" style="max-width:860px;margin:0 auto;padding:30px 24px 0;display:flex;justify-content:space-between;gap:16px;font-family:var(--mono);font-size:13px;border-top:1px solid var(--line)"><a href="22_edge_cases.html" style="color:var(--volt-ink);text-decoration:none;max-width:48%">&larr; Builds on &middot; Edge cases</a><a href="24_carbon_ets.html" style="color:var(--volt-ink);text-decoration:none;max-width:48%;text-align:right">Next &middot; Carbon: the price under the price &rarr;</a></nav>
+
+          <footer class="wrap">Nordic Power School · Lesson 23 — education only. No bids, no trades, no dispatch.</footer>
+
+<script>
+(function(){
+  "use strict";
+  const MONO="ui-monospace,monospace", SANS="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif";
+  const C={ink:"#13202E",slate:"#5A6A7A",line:"#D3DDE6",volt:"#10B5C9",voltink:"#0A7E8E",
+           ember:"#E0913A",emberink:"#B16A12",warm:"#A8472A",ok:"#2FA980",bad:"#DD6457",deep:"#0E1F33"};
+
+  function drawAnatomy(id){
+    const el=document.getElementById(id); if(!el) return; let s="";
+    function box(x,t,subs,accent){
+      let b=`<rect x="${x}" y="40" width="170" height="66" rx="12" fill="#fff" stroke="${C.line}"/>`;
+      b+=`<rect x="${x}" y="40" width="5" height="66" rx="2.5" fill="${accent}"/>`;
+      b+=`<text x="${x+22}" y="66" font-family="${SANS}" font-size="15" font-weight="700" fill="${C.ink}">${t}</text>`;
+      subs.forEach((ln,i)=> b+=`<text x="${x+22}" y="${84+i*15}" font-family="${MONO}" font-size="10.5" fill="${C.slate}">${ln}</text>`);
+      return b;
+    }
+    s+=box(20,"FEED",["forecasts · book","outages · news"],C.volt);
+    s+=box(255,"LOGIC",["rule / model","if-then · optimise"],C.ember);
+    s+=box(490,"ORDER",["submit · modify","cancel"],C.voltink);
+    const arr=(x1,x2)=>`<line x1="${x1}" y1="73" x2="${x2-7}" y2="73" stroke="${C.slate}" stroke-width="2"/>`+
+      `<path d="M${x2-7} 69 L${x2} 73 L${x2-7} 77 Z" fill="${C.slate}"/>`;
+    s+=arr(190,255); s+=arr(425,490);
+    s+=`<path d="M575 108 C575 148, 105 148, 105 110" fill="none" stroke="${C.ember}" stroke-width="1.6" stroke-dasharray="5 4"/>`;
+    s+=`<path d="M101 117 L105 108 L110 116 Z" fill="${C.ember}"/>`;
+    s+=`<text x="340" y="166" text-anchor="middle" font-family="${MONO}" font-size="11" fill="${C.emberink}">react to fills, new prices, new forecasts</text>`;
+    el.innerHTML=s;
+  }
+
+  function drawArenas(id){
+    const el=document.getElementById(id); if(!el) return; let s=""; const Y=84;
+    s+=`<rect x="210" y="${Y+10}" width="440" height="18" rx="7" fill="${C.volt}" opacity="0.16"/>`;
+    s+=`<text x="430" y="${Y+23}" text-anchor="middle" font-family="${MONO}" font-size="10.5" fill="${C.voltink}">machine-paced</text>`;
+    s+=`<text x="125" y="${Y+23}" text-anchor="middle" font-family="${MONO}" font-size="10.5" fill="${C.slate}">human-paced</text>`;
+    s+=`<line x1="40" y1="${Y}" x2="650" y2="${Y}" stroke="${C.line}" stroke-width="2"/>`;
+    [210,520].forEach(x=> s+=`<line x1="${x}" y1="${Y-6}" x2="${x}" y2="${Y+6}" stroke="${C.slate}" stroke-dasharray="3 3"/>`);
+    function seg(cx,t,sub){return `<text x="${cx}" y="${Y-34}" text-anchor="middle" font-family="${SANS}" font-size="14" font-weight="700" fill="${C.ink}">${t}</text>`+
+      `<text x="${cx}" y="${Y-18}" text-anchor="middle" font-family="${MONO}" font-size="10" fill="${C.slate}">${sub}</text>`;}
+    s+=seg(125,"Day-ahead","one auction · ~D-1 noon");
+    s+=seg(365,"Intraday (SIDC)","continuous + 3 auctions");
+    s+=seg(585,"Balancing","real time");
+    s+=`<text x="650" y="${Y+46}" text-anchor="end" font-family="${MONO}" font-size="10" fill="${C.slate}">closer to delivery →</text>`;
+    el.innerHTML=s;
+  }
+
+  function drawConverge(id){
+    const el=document.getElementById(id); if(!el) return; let s=""; const x0=60,x1=600;
+    const da=[52,52,52,52,52,52,52,52];
+    const idl=[100,93,85,76,67,59,54,52];
+    const X=i=>x0+i/(da.length-1)*(x1-x0);
+    const up=da.map((y,i)=>`${X(i).toFixed(1)},${y}`);
+    const dn=idl.map((y,i)=>`${X(i).toFixed(1)},${y}`).reverse();
+    s+=`<polygon points="${up.concat(dn).join(" ")}" fill="${C.ember}" opacity="0.12"/>`;
+    s+=`<polyline points="${da.map((y,i)=>X(i).toFixed(1)+","+y).join(" ")}" fill="none" stroke="${C.slate}" stroke-width="1.6" stroke-dasharray="5 4"/>`;
+    s+=`<polyline points="${idl.map((y,i)=>X(i).toFixed(1)+","+y).join(" ")}" fill="none" stroke="${C.volt}" stroke-width="2.4"/>`;
+    s+=`<text x="${x0}" y="42" font-family="${MONO}" font-size="10.5" fill="${C.slate}">day-ahead level</text>`;
+    s+=`<text x="${x0}" y="116" font-family="${MONO}" font-size="10.5" fill="${C.voltink}">intraday</text>`;
+    s+=`<text x="${x1}" y="42" text-anchor="end" font-family="${MONO}" font-size="11" fill="${C.emberink}">gap closed by arbitrage →</text>`;
+    el.innerHTML=s;
+  }
+
+  drawAnatomy("dAnatomy");
+  drawArenas("dArenas");
+  drawConverge("dConverge");
+
+  const REVEAL={
+    covArena:{correct:"intraday",
+      ok:"Intraday. The continuous order book runs through the day to near delivery and rewards speed — it's where automation dominates, with real-time balancing close behind.",
+      bad:"It's intraday. Day-ahead is one careful auction a day; the continuous intraday book and real-time balancing are where the machines run the flow."},
+    covSpeed:{correct:"seconds",
+      ok:"Within minutes — often seconds. In the continuous book a revised forecast shifts everyone's residual-load view at once, and the fastest systems re-quote first.",
+      bad:"Far sooner — the continuous intraday book re-prices within seconds of a public revision. Waiting for the next auction or for delivery means trading on stale information."},
+    covVol:{correct:"both",
+      ok:"Both. Routine dislocations get damped by fast arbitrage and deep market-making; but when many algos read one signal the same way, correlated reactions in a thin book can gap the price sharply.",
+      bad:"It's both — and that's the point. Automation smooths the ordinary day and can amplify the exceptional one, when every model agrees at the same instant."}
+  };
+  document.querySelectorAll(".choices").forEach(function(g){
+    g.addEventListener("click",function(e){
+      const b=e.target.closest(".choice"); if(!b) return;
+      const cid=g.dataset.reveal, cfg=REVEAL[cid]; if(!cfg) return;
+      g.querySelectorAll(".choice").forEach(function(x){x.setAttribute("aria-pressed", x===b?"true":"false");});
+      const ok=b.dataset.v===cfg.correct;
+      const v=document.querySelector('.verdict[data-for="'+cid+'"]');
+      if(v){v.className="verdict "+(ok?"ok":"bad"); v.textContent=ok?cfg.ok:cfg.bad;}
+      const cov=document.getElementById(cid); if(cov) cov.classList.add("gone");
+    });
+  });
+})();
+</script>
+</body>
+</html>

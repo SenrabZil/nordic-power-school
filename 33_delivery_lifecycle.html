@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lesson 33 — Every hour is decided in layers. · Nordic Power School</title>
+<style>
+  :root{
+    --frost:#EEF3F7; --panel:#FFFFFF; --ink:#13202E; --slate:#5A6A7A;
+    --line:#D3DDE6; --deep:#0E1F33; --deep-2:#16314E; --volt:#10B5C9; --volt-ink:#0A7E8E;
+    --ember:#E0913A; --ember-ink:#B16A12; --ok:#2FA980; --bad:#DD6457;
+    --mono: ui-monospace,"SF Mono","Cascadia Code",Consolas,"Roboto Mono",monospace;
+    --sans: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--frost);color:var(--ink);font-family:var(--sans);line-height:1.62;-webkit-font-smoothing:antialiased;font-size:17px}
+  .wrap{max-width:860px;margin:0 auto;padding:0 24px}
+  a{color:var(--volt-ink)}
+  header{position:sticky;top:0;z-index:20;background:rgba(238,243,247,.86);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+  .bar{display:flex;justify-content:space-between;align-items:center;height:52px;font-size:13px;letter-spacing:.04em;text-transform:uppercase}
+  .bar b{font-weight:700} .bar .r{font-family:var(--mono);color:var(--slate)}
+  .hero{padding:64px 0 28px}
+  .eyebrow{font-family:var(--mono);font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--volt-ink);margin-bottom:18px}
+  h1{font-size:clamp(34px,6vw,58px);line-height:1.02;letter-spacing:-.02em;margin:0 0 18px;font-weight:780}
+  .lead{font-size:clamp(18px,2.4vw,22px);color:var(--slate);max-width:44ch;margin:0}
+  .byline{margin-top:22px;font-size:14px;color:var(--slate)}
+  .byline b{color:var(--ink)}
+  section{padding:40px 0;border-top:1px solid var(--line)}
+  .snum{font-family:var(--mono);font-size:13px;color:var(--volt-ink);letter-spacing:.1em}
+  h2{font-size:clamp(24px,3.5vw,34px);line-height:1.1;letter-spacing:-.015em;margin:6px 0 14px;font-weight:740}
+  p{margin:0 0 16px} .muted{color:var(--slate)}
+  .say{border-left:2px solid var(--volt);padding:2px 0 2px 18px;margin:18px 0;color:var(--ink)}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px;margin:22px 0}
+  .figcap{font-size:13.5px;color:var(--slate);font-family:var(--mono);margin-top:10px}
+  .choices{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0}
+  .choice{font-family:var(--mono);font-size:14px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 16px;cursor:pointer;color:var(--ink);transition:.15s}
+  .choice:hover{border-color:var(--volt)}
+  .choice[aria-pressed=true]{background:var(--deep);color:#fff;border-color:var(--deep)}
+  .verdict{font-size:15px;margin-top:6px;min-height:1.4em}
+  .verdict.ok{color:var(--ok)} .verdict.bad{color:var(--bad)}
+  .reveal{display:none;margin-top:6px;color:var(--slate);font-size:15.5px} .reveal.show{display:block}
+  .rule{background:var(--deep);color:#eaf6f8;border-radius:14px;padding:26px;margin-top:8px}
+  .rule h3{margin:0 0 10px;font-size:20px;color:#fff}
+  .rule p{color:#bcd6dc;margin:0}
+  .rule .k{color:var(--volt);font-family:var(--mono)}
+  .cards{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:8px}
+  .card{border:1px solid var(--line);border-radius:12px;padding:16px;background:#fff}
+  .card .tag{font-family:var(--mono);font-size:12px;color:var(--volt-ink);letter-spacing:.04em}
+  .card h4{margin:3px 0 6px;font-size:15.5px}
+  .card p{margin:0;font-size:14.5px;color:var(--slate)}
+  footer{padding:50px 0;color:var(--slate);font-size:13px;border-top:1px solid var(--line)}
+  :focus-visible{outline:2px solid var(--volt);outline-offset:2px}
+  .dwrap{overflow-x:auto}
+  .lane{font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;fill:var(--slate)}
+  .box{fill:#fff;stroke:var(--line);stroke-width:1.4}
+  .boxt{font-family:var(--sans);font-size:14px;font-weight:600;fill:var(--ink)}
+  .boxs{font-family:var(--mono);font-size:11px;fill:var(--slate)}
+  .flowarr{stroke:var(--slate);stroke-width:1.6;fill:none;marker-end:url(#ar)}
+  .dlabel{font-family:var(--mono);font-size:12px;fill:var(--slate)} .dlabel.k{fill:var(--volt-ink)}
+  .edge{stroke:#9fb4c2;stroke-width:1.4} .edge.ext{stroke:#c2d0db;stroke-dasharray:3 4}
+  .node{fill:#163a4d;stroke:var(--volt);stroke-width:1.6} .node-c{fill:var(--volt)}
+  .zlabel{font-family:var(--mono);font-size:12.5px;fill:#1f4456;font-weight:600}
+  .flow{stroke:var(--volt);stroke-width:2;fill:none;stroke-dasharray:5 9;stroke-linecap:round;animation:dash linear infinite;opacity:.9}
+  @keyframes dash{to{stroke-dashoffset:-140}}
+  .tlaxis{stroke:var(--slate);stroke-width:1.6;marker-end:url(#ar)}
+  .tldot{fill:#fff;stroke:var(--slate);stroke-width:2} .tldot.hl{fill:var(--volt);stroke:var(--volt-ink)}
+  .tlstem{stroke:var(--line);stroke-width:1.4}
+  @media(max-width:640px){.cards{grid-template-columns:1fr}}
+  @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<header><div class="wrap bar"><b>Nordic Power School</b><span class="r">Lesson 33</span></div></header>
+
+<main class="wrap">
+
+  <div class="hero">
+    <div class="eyebrow">Lesson 33 · Market structure</div>
+    <h1>Every hour is decided in layers.</h1>
+    <p class="lead">Long before power flows at 18:00 &mdash; and long after &mdash; that one hour is shaped in stages: hedged, nominated, repaired, balanced, then settled. Here is the whole arc on one line, so the rest of the course has somewhere to hang.</p>
+    <p class="byline">with <b>Elizabeth Cecilia</b>, your mentor. When I ask you to predict, actually predict &mdash; <i>before</i> you reveal.</p>
+  </div>
+
+  <section id="s1">
+    <div class="snum">01</div>
+    <h2>The arc of one hour</h2>
+    <p>Pick a single delivery hour &mdash; say 18:00 tomorrow. It is not decided at 18:00. It is shaped in <b>layers</b>, long before and long after: hedged months out, nominated in the day-ahead auction, repaired in intraday, balanced in real time, then settled and invoiced. Here is the whole arc on one line.</p>
+    <div class="panel"><div class="dwrap"><svg viewBox="0 0 760 250" width="100%" role="img" aria-label="The lifecycle of one delivery hour"><defs><marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#5A6A7A"/></marker></defs><line class="tlaxis" x1="34" y1="150" x2="734" y2="150"/><text class="dlabel" x="34" y="184">time →</text><line class="tlstem" x1="70" y1="143" x2="70" y2="86"/><circle class="tldot" cx="70" cy="150" r="6"/><text class="dlabel k" x="70" y="64" text-anchor="middle">months–days ahead</text><text class="boxt" style="font-size:13px" x="70" y="80" text-anchor="middle">Forward &amp; hedging</text><line class="tlstem" x1="215" y1="157" x2="215" y2="174"/><circle class="tldot" cx="215" cy="150" r="6"/><text class="dlabel k" x="215" y="196" text-anchor="middle">D−1 &middot; ~12:00 CET</text><text class="boxt" style="font-size:13px" x="215" y="212" text-anchor="middle">Day-ahead auction</text><line class="tlstem" x1="360" y1="143" x2="360" y2="86"/><circle class="tldot" cx="360" cy="150" r="6"/><text class="dlabel k" x="360" y="64" text-anchor="middle">D−1 → delivery</text><text class="boxt" style="font-size:13px" x="360" y="80" text-anchor="middle">Intraday: auction + book</text><line class="tlstem" x1="505" y1="157" x2="505" y2="174"/><circle class="tldot hl" cx="505" cy="150" r="6"/><text class="dlabel k" x="505" y="196" text-anchor="middle">the hour &middot; 18:00</text><text class="boxt" style="font-size:13px" x="505" y="212" text-anchor="middle">Real-time balancing</text><line class="tlstem" x1="615" y1="143" x2="615" y2="86"/><circle class="tldot" cx="615" cy="150" r="6"/><text class="dlabel k" x="615" y="64" text-anchor="middle">after</text><text class="boxt" style="font-size:13px" x="615" y="80" text-anchor="middle">Imbalance settlement</text><line class="tlstem" x1="705" y1="157" x2="705" y2="174"/><circle class="tldot" cx="705" cy="150" r="6"/><text class="dlabel k" x="705" y="196" text-anchor="middle">days later</text><text class="boxt" style="font-size:13px" x="705" y="212" text-anchor="middle">Invoice &amp; collateral</text><text class="dlabel" x="215" y="149" text-anchor="middle" style="fill:#B16A12">gate closes</text></svg></div><div class="figcap">One delivery hour, decided in layers. The highlighted point is the hour itself; everything else happens before or after it.</div></div>
+    <div class="qa">
+      <p class="say"><b>Predict:</b> at which stage is the price you actually <i>receive</i> for a last-minute deviation set?</p>
+      <div class="choices" role="group"><button class="choice" data-correct="0" data-exp="Not quite &mdash; day-ahead sets the price for what you <i>planned</i>, not for the gap you couldn&rsquo;t close.">Day-ahead</button><button class="choice" data-correct="0" data-exp="Closer &mdash; intraday lets you repair the plan, but the gap you still carry into real time is priced later.">Intraday</button><button class="choice" data-correct="1" data-exp="Right &mdash; the price for the gap you couldn&rsquo;t close is set by real-time balancing and paid through imbalance settlement, after the fact.">Real-time balancing &amp; settlement</button></div>
+      <div class="verdict"></div>
+      <div class="reveal">Planning markets (forwards, day-ahead, intraday) lock what you arrange in advance. The deviation that remains is priced in real time &mdash; that is what Lessons 05, 19 and 29 are about.</div>
+    </div>
+  </section>
+
+  <section id="s2">
+    <div class="snum">02</div>
+    <h2>What each layer does</h2>
+    <p>Five layers, five jobs. None replaces another; together they decide the hour.</p>
+    <div class="cards"><div class="card"><div class="tag">months &ndash; days out</div><h4>Forwards &amp; hedging</h4><p>Lock a price for volume far ahead to manage risk, not to schedule a specific hour.</p></div><div class="card"><div class="tag">D&minus;1, ~12:00 CET</div><h4>Day-ahead auction</h4><p>One clearing price per zone per hour. The backbone nomination for the delivery day.</p></div><div class="card"><div class="tag">D&minus;1 &rarr; delivery</div><h4>Intraday</h4><p>Continuous trading and auctions to repair the plan as forecasts move, until gate closure.</p></div><div class="card"><div class="tag">real time</div><h4>Balancing</h4><p>The TSO activates reserves up or down to hold 50 Hz; the system&rsquo;s direction sets the imbalance price.</p></div><div class="card"><div class="tag">after the fact</div><h4>Settlement</h4><p>eSett nets each BRP&rsquo;s deviation at the imbalance price; invoicing and collateral follow.</p></div></div>
+  </section>
+
+  <section id="s3">
+    <div class="snum">03</div>
+    <h2>Your exposure is not over at gate closure</h2>
+    <p>A common trap: thinking the job ends when the intraday gate closes. It doesn&rsquo;t.</p>
+    <div class="qa">
+      <p class="say"><b>Predict:</b> intraday has closed for your hour. Are you done?</p>
+      <div class="choices" role="group"><button class="choice" data-correct="0" data-exp="Not quite &mdash; you can no longer <i>trade</i> the hour, but you can still physically deviate from your plan.">Yes &mdash; nothing left to do</button><button class="choice" data-correct="1" data-exp="Right &mdash; after the gate you can&rsquo;t trade the hour, but reality still deviates, and that gap is settled as imbalance.">No &mdash; real time can still move you</button></div>
+      <div class="verdict"></div>
+      <div class="reveal">Gate closure ends your ability to trade the hour &mdash; not your exposure. Whatever your portfolio does physically after that is settled against you or for you in balancing.</div>
+    </div>
+  </section>
+
+  <section id="s4">
+    <div class="snum">04</div>
+    <h2>Where the course lives on this line</h2>
+    <p>Every mechanics lesson in this school sits at one layer of this arc. Use the timeline as a map:</p>
+    <ul style="margin:0 0 16px;padding-left:20px;color:var(--slate)">
+      <li><b>Day-ahead</b> &mdash; how that one clearing price forms: <a href="03_price_formation.html">Lesson 03</a>.</li>
+      <li><b>Intraday</b> &mdash; trading the change: <a href="18_intraday_market.html">Lesson 18</a> and the interactive <a href="28_intraday_interactive.html">Lesson 28</a>.</li>
+      <li><b>Balancing</b> &mdash; reserves and the imbalance price: <a href="05_balancing_imbalance.html">05</a>, <a href="11_ancillary_services.html">11</a>, <a href="12_ancillary_markets.html">12</a>.</li>
+      <li><b>Settlement</b> &mdash; the machinery underneath: <a href="19_imbalance_settlement.html">19</a> and the interactive <a href="29_imbalance_interactive.html">29</a>.</li>
+      <li><b>The whole walk</b> &mdash; one hour end to end: the capstone, <a href="30_capstone_interactive.html">Lesson 30</a>.</li>
+    </ul>
+    <p class="muted">Whenever a later lesson feels disconnected, come back here and ask: which layer is this?</p>
+  </section>
+
+  <section id="s5">
+    <div class="snum">05</div>
+    <h2>The rule, in one breath</h2>
+    <div class="rule">
+      <h3>Forecast early, nominate day-ahead, repair intraday, balance in real time, settle after.</h3>
+      <p>A delivery hour is decided in layers, not at the hour itself. Every lesson in this school lives at one of those layers &mdash; place it, and it makes sense.</p>
+    </div>
+  </section>
+<nav class="lessonseq" style="max-width:860px;margin:0 auto;padding:30px 24px 0;display:flex;justify-content:space-between;gap:16px;font-family:var(--mono);font-size:13px;border-top:1px solid var(--line)"><a href="32_market_map.html" style="color:var(--volt-ink);text-decoration:none;max-width:48%">&larr; Builds on &middot; The Nordic/Baltic map</a><a href="03_price_formation.html" style="color:var(--volt-ink);text-decoration:none;max-width:48%;text-align:right">Next &middot; Price formation &rarr;</a></nav>
+
+            <footer class="wrap">Nordic Power School · Lesson 33 — education only. No bids, no trades, no dispatch.</footer>
+</main>
+
+<script>
+(function(){
+  document.querySelectorAll('.choices').forEach(function(group){
+    group.addEventListener('click',function(e){
+      var b=e.target.closest('.choice'); if(!b) return;
+      group.querySelectorAll('.choice').forEach(function(x){x.setAttribute('aria-pressed','false');});
+      b.setAttribute('aria-pressed','true');
+      var ok=b.dataset.correct==='1';
+      var qa=group.parentNode;
+      var ver=qa.querySelector('.verdict');
+      if(ver){ ver.className='verdict '+(ok?'ok':'bad'); ver.innerHTML=b.dataset.exp||(ok?'Right.':'Not quite.'); }
+      var rev=qa.querySelector('.reveal'); if(rev) rev.classList.add('show');
+    });
+  });
+})();
+</script>
+
+</body>
+</html>

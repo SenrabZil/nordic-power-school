@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lesson 11 — Ancillary services: the frequency ladder · Nordic Power School</title>
+<style>
+  :root{
+    --frost:#EEF3F7; --panel:#FFFFFF; --ink:#13202E; --slate:#5A6A7A;
+    --line:#D3DDE6; --deep:#0E1F33; --deep-2:#16314E; --volt:#10B5C9; --volt-ink:#0A7E8E;
+    --ember:#E0913A; --ember-ink:#B16A12; --warm:#C2603F; --ok:#2FA980; --bad:#DD6457;
+    --mono: ui-monospace,"SF Mono","Cascadia Code",Consolas,"Roboto Mono",monospace;
+    --sans: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--frost);color:var(--ink);font-family:var(--sans);font-size:17px;line-height:1.62;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:860px;margin:0 auto;padding:0 24px}
+
+  header{position:sticky;top:0;z-index:20;background:rgba(238,243,247,.9);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+  .bar{display:flex;justify-content:space-between;align-items:center;height:52px;font-size:13px;letter-spacing:.04em;text-transform:uppercase}
+  .bar b{font-weight:700} .bar .r{font-family:var(--mono);color:var(--slate)}
+
+  .hero{padding:60px 0 26px}
+  .eyebrow{font-family:var(--mono);font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--volt-ink);margin-bottom:16px}
+  h1{font-size:clamp(32px,5.6vw,54px);line-height:1.03;letter-spacing:-.02em;margin:0 0 16px;font-weight:780}
+  .lead{font-size:clamp(18px,2.4vw,22px);color:var(--slate);max-width:42ch;margin:0}
+  .byline{margin-top:20px;font-size:14px;color:var(--slate)} .byline b{color:var(--ink)}
+
+  section{padding:36px 0;border-top:1px solid var(--line)}
+  .snum{font-family:var(--mono);font-size:13px;color:var(--volt-ink);letter-spacing:.1em}
+  h2{font-size:clamp(23px,3.3vw,32px);line-height:1.12;letter-spacing:-.015em;margin:6px 0 12px;font-weight:740}
+  p{margin:0 0 16px} .muted{color:var(--slate)}
+  .say{border-left:2px solid var(--volt);padding:2px 0 2px 18px;margin:18px 0}
+  .caution{border-left:2px solid var(--ember);padding:2px 0 2px 18px;margin:18px 0;color:var(--ember-ink);font-size:15px}
+
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px;margin:20px 0}
+  .stage{position:relative;border-radius:12px;overflow:hidden}
+  .cover{position:absolute;inset:0;background:linear-gradient(180deg,var(--deep),#0a1726);color:#cfe;display:flex;flex-direction:column;gap:14px;align-items:center;justify-content:center;text-align:center;padding:24px;transition:opacity .5s;z-index:4}
+  .cover.gone{opacity:0;pointer-events:none} .cover .q{font-size:16px;max-width:34ch;color:#dCEbF0}
+
+  .controls{display:flex;flex-wrap:wrap;gap:18px;align-items:center;margin-top:14px}
+  .ctl{display:flex;flex-direction:column;gap:6px;min-width:200px;flex:1}
+  .ctl label{font-family:var(--mono);font-size:12.5px;color:var(--slate);display:flex;justify-content:space-between} .ctl label b{color:var(--ink)}
+  #inertia{accent-color:var(--volt)} input[type=range]{width:100%}
+  .seg{display:inline-flex;border:1px solid var(--line);border-radius:9px;overflow:hidden}
+  .seg button{font-family:var(--mono);font-size:13px;border:0;background:#fff;color:var(--slate);padding:8px 14px;cursor:pointer}
+  .seg button[aria-pressed=true]{background:var(--volt);color:#04222a}
+
+  .readout{display:flex;flex-wrap:wrap;gap:8px 24px;align-items:baseline;margin-top:14px;border-top:1px dashed var(--line);padding-top:14px;font-family:var(--mono);font-size:13.5px;color:var(--slate)}
+  .readout b{color:var(--ink)} .readout .big{font-size:24px;font-weight:600}
+  .tag{font-family:var(--mono);font-size:11.5px;letter-spacing:.05em;text-transform:uppercase;border-radius:999px;padding:5px 11px}
+  .tag.safe{background:#e3f6ee;color:#1c7a59} .tag.risk{background:#fbeae7;color:#b23a2c}
+
+  .choices{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0}
+  .choice{font-family:var(--mono);font-size:14px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 16px;cursor:pointer;color:var(--ink);transition:.15s}
+  .choice:hover{border-color:var(--volt)} .choice[aria-pressed=true]{background:var(--deep);color:#fff;border-color:var(--deep)}
+  .verdict{font-size:15px;margin-top:4px;min-height:1.4em} .verdict.ok{color:var(--ok)} .verdict.bad{color:var(--bad)}
+
+  .cards{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin:8px 0}
+  .card{border:1px solid var(--line);border-radius:12px;padding:16px;background:#fff} .card h4{margin:0 0 6px;font-size:15px} .card p{margin:0;font-size:14px;color:var(--slate)} .card .k{font-family:var(--mono);font-size:12px;color:var(--volt-ink)}
+
+  .rule{background:var(--deep);color:#eaf6f8;border-radius:14px;padding:24px;margin-top:8px}
+  .rule h3{margin:0 0 10px;font-size:20px;color:#fff} .rule p{color:#bcd6dc;margin:0 0 10px} .rule p:last-child{margin:0}
+  .rule .k{color:var(--volt);font-family:var(--mono)}
+
+  footer{padding:48px 0;color:var(--slate);font-size:13px;border-top:1px solid var(--line)}
+  :focus-visible{outline:2px solid var(--volt);outline-offset:2px}
+  @media (max-width:640px){ .cards{grid-template-columns:1fr} }
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header><div class="wrap bar"><b>Nordic Power School</b><span class="r">Lesson 11</span></div></header>
+
+<main class="wrap">
+  <div class="hero">
+    <div class="eyebrow">Lesson 11 · Ancillary services</div>
+    <h1>Holding fifty<br>hertz.</h1>
+    <p class="lead">Energy markets clear the plan. Ancillary services keep the lights on between the plans &mdash; the reserves that catch frequency the instant something slips.</p>
+    <p class="byline">with <b>Elizabeth Cecilia</b>. As spinning mass leaves the grid, these markets grow &mdash; and batteries are built for them.</p>
+  </div>
+
+  <!-- 1 -->
+  <section>
+    <div class="snum">01</div>
+    <h2>Why reserves exist</h2>
+    <p>Frequency is the grid&rsquo;s heartbeat: 50 Hz means supply and demand match exactly, every instant. A unit trips, demand jumps &mdash; frequency moves at once, faster than any market can re-clear. So the TSO arranges <b>reserves</b> ahead of time: capacity standing ready to respond automatically.</p>
+    <p>Lesson 05 was the <i>energy</i> of balancing &mdash; what gets settled after. Ancillary services are the <b>capacity</b> arranged before: paid to be ready, whether or not they&rsquo;re called.</p>
+  </section>
+
+  <!-- 2 + 3 the event -->
+  <section>
+    <div class="snum">02</div>
+    <h2>The inertia problem</h2>
+    <p>Spinning generators store kinetic energy &mdash; <b>inertia</b> &mdash; that slows how fast frequency can fall. Replace them with wind and solar (no spinning mass) and the same trip drops frequency faster and deeper.</p>
+    <p class="say"><b>Predict first:</b> a large unit trips on a low-inertia hour, with no fast reserve. What does frequency do?</p>
+    <div class="choices" id="evChoices" role="group" aria-label="Frequency after a trip on low inertia">
+      <button class="choice" data-v="barely">Barely moves</button>
+      <button class="choice" data-v="mild">Dips to ~49.6, recovers</button>
+      <button class="choice" data-v="deep">Falls past the safety line</button>
+    </div>
+    <div class="verdict" id="evVerdict"></div>
+
+    <div class="panel">
+      <div class="stage">
+        <svg viewBox="0 0 720 320" width="100%" id="freqSvg" role="img" aria-label="Frequency response to a generation trip"></svg>
+        <div class="cover" id="evCover"><div class="q">Predict above to trip the unit and watch the frequency fall.</div></div>
+      </div>
+      <div class="controls">
+        <div class="ctl"><label>System inertia <b id="inLab">low</b></label>
+          <input id="inertia" type="range" min="1" max="5" step="0.5" value="1"></div>
+        <div class="seg" role="group" aria-label="Fast Frequency Reserve">
+          <span style="font-family:var(--mono);font-size:12px;color:var(--slate);padding:8px 8px 8px 0">FFR</span>
+          <button id="ffrOff" aria-pressed="true">off</button>
+          <button id="ffrOn" aria-pressed="false">on</button>
+        </div>
+      </div>
+      <div class="readout">
+        <span class="tag risk" id="evTag">load-shedding risk</span>
+        <span><span class="muted">frequency nadir</span> <span class="big" id="nadir">48.8</span> Hz</span>
+        <span class="muted" id="rocof">steep rate of fall</span>
+      </div>
+    </div>
+
+    <div class="snum" style="margin-top:8px">03</div>
+    <h2>The fast fix</h2>
+    <p>Inertia used to buy time for slower reserves. With less of it, the Nordics added <b>Fast Frequency Reserve</b> &mdash; activation in under a second &mdash; to catch the nadir before it reaches the load-shedding line.</p>
+    <p class="say"><b>Predict:</b> flip FFR on at that same low-inertia trip. Does it save the nadir?</p>
+    <div class="choices" id="ffrChoices" role="group" aria-label="Does FFR save the nadir">
+      <button class="choice" data-v="yes">Yes, it catches it</button>
+      <button class="choice" data-v="no">No, too small to matter</button>
+    </div>
+    <div class="verdict" id="ffrVerdict"></div>
+    <p class="muted">Slide inertia high and the dip is gentle &mdash; old grids barely needed FFR. Slide it low and FFR becomes the thing standing between a trip and the lights. That shift is why these markets are growing.</p>
+  </section>
+
+  <!-- 4 ladder -->
+  <section>
+    <div class="snum">04</div>
+    <h2>The reserve ladder</h2>
+    <p>Reserves form a cascade by speed: the fast ones <b>contain</b> the fall, the slower ones <b>restore</b> frequency to 50 and free the fast ones up again.</p>
+    <div class="panel">
+      <svg viewBox="0 0 720 250" width="100%" id="ladderSvg" role="img" aria-label="The reserve ladder by response time"></svg>
+    </div>
+    <p class="muted">FFR and FCR are automatic and near-instant; aFRR is automatic over minutes; mFRR is manually called to replace them. Together they hand the grid back to 50 Hz.</p>
+  </section>
+
+  <!-- 5 payment -->
+  <section>
+    <div class="snum">05</div>
+    <h2>How they pay</h2>
+    <p>Two revenue legs, and the first is the interesting one for a battery.</p>
+    <div class="cards">
+      <div class="card"><div class="k">€/MW/h</div><h4>Availability</h4><p>Paid to <b>stand ready</b> across each procured period &mdash; earned even if never called.</p></div>
+      <div class="card"><div class="k">€/MWh</div><h4>Activation</h4><p>Paid for the <b>energy</b> actually delivered when the reserve is triggered.</p></div>
+      <div class="card"><div class="k">who</div><h4>Fast assets win</h4><p>Batteries respond in milliseconds, so they <b>dominate FFR and FCR</b> &mdash; built for exactly this.</p></div>
+    </div>
+    <p class="caution">This explains what these markets are and how they pay &mdash; it is not advice on which to bid into, or how. Procurement rules, qualification and risk are decisions the school doesn&rsquo;t make for you.</p>
+  </section>
+
+  <!-- 6 rule -->
+  <section>
+    <div class="snum">06</div>
+    <h2>The rule, in one breath</h2>
+    <div class="rule">
+      <h3>Ancillary services are capacity paid to stand ready, in a ladder of speed.</h3>
+      <p>Less inertia means faster frequency swings, so the fast reserves &mdash; <span class="k">FFR</span>, <span class="k">FCR</span> &mdash; matter more every year. They pay mostly for availability, and batteries, responding instantly, are made for them.</p>
+      <p class="muted" style="color:#9fc0cb">Next: the ancillary markets themselves &mdash; how this capacity is procured and priced, and why you can&rsquo;t sell the same megawatt twice. Then BESS value stacking pulls it all together.</p>
+    </div>
+  </section>
+<nav class="lessonseq" style="max-width:860px;margin:0 auto;padding:30px 24px 0;display:flex;justify-content:space-between;gap:16px;font-family:var(--mono);font-size:13px;border-top:1px solid var(--line)"><a href="05_balancing_imbalance.html" style="color:var(--volt-ink);text-decoration:none;max-width:48%">&larr; Builds on &middot; Balancing: when real time takes over</a><a href="19_imbalance_settlement.html" style="color:var(--volt-ink);text-decoration:none;max-width:48%;text-align:right">Next &middot; Imbalance settlement: who pays whom &rarr;</a></nav>
+
+            <footer class="wrap">Nordic Power School · Lesson 11 — education only. No bids, no trades, no dispatch.</footer>
+</main>
+
+<script>
+(function(){
+  "use strict";
+  const $=s=>document.querySelector(s);
+  const C={trace:"#10B5C9",danger:"#DD6457",line:"#D3DDE6",slate:"#5A6A7A",ink:"#13202E",ok:"#2FA980"};
+
+  /* ---- frequency event ---- */
+  const svg=$("#freqSvg"), inertia=$("#inertia");
+  let ffr=false;
+  const X0=46,X1=702,Y0=18,Y1=262, FMIN=48.4,FMAX=50.2, TMAX=300;
+  const xf=t=>X0+Math.sqrt(t/TMAX)*(X1-X0);
+  const yf=f=>Y1-(f-FMIN)/(FMAX-FMIN)*(Y1-Y0);
+  const T =[0,1,2,3,5,8,12,20,30,45,60,90,120,180,240,300];
+  const SH=[0,0.55,1.0,0.92,0.78,0.62,0.5,0.36,0.27,0.2,0.16,0.1,0.07,0.035,0.012,0];
+  function depth(){ const H=+inertia.value; let D=0.4*(3/H); if(ffr) D*=0.55; return D; }
+  function drawFreq(){
+    const D=depth(), nadir=50-D;
+    let s="";
+    // gridlines
+    [48.5,49,49.5,50].forEach(v=>{const y=yf(v);s+=`<text x="${X0-6}" y="${y+3}" text-anchor="end" font-family="ui-monospace,monospace" font-size="11" fill="${C.slate}">${v.toFixed(1)}</text>`;});
+    s+=`<text x="${X0-6}" y="${Y0-4}" text-anchor="end" font-family="ui-monospace,monospace" font-size="11" fill="${C.slate}">Hz</text>`;
+    // 50 Hz reference
+    s+=`<line x1="${X0}" y1="${yf(50)}" x2="${X1}" y2="${yf(50)}" stroke="${C.line}"/>`;
+    // danger line 49.0
+    s+=`<line x1="${X0}" y1="${yf(49)}" x2="${X1}" y2="${yf(49)}" stroke="${C.danger}" stroke-width="1.4" stroke-dasharray="5 4"/>`;
+    s+=`<text x="${X1}" y="${yf(49)-6}" text-anchor="end" font-family="ui-monospace,monospace" font-size="11" fill="${C.danger}">load-shedding line 49.0</text>`;
+    // time ticks
+    [1,5,30,60,300].forEach(t=>{const x=xf(t);s+=`<line x1="${x}" y1="${Y1}" x2="${x}" y2="${Y1+5}" stroke="${C.line}"/><text x="${x}" y="${Y1+17}" text-anchor="middle" font-family="ui-monospace,monospace" font-size="10.5" fill="${C.slate}">${t<60?t+"s":(t/60)+"m"}</text>`;});
+    // phase labels
+    s+=`<text x="${xf(8)}" y="${Y0+12}" text-anchor="middle" font-family="ui-monospace,monospace" font-size="10.5" fill="${C.slate}">FFR + FCR: contain</text>`;
+    s+=`<text x="${xf(120)}" y="${Y0+12}" text-anchor="middle" font-family="ui-monospace,monospace" font-size="10.5" fill="${C.slate}">aFRR / mFRR: restore</text>`;
+    // trace
+    const pts=T.map((t,i)=>`${xf(t).toFixed(1)},${yf(50-D*SH[i]).toFixed(1)}`).join(" ");
+    s+=`<polyline points="${pts}" fill="none" stroke="${C.trace}" stroke-width="2.6"/>`;
+    // nadir marker (at t=2)
+    s+=`<circle cx="${xf(2)}" cy="${yf(nadir)}" r="4.5" fill="${nadir<49?C.danger:C.trace}"/>`;
+    svg.innerHTML=s;
+    // readout
+    $("#inLab").textContent = (+inertia.value)>=4?"high":(+inertia.value)<=2?"low":"moderate";
+    $("#nadir").textContent=nadir.toFixed(1);
+    const tag=$("#evTag");
+    if(nadir<49){tag.className="tag risk";tag.textContent="load-shedding risk";}
+    else{tag.className="tag safe";tag.textContent="contained";}
+    $("#rocof").textContent = (+inertia.value)<=2?"steep rate of fall":(+inertia.value)>=4?"gentle rate of fall":"moderate rate of fall";
+  }
+  inertia.addEventListener("input",drawFreq);
+  function setFFR(on){ ffr=on; $("#ffrOn").setAttribute("aria-pressed",on); $("#ffrOff").setAttribute("aria-pressed",!on); drawFreq(); }
+  $("#ffrOn").addEventListener("click",()=>setFFR(true));
+  $("#ffrOff").addEventListener("click",()=>setFFR(false));
+  drawFreq();
+
+  $("#evChoices").addEventListener("click",e=>{
+    const b=e.target.closest(".choice"); if(!b) return;
+    document.querySelectorAll("#evChoices .choice").forEach(x=>x.setAttribute("aria-pressed","false"));
+    b.setAttribute("aria-pressed","true");
+    const v=$("#evVerdict");
+    if(b.dataset.v==="deep"){v.className="verdict ok";v.textContent="Right \u2014 low inertia, no fast reserve: frequency dives below the 49.0 line.";}
+    else{v.className="verdict bad";v.textContent="With little inertia and no fast reserve, the fall is steep \u2014 past the safety line.";}
+    inertia.value=1; setFFR(false);
+    $("#evCover").classList.add("gone");
+  });
+  $("#ffrChoices").addEventListener("click",e=>{
+    const b=e.target.closest(".choice"); if(!b) return;
+    document.querySelectorAll("#ffrChoices .choice").forEach(x=>x.setAttribute("aria-pressed","false"));
+    b.setAttribute("aria-pressed","true");
+    const v=$("#ffrVerdict");
+    if(b.dataset.v==="yes"){v.className="verdict ok";v.textContent="Right \u2014 FFR catches the fall in under a second; the nadir clears the line again.";}
+    else{v.className="verdict bad";v.textContent="FFR is fast enough to arrest the dip \u2014 the nadir lifts back above 49.0.";}
+    inertia.value=1; setFFR(true);
+    $("#evCover").classList.add("gone");
+  });
+
+  /* ---- reserve ladder ---- */
+  (function ladder(){
+    const lsvg=$("#ladderSvg");
+    const LX0=46,LX1=702,LMAX=900;
+    const lx=t=>LX0+Math.sqrt(t/LMAX)*(LX1-LX0);
+    const rows=[
+      {n:"FFR",t0:0.3,t1:1.3,c:"#10B5C9",note:"automatic \u00b7 sub-second \u00b7 for low inertia"},
+      {n:"FCR-N / FCR-D",t0:1.3,t1:30,c:"#3E9AAE",note:"automatic \u00b7 seconds \u00b7 contain & stabilise"},
+      {n:"aFRR",t0:30,t1:300,c:"#6E8FA6",note:"automatic \u00b7 minutes \u00b7 restore to 50"},
+      {n:"mFRR",t0:300,t1:900,c:"#E0913A",note:"manual \u00b7 ~15 min \u00b7 replace, free the fast reserves"}
+    ];
+    let s="";
+    // time axis
+    [1,10,30,300,900].forEach(t=>{const x=lx(t);s+=`<line x1="${x}" y1="30" x2="${x}" y2="210" stroke="${C.line}"/><text x="${x}" y="226" text-anchor="middle" font-family="ui-monospace,monospace" font-size="10.5" fill="${C.slate}">${t<60?t+"s":(t/60)+"m"}</text>`;});
+    rows.forEach((r,i)=>{
+      const y=44+i*44, x0=lx(r.t0), x1=lx(r.t1);
+      s+=`<rect x="${x0}" y="${y}" width="${Math.max(6,x1-x0)}" height="22" rx="6" fill="${r.c}"/>`;
+      s+=`<text x="${x0+6}" y="${y-4}" font-family="ui-monospace,monospace" font-size="12.5" font-weight="600" fill="${C.ink}">${r.n}</text>`;
+      s+=`<text x="${x1+8}" y="${y+15}" font-family="ui-monospace,monospace" font-size="11" fill="${C.slate}">${r.note}</text>`;
+    });
+    lsvg.innerHTML=s;
+  })();
+})();
+</script>
+</body>
+</html>

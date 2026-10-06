@@ -1,0 +1,580 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lesson 22 — Edge cases · Nordic Power School</title>
+<style>
+  :root{
+    --frost:#EEF3F7; --panel:#FFFFFF; --ink:#13202E; --slate:#5A6A7A;
+    --line:#D3DDE6; --deep:#0E1F33; --volt:#10B5C9; --volt-ink:#0A7E8E;
+    --ember:#E0913A; --ember-ink:#B16A12; --warm:#C2603F; --warm-ink:#A8472A; --ok:#2FA980; --bad:#DD6457;
+    --mono: ui-monospace,"SF Mono","Cascadia Code",Consolas,"Roboto Mono",monospace;
+    --sans: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--frost);color:var(--ink);font-family:var(--sans);font-size:17px;line-height:1.62;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:860px;margin:0 auto;padding:0 24px}
+  header{position:sticky;top:0;z-index:20;background:rgba(238,243,247,.9);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+  .bar{display:flex;justify-content:space-between;align-items:center;height:52px;font-size:13px;letter-spacing:.04em;text-transform:uppercase}
+  .bar b{font-weight:700} .bar .r{font-family:var(--mono);color:var(--slate)}
+  .hero{padding:60px 0 26px}
+  .eyebrow{font-family:var(--mono);font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--volt-ink);margin-bottom:16px}
+  h1{font-size:clamp(32px,5.6vw,54px);line-height:1.03;letter-spacing:-.02em;margin:0 0 16px;font-weight:780}
+  .lead{font-size:clamp(18px,2.4vw,22px);color:var(--slate);max-width:46ch;margin:0}
+  .byline{margin-top:20px;font-size:14px;color:var(--slate)} .byline b{color:var(--ink)}
+  section{padding:36px 0;border-top:1px solid var(--line)}
+  .snum{font-family:var(--mono);font-size:13px;color:var(--volt-ink);letter-spacing:.1em}
+  h2{font-size:clamp(23px,3.3vw,32px);line-height:1.12;letter-spacing:-.015em;margin:6px 0 10px;font-weight:740}
+  p{margin:0 0 16px} .muted{color:var(--slate)}
+  .ex{display:flex;flex-wrap:wrap;align-items:center;gap:9px;margin:0 0 14px;font-family:var(--mono);font-size:12.5px}
+  .ex .zone{background:var(--deep);color:#fff;border-radius:6px;padding:3px 9px;font-weight:600;letter-spacing:.03em}
+  .ex .date{color:var(--ink)}
+  .ex .tag{font-size:11px;letter-spacing:.04em;text-transform:uppercase;border-radius:999px;padding:3px 9px}
+  .ex .tag.rep{background:#fbf0e2;color:var(--ember-ink)} .ex .tag.obs{background:#e3f6f8;color:var(--volt-ink)}
+  .say{border-left:2px solid var(--volt);padding:2px 0 2px 18px;margin:18px 0}
+  .caution{border-left:2px solid var(--ember);padding:2px 0 2px 18px;margin:18px 0;color:var(--ember-ink);font-size:15px}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px;margin:18px 0}
+  .stage{position:relative;border-radius:12px;overflow:hidden;background:#fff}
+  .cover{position:absolute;inset:0;background:linear-gradient(180deg,var(--deep),#0a1726);color:#cfe;display:flex;align-items:center;justify-content:center;text-align:center;padding:20px;transition:opacity .5s;z-index:4}
+  .cover.gone{opacity:0;pointer-events:none} .cover .q{font-size:15px;max-width:40ch;color:#dCEbF0}
+  .cap{font-family:var(--mono);font-size:12px;color:var(--slate);margin-top:10px}
+  .cap b{color:var(--ink)} .cap .ref{color:var(--slate)} .cap .now{color:var(--volt-ink)}
+  .real{font-size:14.5px;color:var(--slate);border-top:1px dashed var(--line);padding-top:12px;margin-top:8px} .real b{color:var(--ink)}
+  .breaks{font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;text-transform:uppercase;margin:2px 0 8px}
+  .breaks.hold{color:var(--volt-ink)} .breaks.break{color:var(--warm-ink)}
+  .choices{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0}
+  .choice{font-family:var(--mono);font-size:14px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 16px;cursor:pointer;color:var(--ink);transition:.15s}
+  .choice:hover{border-color:var(--volt)} .choice[aria-pressed=true]{background:var(--deep);color:#fff;border-color:var(--deep)}
+  .verdict{font-size:15px;margin-top:4px;min-height:1.4em} .verdict.ok{color:var(--ok)} .verdict.bad{color:var(--bad)}
+  .drill{display:inline-flex;align-items:center;gap:6px;font-family:var(--sans);font-weight:600;font-size:13.5px;border:1px solid var(--volt);color:var(--volt-ink);background:#fff;border-radius:9px;padding:7px 13px;text-decoration:none;margin:2px 0 4px}
+  .drill:hover{background:#ecfbfd} .drill svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+  .sb-controls{display:flex;flex-wrap:wrap;gap:10px;margin:4px 0 16px}
+  .sb-btn{font-family:var(--mono);font-size:13.5px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:9px 15px;cursor:pointer;color:var(--ink);transition:.15s;min-width:122px;text-align:left}
+  .sb-btn:hover{border-color:var(--volt)} .sb-btn[aria-pressed=true]{background:var(--deep);color:#fff;border-color:var(--deep)}
+  .sb-read{border-left:2px solid var(--volt);padding:6px 0 6px 18px;margin:16px 0 6px;font-size:15px;min-height:2.4em}
+  .sb-reset{font-family:var(--sans);font-size:12.5px;color:var(--slate);background:none;border:none;cursor:pointer;text-decoration:underline;padding:0}
+  .rule{background:var(--deep);color:#eaf6f8;border-radius:14px;padding:24px;margin-top:8px}
+  .rule h3{margin:0 0 10px;font-size:20px;color:#fff} .rule p{color:#bcd6dc;margin:0 0 10px} .rule p:last-child{margin:0} .rule .k{color:var(--volt);font-family:var(--mono)}
+  footer{padding:48px 0;color:var(--slate);font-size:13px;border-top:1px solid var(--line)}
+  :focus-visible{outline:2px solid var(--volt);outline-offset:2px}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header><div class="wrap bar"><b>Nordic Power School</b><span class="r">Lesson 22 · Deep dive</span></div></header>
+
+<main class="wrap">
+  <div class="hero">
+    <div class="eyebrow">Lesson 22 · Edge cases</div>
+    <h1>When the<br>pattern breaks.</h1>
+    <p class="lead">The school teaches one shape: an overnight low, a midday wind trough, an evening peak, a clean spread. Real days don&rsquo;t always read that way. Knowing which force bent the curve &mdash; and which cue to trust &mdash; is the difference between reading a market and reciting a pattern.</p>
+    <p class="byline">with <b>Elizabeth Cecilia</b>. Twelve days the textbook day doesn&rsquo;t cover. Call each one before it reveals.</p>
+  </div>
+  <p class="buildson" style="font-family:var(--mono);font-size:12.5px;color:var(--slate);margin:0 0 26px;letter-spacing:.02em">Builds on &middot; <a href="03_price_formation.html" style="color:var(--volt-ink);text-decoration:none">03 Price formation</a> &middot; <a href="07_reading_curves.html" style="color:var(--volt-ink);text-decoration:none">07 Reading curves</a></p>
+
+
+  <section>
+    <div class="snum">01</div>
+    <h2>The shape you&rsquo;ve been taught</h2>
+    <p>Across the curriculum the chain has been the same: demand and wind give residual load; residual load walks the merit order; the clear follows. On the canonical day that makes a recognisable curve &mdash; quiet overnight, a midday dip as wind floods cheap supply, a climb to the evening demand peak. Each sketch below shows that chain directly: the day&rsquo;s price on top, and beneath it the two cues &mdash; wind, and residual load (demand minus wind).</p>
+    <p>An edge case is a day where one link in that chain is overridden by a specific force: the wind doesn&rsquo;t blow, a cable goes dark, hydro floods the stack, the sun does the dipping, or the clock itself changes length. Each one below is masked until you make the call &mdash; predict first, then reveal.</p>
+    <p class="muted" style="font-size:14.5px">Each sketch is a stylised shape, labelled with the zone and the day it&rsquo;s drawn after. Two of them you can open as live drills.</p>
+    <p class="caution">This lesson is reading practice. Each day is here to be recognised and understood, never traded. Nothing here is a bid, a position, or a signal to act &mdash; an edge case is a thing to read, not a thing to chase.</p>
+  </section>
+
+  <section>
+    <div class="snum">02</div>
+    <h2>The negative floor</h2>
+    <div class="ex"><span class="zone">SE2</span><span class="date">Sun 11 May 2025</span><span class="tag rep">representative</span></div>
+    <p class="breaks hold">Shape holds &middot; numbers don&rsquo;t</p>
+    <p>A windy, low-demand day &mdash; a mild spring weekend &mdash; pushes residual load so low the clear falls through zero. Subsidised wind and must-run plant bid below the line rather than stop (Lesson 20), so the stack starts in negative territory and the midday wind trough lands beneath it. The <i>shape</i> is the textbook one; only the numbers are unusual.</p>
+    <p class="say"><b>Predict first:</b> wind flooding in, demand at its floor, the cables already full. Where does the midday clear?</p>
+    <div class="choices" data-reveal="cov2" role="group" aria-label="Where the midday clears">
+      <button class="choice" data-v="near">Down near zero</button>
+      <button class="choice" data-v="below">Below zero</button>
+      <button class="choice" data-v="high">Up at evening levels</button>
+    </div>
+    <div class="verdict" data-for="cov2"></div>
+    <div class="panel"><div class="stage"><svg viewBox="0 0 680 150" width="100%" id="cNeg" role="img" aria-label="A day whose midday trough falls below zero"></svg><div class="cover" id="cov2"><div class="q">Make the call to reveal the day.</div></div></div>
+      <div class="cap"><b>SE2 · 11 May 2025.</b> <span style="color:#13202E">━ price</span> · <span style="color:#10B5C9">━ wind</span> · <span style="color:#E0913A">┄ residual</span> &mdash; wind floods midday, residual drops below zero, price follows.</div></div>
+    <p class="say"><b>Elizabeth:</b> the read barely changes &mdash; wind carves the midday, demand lifts the evening. What changes is that the trough is a price you&rsquo;re <i>paid</i> to sit at. Recognise the curve doing the ordinary thing in an extraordinary place; nothing has broken.</p>
+    <p class="real"><b>Seen recently:</b> SE2 logged the most negative-price hours of any European zone in 2025 &mdash; on the order of a month of hours &mdash; in spring snowmelt, windy shoulder seasons and low-demand weekends and nights.</p>
+  </section>
+
+  <section>
+    <div class="snum">03</div>
+    <h2>The Dunkelflaute</h2>
+    <div class="ex"><span class="zone">FI</span><span class="date">Wed 8 Jan 2025</span><span class="tag rep">representative</span></div>
+    <p class="breaks break">Pattern breaks</p>
+    <p><i>Dunkelflaute</i> is German &mdash; <i>Dunkel</i>, dark; <i>Flaute</i>, a lull or calm &mdash; a &ldquo;dark wind-lull&rdquo;. It names a winter stretch, sometimes lasting several days, when a stalled high-pressure system brings little wind <i>and</i> little sun at once: short, overcast days and still, cold air. Wind and solar fail together at exactly the moment heating demand is highest. For a renewable-heavy grid it is the hardest day of the year to serve.</p>
+    <p>For a reader, it&rsquo;s the day the template misleads. The cue you&rsquo;re taught to look for &mdash; wind carving a midday dip &mdash; is simply absent, so nothing suppresses the middle of the day. Price stays high throughout; the real low is overnight, and the high is the breakfast heating ramp.</p>
+    <p class="say"><b>Predict first:</b> on a cold, windless day, where does the price top out?</p>
+    <div class="choices" data-reveal="cov3" role="group" aria-label="Where the day's high sits">
+      <button class="choice" data-v="mid">Around midday</button>
+      <button class="choice" data-v="eve">The evening peak</button>
+      <button class="choice" data-v="morn">The 08:00 heating ramp</button>
+    </div>
+    <div class="verdict" data-for="cov3"></div>
+    <div class="panel"><div class="stage"><svg viewBox="0 0 680 150" width="100%" id="cDunk" role="img" aria-label="A windless cold day with no midday trough and a morning peak"></svg><div class="cover" id="cov3"><div class="q">Make the call to reveal the day.</div></div></div>
+      <div class="cap"><b>FI · 8 Jan 2025.</b> <span style="color:#13202E">━ price</span> · <span style="color:#10B5C9">━ wind</span> · <span style="color:#E0913A">┄ residual</span> &mdash; wind flat near zero, so no midday dip; price tracks the residual humps.</div></div>
+    <p class="say"><b>Elizabeth:</b> this is the day the template misleads. Read it the canonical way and you&rsquo;ll hunt a midday dip the weather never made. Read the <i>cue</i> &mdash; wind near zero &mdash; and the shape explains itself.</p>
+    <p class="real"><b>Seen recently:</b> repeated low-wind cold spells across Europe in early 2025. Finland and the Baltics ran cold with little wind in January 2025, prices well above the prior year and climbing further in February.</p>
+  </section>
+
+  <section>
+    <div class="snum">04</div>
+    <h2>The decoupled zone</h2>
+    <div class="ex"><span class="zone">EE vs FI</span><span class="date">Wed 12 Feb 2025</span><span class="tag obs">observed</span></div>
+    <p class="breaks break">Pattern breaks</p>
+    <p>Zones normally couple: the interconnectors flow until prices converge, and a zone&rsquo;s curve looks like its neighbours&rsquo;. When a cable trips, that link is severed. The zone falls back on its own stack &mdash; local thermal, costlier imports &mdash; and can sit far above a cheap neighbour for days or months. The single-zone curve stops telling you anything about the region.</p>
+    <p class="say"><b>Predict first:</b> Estonia&rsquo;s cable to Finland is down; Finland is calm and cheap. Where does Estonia&rsquo;s price sit?</p>
+    <div class="choices" data-reveal="cov4" role="group" aria-label="Where the islanded zone prices">
+      <button class="choice" data-v="same">About the same</button>
+      <button class="choice" data-v="above">Far above Finland</button>
+      <button class="choice" data-v="below">Below Finland</button>
+    </div>
+    <div class="verdict" data-for="cov4"></div>
+    <div class="panel"><div class="stage"><svg viewBox="0 0 680 150" width="100%" id="cDecouple" role="img" aria-label="An islanded zone priced far above its coupled neighbour"></svg><div class="cover" id="cov4"><div class="q">Make the call to reveal the day.</div></div></div>
+      <div class="cap"><b>EE vs FI · 12 Feb 2025.</b> <span style="color:#A8472A">━ Estonia (islanded)</span> &nbsp; <span class="now">━ Finland</span> &mdash; the band is the gap the cable would erase.</div></div>
+    <p class="say"><b>Elizabeth:</b> the tell is the <i>gap</i>, not the shape. When one zone runs persistently above an otherwise-similar neighbour, ask what stopped the flow between them before you ask anything about merit order &mdash; the cable, not the stack, is setting the price.</p>
+    <p class="real"><b>Seen recently:</b> the Estlink&nbsp;2 cable between Finland and Estonia was severed on 25 December 2024 and stayed out until around August 2025. Baltic prices rose more than 40%; on 12 February 2025 Estonia&rsquo;s average exchange price ran roughly four and a half times Finland&rsquo;s.</p>
+  </section>
+
+  <section>
+    <div class="snum">05</div>
+    <h2>The hydro-flooded flat</h2>
+    <div class="ex"><span class="zone">NO4</span><span class="date">Mon 14 Jul 2025</span><span class="tag rep">representative</span></div>
+    <p class="breaks break">Pattern breaks</p>
+    <p>A wet year with full reservoirs floods cheap, flexible hydro across every hour. Hydro&rsquo;s water value (Lesson 16) sits low and even, capping the clear at much the same level morning, noon and night. Volatility collapses &mdash; there&rsquo;s a trough and peak only in the most technical sense, and the spread is too thin to cover a round-trip&rsquo;s losses.</p>
+    <p class="say"><b>Predict first:</b> reservoirs are brimming after a wet spring. What does the day&rsquo;s spread look like?</p>
+    <div class="choices" data-reveal="cov5" role="group" aria-label="What the spread looks like">
+      <button class="choice" data-v="wide">Wide and clean</button>
+      <button class="choice" data-v="thin">Thin &mdash; barely there</button>
+      <button class="choice" data-v="neg">Negative all day</button>
+    </div>
+    <div class="verdict" data-for="cov5"></div>
+    <div class="panel"><div class="stage"><svg viewBox="0 0 680 150" width="100%" id="cHydro" role="img" aria-label="A nearly flat low-volatility day flooded with hydro"></svg><div class="cover" id="cov5"><div class="q">Make the call to reveal the day.</div></div></div>
+      <div class="cap"><b>NO4 · 14 Jul 2025.</b> <span style="color:#13202E">━ price</span> · <span style="color:#10B5C9">━ wind</span> · <span style="color:#E0913A">┄ residual</span> &mdash; residual still swings, but abundant hydro pins price flat.</div></div>
+    <p class="say"><b>Elizabeth:</b> the capstone&rsquo;s arbitrage stage will tell you, correctly, that this day doesn&rsquo;t pay to cycle. That isn&rsquo;t a failure to find the trade &mdash; it&rsquo;s the right read. Some days the honest answer is that there&rsquo;s nothing to do.</p>
+    <p class="real"><b>Seen recently:</b> through 2025, very low prices in the northern Nordics on a strong hydrological balance &mdash; abundant reservoirs pressing the system price sharply lower year on year.</p>
+  </section>
+
+  <section>
+    <div class="snum">06</div>
+    <h2>The solar-led dip</h2>
+    <div class="ex"><span class="zone">DK1</span><span class="date">Sun 8 Jun 2025</span><span class="tag rep">representative</span></div>
+    <p class="breaks hold">Right shape &middot; wrong cause</p>
+    <p>The subtle one. In Denmark, southern Sweden and the Baltics, growing solar now carves a midday trough of its own, with a steep ramp as the sun drops into the evening peak. The curve looks almost exactly like the canonical wind day, so a student reading &ldquo;wind&rdquo; gets the right answer for the wrong reason. The truth is in the cue panel: low wind, a midday solar bulge.</p>
+    <p class="say"><b>Predict first:</b> the price dips hard at midday and climbs to an evening peak &mdash; same shape as a wind day. Which cue actually carved the dip?</p>
+    <div class="choices" data-reveal="cov6" role="group" aria-label="Which cue carved the dip">
+      <button class="choice" data-v="wind">Wind</button>
+      <button class="choice" data-v="solar">Solar</button>
+      <button class="choice" data-v="demand">Demand</button>
+    </div>
+    <div class="verdict" data-for="cov6"></div>
+    <div class="panel"><div class="stage"><svg viewBox="0 0 680 150" width="100%" id="cSolar" role="img" aria-label="A canonical-looking day whose midday dip is carved by solar, not wind"></svg><div class="cover" id="cov6"><div class="q">Make the call to reveal the day.</div></div></div>
+      <div class="cap"><b>DK1 · 8 Jun 2025.</b> <span style="color:#13202E">━ price</span> · <span style="color:#10B5C9">━ wind</span> · <span style="color:#EBBE3E">━ solar</span> · <span style="color:#E0913A">┄ residual</span> &mdash; wind is flat, but the solar bulge pulls residual (demand &minus; wind &minus; solar) down at midday: the sun carved it.</div></div>
+    <p class="say"><b>Elizabeth:</b> this is why we read the cues, not the price. A day that <i>looks</i> right can still be misread &mdash; wind is flat all day, yet the price dips; only the solar line explains it. Think &ldquo;wind&rdquo; here and you&rsquo;ll be wrong tomorrow, when the sun is out and the wind is the same.</p>
+    <p class="real"><b>Seen recently:</b> negative Nordic prices in Q2 2025 occurred specifically during high-solar hours, and across Europe solar became the single largest source of electricity for the first time in June 2025.</p>
+  </section>
+
+  <section>
+    <div class="snum">07</div>
+    <h2>The day that isn&rsquo;t 24 hours</h2>
+    <div class="ex"><span class="zone">All zones</span><span class="date">Sun 26 Oct 2025</span><span class="tag obs">observed</span></div>
+    <p class="breaks break">Structure breaks</p>
+    <p>The last edge isn&rsquo;t about price &mdash; it&rsquo;s the clock. Two structural facts break any tool that assumes a flat 24 hourly slots. At the daylight-saving transitions a day has 23 or 25 hours: on 26 October 2025 the clocks went back and the 02:00&ndash;03:00 hour repeated. And since 1 October 2025 the Nordic day-ahead clears in 15-minute market time units &mdash; 96 periods a day, not 24.</p>
+    <p class="say"><b>Predict first:</b> it&rsquo;s the autumn clock change. How many hours does this delivery day have?</p>
+    <div class="choices" data-reveal="cov7" role="group" aria-label="How many hours the day has">
+      <button class="choice" data-v="23">23</button>
+      <button class="choice" data-v="24">24</button>
+      <button class="choice" data-v="25">25</button>
+    </div>
+    <div class="verdict" data-for="cov7"></div>
+    <div class="panel"><div class="stage"><svg viewBox="0 0 680 150" width="100%" id="cStruct" role="img" aria-label="A 24-hour day compared with a 25-hour autumn DST day"></svg><div class="cover" id="cov7"><div class="q">Make the call to reveal the day.</div></div></div>
+      <div class="cap"><b>26 Oct 2025.</b> the autumn change carries an extra hour; the 15-minute MTU carries four periods where the lessons draw one.</div></div>
+    <p class="say"><b>Elizabeth:</b> never index a day by hour-of-day, and never assume it&rsquo;s 24 long. Carry each period&rsquo;s own length and timestamp, store and compute in UTC, convert to market time only at the edges &mdash; exactly as Lesson 2 insisted. The clock is a cue too.</p>
+    <p class="caution">When a day repeats an hour or runs on quarter-hours, a &ldquo;trough&rdquo; or &ldquo;peak&rdquo; found by counting slots can land on the wrong moment. Read the timestamps, not the position in the list.</p>
+  </section>
+
+  <section>
+    <div class="snum">08</div>
+    <h2>The scarcity spike</h2>
+    <div class="ex"><span class="zone">FI</span><span class="date">Fri 5 Jan 2024</span><span class="tag obs">observed</span></div>
+    <p class="breaks hold">Shape holds &middot; numbers don&rsquo;t</p>
+    <p>The mirror image of the negative floor. A deep freeze pushes demand toward record levels while a windless high-pressure system leaves wind near zero. Residual load runs so high that the clear climbs deep into the costliest peaking plant, and price vaults toward the cap. The shape is still a textbook evening peak &mdash; only the altitude is extraordinary.</p>
+    <p class="say"><b>Predict first:</b> deep freeze, demand near record, almost no wind. Where does the evening peak clear?</p>
+    <div class="choices" data-reveal="cov8" role="group" aria-label="Where the evening peak clears">
+      <button class="choice" data-v="busy">A busy ~&euro;90</button>
+      <button class="choice" data-v="high">A few hundred &euro;</button>
+      <button class="choice" data-v="cap">Near &euro;1,900/MWh</button>
+    </div>
+    <div class="verdict" data-for="cov8"></div>
+    <div class="panel"><div class="stage"><svg viewBox="0 0 680 150" width="100%" id="cSpike" role="img" aria-label="A cold windless day whose evening peak vaults toward the price cap"></svg><div class="cover" id="cov8"><div class="q">Make the call to reveal the day.</div></div></div>
+      <div class="cap"><b>FI &middot; 5 Jan 2024.</b> <span style="color:#13202E">━ price</span> &middot; <span style="color:#10B5C9">━ wind</span> &middot; <span style="color:#E0913A">┄ residual</span> &mdash; wind flat near zero, residual near record, price near the cap.</div></div>
+    <p class="say"><b>Elizabeth:</b> read it exactly like the canonical day &mdash; overnight low, evening peak &mdash; then respect the scale. The same grammar can spell a number an order of magnitude past anything the curriculum&rsquo;s sample days show.</p>
+    <p class="real"><b>Seen recently:</b> on 5 January 2024 a prolonged Arctic freeze with little wind pushed Finland&rsquo;s day-ahead average toward &euro;890/MWh, with the evening peak near &euro;1,900/MWh. Fingrid raised its readiness and urged consumers to shift load; imports from Sweden and Estonia were maxed out.</p>
+  </section>
+
+  <section>
+    <div class="snum">09</div>
+    <h2>The unit trip</h2>
+    <div class="ex"><span class="zone">FI</span><span class="date">Sun 17 Nov 2024</span><span class="tag obs">observed</span></div>
+    <p class="breaks break">Structure breaks mid-day</p>
+    <p>A single large generator can leave the stack in seconds. When it does, that block of cheap capacity vanishes and the zone climbs to costlier plant within the hour &mdash; an instant upward step that no weather cue foretold. The day reads perfectly normal right up to the moment it doesn&rsquo;t.</p>
+    <p class="say"><b>Predict first:</b> a 1,600&nbsp;MW reactor trips offline at 15:25. What happens to price?</p>
+    <div class="choices" data-reveal="cov9" role="group" aria-label="What a unit trip does to price">
+      <button class="choice" data-v="absorb">Absorbed &mdash; unchanged</button>
+      <button class="choice" data-v="up">Steps up within the hour</button>
+      <button class="choice" data-v="fall">Falls</button>
+    </div>
+    <div class="verdict" data-for="cov9"></div>
+    <div class="panel"><div class="stage"><svg viewBox="0 0 680 150" width="100%" id="cTrip" role="img" aria-label="A normal day that steps up sharply when a large unit trips in the afternoon"></svg><div class="cover" id="cov9"><div class="q">Make the call to reveal the day.</div></div></div>
+      <div class="cap"><b>FI &middot; 17 Nov 2024.</b> <span style="color:#13202E">━ price</span> &middot; <span style="color:#10B5C9">━ wind</span> &middot; <span style="color:#E0913A">┄ residual</span> &mdash; the trip steps residual up; price follows within the hour.</div></div>
+    <p class="say"><b>Elizabeth:</b> this is the cue that isn&rsquo;t weather at all. Watch availability, not just demand and wind &mdash; a healthy-looking curve can break the instant a big unit drops.</p>
+    <p class="real"><b>Seen recently:</b> on 17 November 2024 Olkiluoto&nbsp;3 &mdash; Europe&rsquo;s largest reactor at 1,600&nbsp;MW &mdash; tripped on a turbine fault, briefly dragging Nordic system frequency to about 49.59&nbsp;Hz and lifting Finnish and Nordic short-term prices while the outage ran for several days.</p>
+  </section>
+
+  <section>
+    <div class="snum">10</div>
+    <h2>The forecast bust</h2>
+    <div class="ex"><span class="zone">Any zone</span><span class="date">representative</span><span class="tag rep">representative</span></div>
+    <p class="breaks break">Right read &middot; wrong day</p>
+    <p>The day-ahead clears on <i>forecasts</i>. If it priced in an afternoon of wind that never arrived, the realised system is short: intraday prices climb to source the missing energy, and imbalance prices punish the gap after the fact. The day-ahead curve wasn&rsquo;t misread &mdash; it was a fair read of a day that didn&rsquo;t happen.</p>
+    <p class="say"><b>Predict first:</b> day-ahead priced in a windy afternoon. The wind never came. Where do intraday and imbalance prices go?</p>
+    <div class="choices" data-reveal="cov10" role="group" aria-label="Where intraday and imbalance prices go">
+      <button class="choice" data-v="same">Stay at the day-ahead level</button>
+      <button class="choice" data-v="up">Jump above it</button>
+      <button class="choice" data-v="below">Drop below</button>
+    </div>
+    <div class="verdict" data-for="cov10"></div>
+    <div class="panel"><div class="stage"><svg viewBox="0 0 680 150" width="100%" id="cBust" role="img" aria-label="A realised price curve sitting above the day-ahead curve where forecast wind failed"></svg><div class="cover" id="cov10"><div class="q">Make the call to reveal the day.</div></div></div>
+      <div class="cap"><b>Representative.</b> <span style="color:#A8472A">━ realised / intraday</span> &middot; <span style="color:#10B5C9">━ day-ahead</span> &mdash; the band is the shortfall the missing wind created.</div></div>
+    <p class="say"><b>Elizabeth:</b> the day-ahead curve is a forecast wearing a price. When the weather diverges, the truth shows up in the intraday and imbalance markets (Lessons&nbsp;18&ndash;19) &mdash; not in the number you read the night before.</p>
+    <p class="real"><b>Seen recently:</b> Fingrid has repeatedly flagged wind landing far from forecast &mdash; sometimes well above a low-wind scenario, sometimes cut sharply by blade icing. Every miss is settled in the intraday and imbalance markets, not the day-ahead.</p>
+  </section>
+
+  <section>
+    <div class="snum">11</div>
+    <h2>The flow reversal</h2>
+    <div class="ex"><span class="zone">FI &harr; EE</span><span class="date">Sat 2 Mar 2024</span><span class="tag obs">observed</span></div>
+    <p class="breaks break">The link flips</p>
+    <p>An interconnector has a direction, and it isn&rsquo;t fixed. A cable that carries power one way all winter can reverse when the exporting zone loses generation: the importer becomes the exporter, or the reverse. The coupling itself changes sign &mdash; and a single-zone read misses it entirely.</p>
+    <p class="say"><b>Predict first:</b> Finland exported to Estonia all winter. Its biggest reactor goes down for maintenance. The interconnector now&hellip;</p>
+    <div class="choices" data-reveal="cov11" role="group" aria-label="What the interconnector does">
+      <button class="choice" data-v="export">Keeps exporting</button>
+      <button class="choice" data-v="import">Reverses to importing</button>
+      <button class="choice" data-v="off">Shuts off</button>
+    </div>
+    <div class="verdict" data-for="cov11"></div>
+    <div class="panel"><div class="stage"><svg viewBox="0 0 680 150" width="100%" id="cFlow" role="img" aria-label="A cross-border flow that crosses zero from export to import during the day"></svg><div class="cover" id="cov11"><div class="q">Make the call to reveal the day.</div></div></div>
+      <div class="cap"><b>FI &harr; EE &middot; 2 Mar 2024.</b> net flow on the Finland&ndash;Estonia link &mdash; above the line is export, below is import.</div></div>
+    <p class="say"><b>Elizabeth:</b> never read a border as a fixed arrow. When a zone loses supply, the cable that fed its neighbour can turn around and feed it instead &mdash; the direction is a variable, not a label.</p>
+    <p class="real"><b>Seen recently:</b> when Olkiluoto&nbsp;3 went offline for maintenance on 2 March 2024, Finland flipped from exporting a few hundred MW to Estonia to importing a similar amount &mdash; the flow reversed with the loss of supply.</p>
+  </section>
+
+  <section>
+    <div class="snum">12</div>
+    <h2>The fuel-shock level shift</h2>
+    <div class="ex"><span class="zone">Europe / FI</span><span class="date">Dec 2022</span><span class="tag obs">observed</span></div>
+    <p class="breaks hold">Shape holds &middot; level doesn&rsquo;t</p>
+    <p>Gas and carbon set the marginal cost of the thermal plant at the top of the stack. When they jump, every hour that the marginal unit is thermal lifts with them &mdash; so the whole curve rises, overnight low and evening peak alike, without changing shape. You&rsquo;re reading the same day at a different altitude.</p>
+    <p class="say"><b>Predict first:</b> gas and carbon prices roughly triple. The daily price curve&hellip;</p>
+    <div class="choices" data-reveal="cov12" role="group" aria-label="What a fuel shock does to the curve">
+      <button class="choice" data-v="shape">Changes shape entirely</button>
+      <button class="choice" data-v="lift">Keeps its shape, lifts higher</button>
+      <button class="choice" data-v="fall">Falls</button>
+    </div>
+    <div class="verdict" data-for="cov12"></div>
+    <div class="panel"><div class="stage"><svg viewBox="0 0 680 150" width="100%" id="cFuel" role="img" aria-label="A normal-shaped curve and a parallel curve lifted by a fuel shock"></svg><div class="cover" id="cov12"><div class="q">Make the call to reveal the day.</div></div></div>
+      <div class="cap"><b>Europe / FI &middot; Dec 2022.</b> <span style="color:#A8472A">━ fuel-shock level</span> &middot; <span style="color:#10B5C9">━ normal level</span> &mdash; same shape, lifted bodily.</div></div>
+    <p class="say"><b>Elizabeth:</b> separate the shape from the level. Weather and demand draw the curve&rsquo;s <i>shape</i>; fuel and carbon set its <i>height</i>. A level shift is not a new pattern &mdash; it&rsquo;s the same pattern, re-priced.</p>
+    <p class="real"><b>Seen recently:</b> through the 2022 gas crisis the curve kept its familiar shape but sat far higher &mdash; Finland&rsquo;s December 2022 average was about &euro;246/MWh against roughly &euro;60/MWh the following spring, and the European benchmark briefly topped &euro;400/MWh on gas and carbon costs.</p>
+  </section>
+
+  <section>
+    <div class="snum">13</div>
+    <h2>The holiday profile</h2>
+    <div class="ex"><span class="zone">FI</span><span class="date">Wed 1 May 2024</span><span class="tag obs">observed</span></div>
+    <p class="breaks break">The demand shape breaks</p>
+    <p>The morning ramp you lean on is people: commuters and industry waking up together. On a public holiday that ramp simply doesn&rsquo;t happen. Demand stays low and flat all day, so the price loses its usual landmarks &mdash; the &ldquo;morning peak&rdquo; you&rsquo;d reach for isn&rsquo;t there to find.</p>
+    <p class="say"><b>Predict first:</b> it&rsquo;s a public holiday. Where&rsquo;s the morning demand ramp?</p>
+    <div class="choices" data-reveal="cov13" role="group" aria-label="What happens to the morning ramp">
+      <button class="choice" data-v="same">Same as a workday</button>
+      <button class="choice" data-v="flat">Flattened &mdash; no commute or industry</button>
+      <button class="choice" data-v="high">Higher than usual</button>
+    </div>
+    <div class="verdict" data-for="cov13"></div>
+    <div class="panel"><div class="stage"><svg viewBox="0 0 680 150" width="100%" id="cHoliday" role="img" aria-label="A holiday day with a flat demand profile and no morning ramp"></svg><div class="cover" id="cov13"><div class="q">Make the call to reveal the day.</div></div></div>
+      <div class="cap"><b>FI &middot; 1 May 2024.</b> <span style="color:#13202E">━ price</span> &middot; <span style="color:#10B5C9">━ wind</span> &middot; <span style="color:#E0913A">┄ residual</span> &mdash; flat holiday demand, no morning ramp, shapeless price.</div></div>
+    <p class="say"><b>Elizabeth:</b> the calendar is a cue too. Before you reach for &ldquo;morning peak&rdquo;, ask whether anyone&rsquo;s actually going to work &mdash; on a holiday the demand shape you assume just isn&rsquo;t there.</p>
+    <p class="real"><b>Seen recently:</b> on 1 May 2024 &mdash; Vappu, a Finnish public holiday &mdash; demand stayed flat and subdued. The very next day it jumped roughly 800&nbsp;MW as normal activity resumed and prices climbed back to a workday shape.</p>
+  </section>
+
+  <section>
+    <div class="snum">14</div>
+    <h2>Build the day</h2>
+    <p>Reading is half of it; the other half is knowing which force does what. This is a stylised model &mdash; a teaching toy, not a market &mdash; that turns the chain the right way round: <b>you</b> set the forces, and the price follows. Add wind and watch the midday sink. Switch on solar and watch a second dip appear with no wind at all. Flood the system with hydro and watch the whole curve go flat. Trip a unit offline and watch the stack climb.</p>
+    <div class="sb-controls" id="sbControls">
+      <button class="sb-btn" id="sbWind" data-act="wind" aria-pressed="false">Wind: off</button>
+      <button class="sb-btn" id="sbSolar" data-act="solar" aria-pressed="false">Solar: off</button>
+      <button class="sb-btn" id="sbHydro" data-act="hydro" aria-pressed="false">Hydro flood: off</button>
+      <button class="sb-btn" id="sbOutage" data-act="outage" aria-pressed="false">Unit trip: off</button>
+    </div>
+    <div class="panel"><div class="stage"><svg viewBox="0 0 680 150" width="100%" id="sbChart" role="img" aria-label="A price curve that responds to the forces you add"></svg></div>
+      <div class="cap"><span style="color:#13202E">━ price</span> · <span style="color:#10B5C9">━ wind</span> · <span style="color:#EBBE3E">━ solar</span> · <span style="color:#E0913A">┄ residual</span> &mdash; residual = demand &minus; wind &minus; solar (a tripped unit adds to it).</div></div>
+    <p class="sb-read say" id="sbRead"></p>
+    <button class="sb-reset" id="sbReset">↺ reset to a calm day</button>
+    <p class="caution">A toy to build intuition, not a forecast or a dispatch tool. The numbers are illustrative; nothing here is a bid, a position, or a signal to act.</p>
+  </section>
+
+  <section>
+    <div class="snum">15</div>
+    <div class="rule">
+      <h3>Read the force, not the template</h3>
+      <p>The canonical day is a starting grammar, not a law. Every edge here is the same lesson from a different angle: <span class="k">the cues come first</span>. When the shape surprises you, don&rsquo;t bend the day to fit the pattern &mdash; find the force that bent it.</p>
+      <p>No wind and the midday dip vanishes. A dead cable and the zone leaves the region behind. A flood of hydro and the whole curve flattens. Solar instead of wind and the right shape hides the wrong cause. A clock change and the day isn&rsquo;t even 24 hours long. A deep freeze vaults price toward the cap; a tripped unit climbs the stack in minutes; a fuel shock lifts the whole curve; a holiday erases the morning ramp; a busted forecast is settled intraday; and a lost reactor can reverse a cable&rsquo;s flow.</p>
+      <p>Read which of those is in charge today, and the day &mdash; however strange &mdash; explains itself.</p>
+    </div>
+  </section>
+</main>
+<nav class="lessonseq" style="max-width:860px;margin:0 auto;padding:30px 24px 0;display:flex;justify-content:space-between;gap:16px;font-family:var(--mono);font-size:13px;border-top:1px solid var(--line)"><a href="12_ancillary_markets.html" style="color:var(--volt-ink);text-decoration:none;max-width:48%">&larr; Builds on &middot; Ancillary markets</a><a href="23_algo_trading.html" style="color:var(--volt-ink);text-decoration:none;max-width:48%;text-align:right">Next &middot; Algorithmic trading &rarr;</a></nav>
+
+          <footer class="wrap">Nordic Power School · Lesson 22 — education only. No bids, no trades, no dispatch.</footer>
+
+<script>
+(function(){
+  "use strict";
+  const MONO="ui-monospace,monospace";
+  const C={ink:"#13202E",slate:"#5A6A7A",line:"#D3DDE6",volt:"#10B5C9",voltink:"#0A7E8E",sun:"#EBBE3E",
+           ember:"#E0913A",emberink:"#B16A12",warm:"#A8472A",ok:"#2FA980",bad:"#DD6457",deep:"#0E1F33"};
+  const CANON=[46,44,43,43,45,52,63,71,70,58,40,28,21,20,24,33,48,67,85,82,70,60,53,49];
+  const W=680,H=150,X0=42,X1=666;
+  const PY0=14,PY1=86, DV=96, CY0=106,CY1=138;   // price panel / divider / cue panel
+  const xAt=(i,n)=>X0+i/((n-1)||1)*(X1-X0);
+  function poly(arr,yf){return arr.map((v,i)=>`${xAt(i,arr.length).toFixed(1)},${yf(v).toFixed(1)}`).join(" ");}
+
+  function drawShape(id, price, o){
+    o=o||{}; const el=document.getElementById(id); if(!el) return; let s="";
+    // two-price mode (decoupling): one full-height panel, two price lines + gap band
+    if(o.second){
+      const lo=Math.min(...price,...o.second), hi=Math.max(...price,...o.second), sp=(hi-lo)||1;
+      const y=v=>CY1-(v-lo)/sp*(CY1-PY0);
+      if(o.band){const up=price.map((v,i)=>`${xAt(i,price.length).toFixed(1)},${y(v).toFixed(1)}`);
+        const dn=o.second.map((v,i)=>`${xAt(i,o.second.length).toFixed(1)},${y(v).toFixed(1)}`).reverse();
+        s+=`<polygon points="${up.concat(dn).join(" ")}" fill="${C.ember}" opacity="0.12"/>`;}
+      s+=`<polyline points="${poly(o.second,y)}" fill="none" stroke="${o.secondColor||C.volt}" stroke-width="2.2"/>`;
+      s+=`<polyline points="${poly(price,y)}" fill="none" stroke="${o.color||C.warm}" stroke-width="2.4"/>`;
+      el.innerHTML=s; return;
+    }
+    // price (top panel) + wind & residual=demand-wind (cue panel)
+    const wind=o.wind, dem=o.demand, sol=o.solar, res=(dem&&wind)?dem.map((d,i)=>d-wind[i]-(sol?sol[i]:0)):null;
+    let plo=Math.min(...price); if(o.zero)plo=Math.min(plo,0); const phi=Math.max(...price), psp=(phi-plo)||1;
+    const py=v=>PY1-(v-plo)/psp*(PY1-PY0);
+    s+=`<line x1="${X0}" y1="${PY0}" x2="${X1}" y2="${PY0}" stroke="${C.line}" opacity="0.5"/>`;
+    if(o.zero && plo<0){const yz=py(0);
+      s+=`<rect x="${X0}" y="${yz.toFixed(1)}" width="${X1-X0}" height="${(PY1-yz).toFixed(1)}" fill="${C.warm}" opacity="0.07"/>`;
+      s+=`<line x1="${X0}" y1="${yz.toFixed(1)}" x2="${X1}" y2="${yz.toFixed(1)}" stroke="${C.slate}" stroke-dasharray="4 3" opacity="0.7"/>`;
+      s+=`<text x="${X1}" y="${(yz-3).toFixed(1)}" text-anchor="end" font-family="${MONO}" font-size="9.5" fill="${C.slate}">€0</text>`;}
+    s+=`<text x="${X0-4}" y="${PY0+8}" text-anchor="end" font-family="${MONO}" font-size="9.5" fill="${C.slate}">€</text>`;
+    s+=`<polyline points="${poly(price,py)}" fill="none" stroke="${C.ink}" stroke-width="2.4"/>`;
+    (o.marks||[]).forEach(m=>{const px=xAt(m.i,price.length),pyy=py(price[m.i]);
+      s+=`<circle cx="${px.toFixed(1)}" cy="${pyy.toFixed(1)}" r="3" fill="${m.color||C.voltink}"/>`+
+         `<text x="${px.toFixed(1)}" y="${(pyy+(m.dy||-8)).toFixed(1)}" text-anchor="middle" font-family="${MONO}" font-size="10" fill="${m.color||C.voltink}">${m.text}</text>`;});
+    s+=`<line x1="${X0}" y1="${DV}" x2="${X1}" y2="${DV}" stroke="${C.line}"/>`;
+    if(wind && res){
+      const pool=[...wind,...res,0]; if(sol)pool.push(...sol);
+      const clo=Math.min(...pool), chi=Math.max(...pool), csp=(chi-clo)||1;
+      const cy=v=>CY1-(v-clo)/csp*(CY1-CY0);
+      if(clo<0){const yz=cy(0);s+=`<line x1="${X0}" y1="${yz.toFixed(1)}" x2="${X1}" y2="${yz.toFixed(1)}" stroke="${C.line}" stroke-dasharray="3 3" opacity="0.7"/>`;}
+      s+=`<text x="${X0-4}" y="${CY0+7}" text-anchor="end" font-family="${MONO}" font-size="9.5" fill="${C.slate}">GW</text>`;
+      if(sol){const base=cy(Math.max(clo,0));
+        const up=sol.map((v,i)=>`${xAt(i,sol.length).toFixed(1)},${cy(v).toFixed(1)}`).join(" ");
+        s+=`<polygon points="${X0},${base.toFixed(1)} ${up} ${X1},${base.toFixed(1)}" fill="${C.sun}" opacity="0.16"/>`;
+        s+=`<polyline points="${poly(sol,cy)}" fill="none" stroke="${C.sun}" stroke-width="1.8"/>`;}
+      s+=`<polyline points="${poly(res,cy)}" fill="none" stroke="${C.ember}" stroke-width="1.8" stroke-dasharray="5 4"/>`;
+      s+=`<polyline points="${poly(wind,cy)}" fill="none" stroke="${C.volt}" stroke-width="1.8"/>`;
+    }
+    el.innerHTML=s;
+  }
+  function drawStruct(id){
+    const el=document.getElementById(id); if(!el) return; let s="";
+    function row(yy,n,label,note){
+      s+=`<text x="${X0}" y="${yy-12}" font-family="${MONO}" font-size="11.5" fill="${C.ink}">${label}</text>`;
+      s+=`<line x1="${X0}" y1="${yy}" x2="${X1}" y2="${yy}" stroke="${C.line}"/>`;
+      for(let i=0;i<n;i++){const x=X0+i/(n-1)*(X1-X0);s+=`<line x1="${x.toFixed(1)}" y1="${yy-5}" x2="${x.toFixed(1)}" y2="${yy+5}" stroke="${C.slate}"/>`;}
+      s+=`<text x="${X1}" y="${yy+19}" text-anchor="end" font-family="${MONO}" font-size="10" fill="${C.slate}">${note}</text>`;
+    }
+    row(48, 24, "Normal day", "24 hours");
+    row(112, 25, "Autumn clock change", "25 hours — 02:00 repeats");
+    el.innerHTML=s;
+  }
+
+  const NEG_P=[6,5,4,4,5,7,9,11,12,4,-2,-7,-10,-9,-4,2,8,14,19,22,18,12,9,7];
+  const NEG_D=[3.0,2.9,2.8,2.8,2.9,3.0,3.2,3.4,3.5,3.4,3.3,3.2,3.1,3.1,3.2,3.3,3.5,3.7,3.9,4.0,3.8,3.5,3.2,3.0];
+  const NEG_W=[4.0,4.2,4.5,4.8,4.9,4.8,4.6,4.4,4.6,5.5,6.8,7.8,8.4,8.3,7.6,6.4,5.0,3.8,3.0,2.8,3.2,3.8,4.2,4.4];
+  drawShape("cNeg",NEG_P,{zero:true,demand:NEG_D,wind:NEG_W,marks:[{i:12,text:"below €0",color:C.warm,dy:14}]});
+  const DUN_P=[95,88,80,75,78,90,120,160,180,165,140,125,115,110,112,120,135,148,150,145,130,115,105,98];
+  const DUN_D=[10.5,10.0,9.8,9.7,10.2,11.5,13.0,14.0,14.2,13.5,12.8,12.3,12.0,11.8,11.9,12.2,12.8,13.3,13.5,13.2,12.5,11.8,11.0,10.5];
+  const DUN_W=[1.2,1.1,1.0,0.9,0.9,0.8,0.8,0.7,0.7,0.8,1.0,1.2,1.4,1.5,1.4,1.2,1.0,0.9,0.8,0.8,0.9,1.0,1.1,1.2];
+  drawShape("cDunk",DUN_P,{demand:DUN_D,wind:DUN_W,marks:[{i:3,text:"low",color:C.voltink,dy:14},{i:8,text:"high 08:00",color:C.bad}]});
+  drawShape("cDecouple",
+    [95,92,90,90,92,100,108,115,112,104,98,94,92,92,95,100,108,118,128,124,116,108,100,96],
+    {color:C.warm,band:true,secondColor:C.volt,
+     second:[22,20,19,19,21,26,32,36,34,28,22,18,15,14,17,24,33,44,52,50,42,36,30,26]});
+  const HYD_P=[30,29,28,28,29,31,32,33,33,32,31,30,30,30,31,32,33,34,34,33,32,31,30,30];
+  const HYD_D=[5.0,4.8,4.7,4.7,4.9,5.4,6.0,6.4,6.3,5.9,5.6,5.4,5.3,5.3,5.5,5.8,6.2,6.6,6.8,6.7,6.3,5.9,5.4,5.1];
+  const HYD_W=[1.5,1.6,1.7,1.8,1.7,1.6,1.5,1.4,1.5,1.8,2.0,2.1,2.2,2.2,2.0,1.8,1.6,1.4,1.3,1.3,1.4,1.6,1.7,1.8];
+  drawShape("cHydro",HYD_P,{demand:HYD_D,wind:HYD_W,marks:[{i:18,text:"price barely moves",color:C.slate}]});
+  const SOL_P=[44,42,41,41,43,48,54,56,50,38,26,16,10,9,13,23,38,54,68,74,66,56,50,46];
+  const SOL_D=[3.2,3.0,2.9,2.9,3.1,3.6,4.2,4.6,4.5,4.2,4.0,3.9,3.8,3.8,3.9,4.1,4.4,4.8,5.2,5.4,5.0,4.6,4.0,3.6];
+  const SOL_W=[1.6,1.7,1.8,1.9,1.8,1.7,1.6,1.5,1.6,1.7,1.8,1.9,2.0,2.0,1.9,1.8,1.7,1.5,1.4,1.4,1.5,1.6,1.7,1.8];
+  const SOL_S=[0,0,0,0,0,0.1,0.4,0.9,1.6,2.3,2.9,3.2,3.3,3.2,2.8,2.1,1.3,0.6,0.15,0,0,0,0,0];
+  drawShape("cSolar",SOL_P,{demand:SOL_D,wind:SOL_W,solar:SOL_S,marks:[{i:13,text:"price dips",color:C.emberink},{i:19,text:"evening peak",color:C.voltink}]});
+  drawStruct("cStruct");
+
+  // ---- cross-border flow chart (export above the line, import below) ----
+  function drawFlow(id, flow){
+    const el=document.getElementById(id); if(!el) return; let s="";
+    const lo=Math.min(...flow,0), hi=Math.max(...flow,0), sp=(hi-lo)||1;
+    const y=v=>CY1-(v-lo)/sp*(CY1-PY0); const yz=y(0);
+    s+=`<rect x="${X0}" y="${PY0}" width="${X1-X0}" height="${(yz-PY0).toFixed(1)}" fill="${C.volt}" opacity="0.06"/>`;
+    s+=`<rect x="${X0}" y="${yz.toFixed(1)}" width="${X1-X0}" height="${(CY1-yz).toFixed(1)}" fill="${C.warm}" opacity="0.06"/>`;
+    s+=`<line x1="${X0}" y1="${yz.toFixed(1)}" x2="${X1}" y2="${yz.toFixed(1)}" stroke="${C.slate}" stroke-dasharray="4 3" opacity="0.8"/>`;
+    s+=`<text x="${X0-4}" y="${(PY0+10).toFixed(1)}" text-anchor="end" font-family="${MONO}" font-size="9" fill="${C.voltink}">export</text>`;
+    s+=`<text x="${X0-4}" y="${(CY1-2).toFixed(1)}" text-anchor="end" font-family="${MONO}" font-size="9" fill="${C.warm}">import</text>`;
+    for(let i=1;i<flow.length;i++){ if((flow[i-1]>=0)!==(flow[i]>=0)){const px=xAt(i,flow.length);
+      s+=`<circle cx="${px.toFixed(1)}" cy="${yz.toFixed(1)}" r="3.2" fill="${C.warm}"/>`+
+         `<text x="${px.toFixed(1)}" y="${(yz-7).toFixed(1)}" text-anchor="middle" font-family="${MONO}" font-size="10" fill="${C.warm}">flow reverses</text>`; break;}}
+    s+=`<polyline points="${poly(flow,y)}" fill="none" stroke="${C.ink}" stroke-width="2.4"/>`;
+    el.innerHTML=s;
+  }
+
+  // 08 scarcity spike (FI, 5 Jan 2024)
+  const SPK_P=[180,160,150,150,170,240,420,650,700,620,560,540,560,600,680,820,1050,1450,1900,1750,1200,700,420,260];
+  const SPK_D=[12.5,12.2,12.0,12.0,12.4,13.2,14.0,14.5,14.4,14.0,13.6,13.4,13.5,13.7,14.0,14.4,14.8,15.0,15.0,14.8,14.2,13.4,12.8,12.4];
+  const SPK_W=[0.3,0.3,0.3,0.3,0.3,0.3,0.3,0.3,0.3,0.4,0.5,0.5,0.5,0.5,0.4,0.4,0.3,0.3,0.3,0.3,0.3,0.3,0.3,0.3];
+  drawShape("cSpike",SPK_P,{demand:SPK_D,wind:SPK_W,marks:[{i:18,text:"≈€1,900",color:C.bad,dy:14}]});
+  // 09 unit trip (FI, 17 Nov 2024) - demand carries the +1.6 GW step the lost unit must be served from
+  const TRP_P=[60,55,52,52,55,62,75,88,85,78,72,70,72,75,80,140,185,210,205,170,130,95,75,65];
+  const TRP_D=[8.0,7.7,7.5,7.5,7.8,8.4,9.2,9.8,9.7,9.3,9.0,8.8,8.9,9.1,9.4,11.4,11.8,12.2,12.4,12.2,11.6,11.0,10.2,9.8];
+  const TRP_W=[2.0,2.1,2.2,2.3,2.2,2.1,2.0,1.9,2.0,2.2,2.4,2.5,2.5,2.4,2.3,2.1,2.0,1.9,1.8,1.8,1.9,2.0,2.1,2.2];
+  drawShape("cTrip",TRP_P,{demand:TRP_D,wind:TRP_W,marks:[{i:15,text:"unit trips",color:C.bad,dy:14}]});
+  // 10 forecast bust (representative) - realised vs day-ahead, gap band
+  drawShape("cBust",
+    [44,42,41,41,44,50,60,66,64,60,58,56,55,56,60,70,84,96,104,100,86,70,58,50],
+    {color:C.warm,band:true,secondColor:C.volt,
+     second:[42,40,39,39,41,46,54,58,52,40,30,24,22,22,26,34,46,58,66,70,62,54,48,44]});
+  // 11 flow reversal (FI<->EE, 2 Mar 2024)
+  drawFlow("cFlow",[0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.45,0.4,0.3,0.2,0.1,-0.05,-0.18,-0.3,-0.36,-0.4,-0.4,-0.38,-0.34,-0.28,-0.2,-0.1]);
+  // 12 fuel-shock level shift (Dec 2022) - same shape, lifted
+  drawShape("cFuel",
+    [150,145,142,142,148,165,195,215,210,190,175,170,172,180,192,215,250,285,300,290,255,215,185,160],
+    {color:C.warm,band:true,secondColor:C.volt,
+     second:[40,38,37,37,39,45,55,62,60,52,46,44,45,48,52,60,72,82,88,84,72,60,50,44]});
+  // 13 holiday profile (FI, 1 May 2024) - flat demand, no morning ramp
+  const HOL_P=[34,32,31,31,32,34,37,39,38,37,36,35,35,35,36,37,39,41,42,43,41,38,36,34];
+  const HOL_D=[6.0,5.8,5.7,5.7,5.8,6.0,6.2,6.4,6.5,6.5,6.4,6.4,6.4,6.4,6.5,6.6,6.7,6.8,6.9,6.9,6.7,6.4,6.2,6.0];
+  const HOL_W=[1.8,1.9,2.0,2.0,1.9,1.8,1.7,1.6,1.7,1.9,2.0,2.1,2.1,2.0,1.9,1.8,1.7,1.6,1.5,1.5,1.6,1.7,1.8,1.9];
+  drawShape("cHoliday",HOL_P,{demand:HOL_D,wind:HOL_W,marks:[{i:8,text:"no morning ramp",color:C.slate,dy:14}]});
+
+  // ---- interactive sandbox: set the forces, the price follows (stylised) ----
+  const SB_D=[3.0,2.9,2.8,2.8,2.9,3.2,3.8,4.4,4.5,4.3,4.1,4.0,3.9,3.9,4.0,4.2,4.5,4.9,5.3,5.5,5.1,4.6,4.0,3.5];
+  const SB_WB=[1.5,1.6,1.7,1.8,1.8,1.7,1.6,1.5,1.6,1.9,2.2,2.4,2.5,2.5,2.3,2.0,1.8,1.6,1.5,1.5,1.6,1.8,1.9,2.0];
+  const SB_SB=[0,0,0,0,0,0.1,0.4,0.9,1.6,2.3,2.9,3.2,3.3,3.2,2.8,2.1,1.3,0.6,0.15,0,0,0,0,0];
+  const sb={wind:0,solar:false,hydro:false,outage:false};   // wind: 0 off / 1 breezy / 2 windy
+  function priceMap(r){return r<=0 ? r*9 : 5*Math.pow(r,1.7);}
+  function sbCompute(){
+    const W=SB_WB.map(v=> sb.wind===0?0 : sb.wind===1? v : v*2.4);
+    const S=sb.solar? SB_SB.slice() : SB_SB.map(()=>0);
+    const out=sb.outage?1.6:0;
+    let P=SB_D.map((d,i)=>priceMap(d-W[i]-S[i]+out));
+    if(sb.hydro){const m=P.reduce((a,b)=>a+b,0)/P.length; P=P.map(x=>26+0.18*(x-m));}
+    return {W,S,P,out};
+  }
+  function sbReadText(c){
+    const P=c.P,n=P.length; let lo=0,hi=0;
+    for(let i=1;i<n;i++){if(P[i]<P[lo])lo=i; if(P[i]>P[hi])hi=i;}
+    const f=x=>Math.round(x), hh=i=>String(i).padStart(2,"0")+":00";
+    if(sb.hydro) return "Abundant hydro pins the whole day flat near €"+f(P[hi])+" — barely a spread worth noting. Some days the honest read is: nothing to do.";
+    const forces=[]; forces.push(sb.wind===2?"strong wind":sb.wind===1?"a light breeze":"no wind");
+    if(sb.solar)forces.push("midday sun"); if(sb.outage)forces.push("a unit tripped offline");
+    const low=P[lo]<0 ? "the midday clear falls below zero (−€"+f(-P[lo])+") around "+hh(lo) : "the low sits near €"+f(P[lo])+" at "+hh(lo);
+    return "With "+forces.join(", ")+", "+low+", and the peak near €"+f(P[hi])+" at "+hh(hi)+". Read the cue that moved it — not the shape.";
+  }
+  function sbSet(id,label,on){const b=document.getElementById(id); if(!b)return; b.textContent=label; b.setAttribute("aria-pressed",on?"true":"false");}
+  function renderSandbox(){
+    const c=sbCompute();
+    drawShape("sbChart", c.P, {zero:true, demand:SB_D.map(d=>d+c.out), wind:c.W, solar: sb.solar? c.S : null});
+    const r=document.getElementById("sbRead"); if(r) r.textContent=sbReadText(c);
+    sbSet("sbWind",["Wind: off","Wind: breezy","Wind: windy"][sb.wind], sb.wind>0);
+    sbSet("sbSolar","Solar: "+(sb.solar?"on":"off"), sb.solar);
+    sbSet("sbHydro","Hydro flood: "+(sb.hydro?"on":"off"), sb.hydro);
+    sbSet("sbOutage","Unit trip: "+(sb.outage?"on":"off"), sb.outage);
+  }
+  const sbC=document.getElementById("sbControls");
+  if(sbC) sbC.addEventListener("click",function(e){
+    const b=e.target.closest(".sb-btn"); if(!b) return;
+    const a=b.dataset.act;
+    if(a==="wind") sb.wind=(sb.wind+1)%3; else sb[a]=!sb[a];
+    renderSandbox();
+  });
+  const sbR=document.getElementById("sbReset");
+  if(sbR) sbR.addEventListener("click",function(){sb.wind=0;sb.solar=false;sb.hydro=false;sb.outage=false;renderSandbox();});
+  renderSandbox();
+
+  const REVEAL={
+    cov2:{correct:"below",
+      ok:"Below zero. Wind floods the stack, demand is at its floor, and the subsidised plant takes the clear under the line.",
+      bad:"Lower than that — with demand at its floor and wind flooding in, the midday clears below zero, not just near it."},
+    cov3:{correct:"morn",
+      ok:"Yes — with no wind to dip the midday and heating spiking at breakfast, the high is the morning, not the evening.",
+      bad:"Not on this day — the evening peak is a wind-day habit. With no midday dip, the high tracks the cold morning heating ramp."},
+    cov4:{correct:"above",
+      ok:"Far above. With the cable down, Estonia falls back on costlier local generation while Finland stays cheap — the gap is the severed link.",
+      bad:"The other way — the importing zone (Estonia) sits well above cheap Finland. The cable, not the stack, sets the gap."},
+    cov5:{correct:"thin",
+      ok:"Thin. Brimming reservoirs cap the clear at much the same level all day, so there's barely a spread to cycle.",
+      bad:"Flatter than that — abundant hydro flattens the whole curve, and the spread is too thin to cover a round-trip's losses."},
+    cov6:{correct:"solar",
+      ok:"Solar. The shape mimics a wind day, but the midday sun carved this dip — the wind was low. Read the cue, not the curve.",
+      bad:"Check the cues — the wind was low all day. It's the midday sun that carved this dip, even though the shape mimics a wind day."},
+    cov7:{correct:"25",
+      ok:"25. At the autumn change the clocks go back and 02:00–03:00 repeats, so the delivery day runs 25 hours — never assume 24.",
+      bad:"It's the autumn change — the clocks go back, 02:00 repeats, and the day runs 25 hours. (Spring is the 23-hour one.)"},
+    cov8:{correct:"cap",
+      ok:"Near the ceiling. Record demand and almost no wind push residual high into the peaker stack — the evening clears close to €1,900/MWh.",
+      bad:"Far higher — with demand near record and wind near zero, the evening climbs deep into the costly peakers, toward €1,900/MWh."},
+    cov9:{correct:"up",
+      ok:"Up, fast. Losing 1,600 MW in seconds forces the zone up its stack within the hour — the same day, a step higher after the trip.",
+      bad:"It steps up — 1,600 MW vanishing from the stack can't be absorbed quietly; the zone climbs to costlier plant within the hour."},
+    cov10:{correct:"up",
+      ok:"Above it. The day-ahead priced wind that never arrived, so the realised system is short — intraday and imbalance prices climb to fill the gap.",
+      bad:"Higher — the day-ahead was a fair read of a windy day that didn't happen; the shortfall is settled at a premium intraday and in imbalance."},
+    cov11:{correct:"import",
+      ok:"It reverses. With its own supply down, Finland pulls power in — the cable that exported all winter now imports.",
+      bad:"It flips — lose the generation and the flow reverses; the exporter becomes the importer until the unit returns."},
+    cov12:{correct:"lift",
+      ok:"Same shape, higher altitude. Fuel and carbon set thermal cost, so the whole curve lifts — low, peak and all — without changing form.",
+      bad:"It keeps its shape and lifts — gas and carbon move the level, not the timing; you're reading the same day far higher up."},
+    cov13:{correct:"flat",
+      ok:"Flattened. No commute or industrial ramp on a holiday, so demand stays low and even — and the price loses its usual landmarks.",
+      bad:"It's flattened — the morning ramp is commuters and industry; on a holiday they don't show, so the curve goes shapeless."}
+  };
+  document.querySelectorAll(".choices").forEach(function(g){
+    g.addEventListener("click",function(e){
+      const b=e.target.closest(".choice"); if(!b) return;
+      const cid=g.dataset.reveal, cfg=REVEAL[cid]; if(!cfg) return;
+      g.querySelectorAll(".choice").forEach(function(x){x.setAttribute("aria-pressed", x===b?"true":"false");});
+      const ok=b.dataset.v===cfg.correct;
+      const v=document.querySelector('.verdict[data-for="'+cid+'"]');
+      if(v){v.className="verdict "+(ok?"ok":"bad");v.textContent=ok?cfg.ok:cfg.bad;}
+      const cov=document.getElementById(cid); if(cov) cov.classList.add("gone");
+    });
+  });
+})();
+</script>
+</body>
+</html>

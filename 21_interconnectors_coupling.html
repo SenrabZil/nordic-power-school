@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lesson 21 — Interconnectors &amp; market coupling · Nordic Power School</title>
+<style>
+  :root{
+    --frost:#EEF3F7; --panel:#FFFFFF; --ink:#13202E; --slate:#5A6A7A;
+    --line:#D3DDE6; --deep:#0E1F33; --volt:#10B5C9; --volt-ink:#0A7E8E;
+    --ember:#E0913A; --ember-ink:#B16A12; --warm:#C2603F; --warm-ink:#A8472A; --ok:#2FA980; --bad:#DD6457;
+    --mono: ui-monospace,"SF Mono","Cascadia Code",Consolas,"Roboto Mono",monospace;
+    --sans: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--frost);color:var(--ink);font-family:var(--sans);font-size:17px;line-height:1.62;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:860px;margin:0 auto;padding:0 24px}
+  header{position:sticky;top:0;z-index:20;background:rgba(238,243,247,.9);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+  .bar{display:flex;justify-content:space-between;align-items:center;height:52px;font-size:13px;letter-spacing:.04em;text-transform:uppercase}
+  .bar b{font-weight:700} .bar .r{font-family:var(--mono);color:var(--slate)}
+  .hero{padding:60px 0 26px}
+  .eyebrow{font-family:var(--mono);font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--volt-ink);margin-bottom:16px}
+  h1{font-size:clamp(32px,5.6vw,54px);line-height:1.03;letter-spacing:-.02em;margin:0 0 16px;font-weight:780}
+  .lead{font-size:clamp(18px,2.4vw,22px);color:var(--slate);max-width:42ch;margin:0}
+  .byline{margin-top:20px;font-size:14px;color:var(--slate)} .byline b{color:var(--ink)}
+  section{padding:36px 0;border-top:1px solid var(--line)}
+  .snum{font-family:var(--mono);font-size:13px;color:var(--volt-ink);letter-spacing:.1em}
+  h2{font-size:clamp(23px,3.3vw,32px);line-height:1.12;letter-spacing:-.015em;margin:6px 0 12px;font-weight:740}
+  p{margin:0 0 16px} .muted{color:var(--slate)}
+  .say{border-left:2px solid var(--volt);padding:2px 0 2px 18px;margin:18px 0}
+  .caution{border-left:2px solid var(--ember);padding:2px 0 2px 18px;margin:18px 0;color:var(--ember-ink);font-size:15px}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px;margin:20px 0}
+  .stage{position:relative;border-radius:12px;overflow:hidden}
+  .cover{position:absolute;inset:0;background:linear-gradient(180deg,var(--deep),#0a1726);color:#cfe;display:flex;flex-direction:column;gap:14px;align-items:center;justify-content:center;text-align:center;padding:24px;transition:opacity .5s;z-index:4}
+  .cover.gone{opacity:0;pointer-events:none} .cover .q{font-size:16px;max-width:34ch;color:#dCEbF0}
+  .controls{display:flex;flex-wrap:wrap;gap:18px;align-items:center;margin-top:14px}
+  .ctl{display:flex;flex-direction:column;gap:6px;min-width:240px;flex:1}
+  .ctl label{font-family:var(--mono);font-size:12.5px;color:var(--slate);display:flex;justify-content:space-between} .ctl label b{color:var(--ink)}
+  #cap{accent-color:var(--volt)} input[type=range]{width:100%}
+  .seg{display:inline-flex;border:1px solid var(--line);border-radius:9px;overflow:hidden}
+  .seg button{font-family:var(--mono);font-size:13px;border:0;background:#fff;color:var(--slate);padding:8px 14px;cursor:pointer}
+  .seg button[aria-pressed=true]{background:var(--bad);color:#fff}
+  .readout{display:flex;flex-wrap:wrap;gap:8px 24px;align-items:baseline;margin-top:14px;border-top:1px dashed var(--line);padding-top:14px;font-family:var(--mono);font-size:13.5px;color:var(--slate)}
+  .readout b{color:var(--ink)} .readout .big{font-size:22px;font-weight:600}
+  .tag{font-family:var(--mono);font-size:11.5px;letter-spacing:.05em;text-transform:uppercase;border-radius:999px;padding:5px 11px}
+  .tag.split{background:#fbeae7;color:#b23a2c} .tag.coupled{background:#e3f6ee;color:#1c7a59}
+  .choices{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0}
+  .choice{font-family:var(--mono);font-size:14px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 16px;cursor:pointer;color:var(--ink);transition:.15s}
+  .choice:hover{border-color:var(--volt)} .choice[aria-pressed=true]{background:var(--deep);color:#fff;border-color:var(--deep)}
+  .verdict{font-size:15px;margin-top:4px;min-height:1.4em} .verdict.ok{color:var(--ok)} .verdict.bad{color:var(--bad)}
+  .disc{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px}
+  .d{border:1px solid var(--line);border-radius:12px;padding:14px 16px;background:#fff;font-size:14.5px} .d b{color:var(--volt-ink)}
+  .rule{background:var(--deep);color:#eaf6f8;border-radius:14px;padding:24px;margin-top:8px}
+  .rule h3{margin:0 0 10px;font-size:20px;color:#fff} .rule p{color:#bcd6dc;margin:0 0 10px} .rule p:last-child{margin:0} .rule .k{color:var(--volt);font-family:var(--mono)}
+  footer{padding:48px 0;color:var(--slate);font-size:13px;border-top:1px solid var(--line)}
+  :focus-visible{outline:2px solid var(--volt);outline-offset:2px}
+  @media (max-width:640px){ .disc{grid-template-columns:1fr} }
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header><div class="wrap bar"><b>Nordic Power School</b><span class="r">Lesson 21 · Deep dive</span></div></header>
+
+<main class="wrap">
+  <div class="hero">
+    <div class="eyebrow">Lesson 21 · Coupling</div>
+    <h1>The cable<br>clears itself.</h1>
+    <p class="lead">Nobody books the wire between two zones. The day-ahead auction allocates it for you &mdash; flowing power from cheap to dear until the prices meet or the cable runs out.</p>
+    <p class="byline">with <b>Elizabeth Cecilia</b>. Lesson 04 showed the split; this is the machinery that decides it, and the asset that can fail.</p>
+  </div>
+  <p class="buildson" style="font-family:var(--mono);font-size:12.5px;color:var(--slate);margin:0 0 26px;letter-spacing:.02em">Builds on &middot; <a href="04_zonal_pricing.html" style="color:var(--volt-ink);text-decoration:none">04 Zonal pricing</a></p>
+
+
+  <section>
+    <div class="snum">01</div>
+    <h2>The implicit auction</h2>
+    <p>Once, traders bought interconnector capacity in a <b>separate</b> auction, then decided what to send &mdash; explicit allocation, and easy to get wrong. Today it&rsquo;s <b>implicit</b>: the day-ahead auction clears every coupled zone as a <i>single</i> optimisation, and the algorithm allocates the cable itself, sending power from the low-price side to the high-price side up to the capacity available. You bid in your own zone; the coupling does the rest, across all of Europe&rsquo;s linked markets at once.</p>
+    <p>So the cable isn&rsquo;t something you use. It&rsquo;s something the market <i>solves</i>.</p>
+  </section>
+
+  <section>
+    <div class="snum">02</div>
+    <h2>Watch it couple</h2>
+    <p>A cheap surplus <b>North</b> at &euro;30, a dear deficit <b>South</b> at &euro;70, one cable between. The auction will flow power North&nbsp;&rarr;&nbsp;South, lifting the North price and easing the South, until they meet &mdash; if the wire can carry enough.</p>
+    <p class="say"><b>Predict first:</b> the cable is healthy with room to spare. After the coupling auction, what happens to the two prices?</p>
+    <div class="choices" id="coupChoices" role="group" aria-label="What coupling does with a healthy cable">
+      <button class="choice" data-v="conv">They converge to one price</button>
+      <button class="choice" data-v="same">They stay €30 and €70</button>
+      <button class="choice" data-v="cross">They swap over</button>
+    </div>
+    <div class="verdict" id="coupVerdict"></div>
+
+    <div class="panel">
+      <div class="stage">
+        <svg viewBox="0 0 720 250" width="100%" id="coupSvg" role="img" aria-label="Two zones and an interconnector, coupling under the auction"></svg>
+        <div class="cover" id="coupCover"><div class="q">Predict above to run the coupling auction.</div></div>
+      </div>
+      <div class="controls">
+        <div class="ctl"><label>Capacity to the market <b id="capLab">5 GW</b></label><input id="cap" type="range" min="0" max="8" step="1" value="5"></div>
+        <div class="seg" role="group" aria-label="Cable outage">
+          <span style="font-family:var(--mono);font-size:12px;color:var(--slate);padding:8px 8px 8px 0">cable</span>
+          <button id="ok-on" aria-pressed="true">healthy</button>
+          <button id="ok-out" aria-pressed="false">outage</button>
+        </div>
+      </div>
+      <div class="readout">
+        <span class="tag coupled" id="cTag">coupled · one price</span>
+        <span><span class="muted">North</span> <b id="pN">€50</b></span>
+        <span><span class="muted">South</span> <b id="pS">€50</b></span>
+        <span><span class="muted">flow</span> <b id="flow">4.0 GW</b></span>
+        <span><span class="muted">congestion rent</span> <span class="big" id="rent">€0</span>/h</span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="snum">03</div>
+    <h2>Who earns the gap</h2>
+    <p>When the cable saturates and a spread survives, that spread isn&rsquo;t lost &mdash; it becomes <b>congestion rent</b>: the price difference times the flow, collected by the TSOs and put toward grid and interconnector investment. Notice the twist in the readout: a full <b>outage</b> gives the <i>widest</i> gap but <b>zero</b> rent &mdash; because nothing flows. Rent needs both a spread <i>and</i> a flow; the most congested healthy cable, not the broken one, earns the most.</p>
+  </section>
+
+  <section>
+    <div class="snum">04</div>
+    <h2>How much capacity even reaches the market</h2>
+    <p>The number on that slider isn&rsquo;t the cable&rsquo;s physical rating &mdash; it&rsquo;s what the TSO <b>gives the market</b> after holding back margin for security. Two ways to compute it: <b>NTC</b> (a simple fixed limit per border, the Nordic tradition) and <b>flow-based</b> (a richer model that captures how a flow on one border loads the whole meshed grid, and typically frees up more capacity). The Nordics have been moving from NTC toward flow-based coupling &mdash; same auction, a smarter view of what the wires can really carry.</p>
+    <div class="disc">
+      <div class="d"><b>NTC / ATC.</b> One number per border. Simple, but conservative on a meshed network &mdash; it can&rsquo;t see loop flows.</div>
+      <div class="d"><b>Flow-based.</b> Constraints across the whole grid at once. More capacity offered, prices that reflect the physics more faithfully.</div>
+    </div>
+  </section>
+
+  <section>
+    <div class="snum">05</div>
+    <h2>Cables are assets, and they trip</h2>
+    <p>Each interconnector is a physical thing &mdash; the HVDC links with names: NordLink to Germany, NorNed to the Netherlands, Estlink to Estonia. When one goes on outage, planned or not, its capacity vanishes from the auction and the zones it joined <b>re-split</b>, the surplus trapped on the cheap side. Outages are published ahead (the REMIT transparency notices), so a scheduled cable maintenance is a price event you can see coming &mdash; one of the most readable signals on the board.</p>
+    <p class="caution">This explains how coupling allocates capacity and how outages move prices &mdash; not advice on trading interconnector spreads or transmission rights. What to do with a coupling signal is a decision the school doesn&rsquo;t make.</p>
+  </section>
+
+  <section>
+    <div class="snum">06</div>
+    <h2>The rule, in one breath</h2>
+    <div class="rule">
+      <h3>The auction allocates the cable implicitly, flowing low to high until prices meet or the wire saturates.</h3>
+      <p>You bid in your zone; the coupling sends power across borders and converges prices wherever capacity allows. The surviving spread becomes <span class="k">congestion rent</span> &mdash; gap times flow &mdash; and the capacity offered depends on <span class="k">NTC vs flow-based</span>. When a cable trips, its zones re-split. Read the wire and the outages, and you read the borders.</p>
+      <p class="muted" style="color:#9fc0cb">Deep dive complete. Back to the dashboard whenever you want today&rsquo;s read.</p>
+    </div>
+  </section>
+<nav class="lessonseq" style="max-width:860px;margin:0 auto;padding:30px 24px 0;display:flex;justify-content:space-between;gap:16px;font-family:var(--mono);font-size:13px;border-top:1px solid var(--line)"><a href="17_cross_zonal_spreads.html" style="color:var(--volt-ink);text-decoration:none;max-width:48%">&larr; Builds on &middot; Cross-zonal spreads</a><a href="26_baltic_dimension.html" style="color:var(--volt-ink);text-decoration:none;max-width:48%;text-align:right">Next &middot; The Baltic dimension &rarr;</a></nav>
+
+            <footer class="wrap">Nordic Power School · Lesson 21 — education only. No bids, no trades, no dispatch.</footer>
+</main>
+
+<script>
+(function(){
+  "use strict";
+  const $=s=>document.querySelector(s);
+  const C={cheap:"#0A7E8E",dear:"#A8472A",mid:"#13202E",cable:"#5A6A7A",flow:"#10B5C9",line:"#D3DDE6",slate:"#5A6A7A",ink:"#13202E",bad:"#DD6457",ok:"#2FA980"};
+  const P0N=30, P0S=70, K=5, FEQ=(P0S-P0N)/(2*K);   // 4 GW equalises
+  const cap=$("#cap"); let outage=false;
+  function state(){
+    const f = outage ? 0 : Math.min(+cap.value, FEQ);
+    const pN = P0N + K*f, pS = P0S - K*f, spread = pS - pN;
+    const rent = spread * f * 1000;   // €/MWh × MW = €/h
+    return {f,pN,pS,spread,rent,coupled:spread<0.5};
+  }
+  const svg=$("#coupSvg");
+  function box(x,label,price,col){
+    return `<rect x="${x}" y="70" width="200" height="108" rx="14" fill="#fff" stroke="${col}" stroke-width="1.5"/>`+
+      `<text x="${x+100}" y="62" text-anchor="middle" font-family="ui-monospace,monospace" font-size="11.5" fill="${C.slate}">${label}</text>`+
+      `<text x="${x+100}" y="138" text-anchor="middle" font-family="ui-monospace,monospace" font-size="34" font-weight="600" fill="${col}">€${price}</text>`;
+  }
+  function draw(){
+    const s=state();
+    const colN = s.coupled?C.mid:C.cheap, colS=s.coupled?C.mid:C.dear;
+    let g="";
+    g+=box(60,"North · surplus",Math.round(s.pN),colN);
+    g+=box(460,"South · deficit",Math.round(s.pS),colS);
+    // cable
+    const y=124, x0=260,x1=460;
+    if(outage){
+      g+=`<line x1="${x0}" y1="${y}" x2="${x1}" y2="${y}" stroke="${C.line}" stroke-width="2" stroke-dasharray="6 5"/>`;
+      g+=`<text x="${(x0+x1)/2}" y="${y-12}" text-anchor="middle" font-family="ui-monospace,monospace" font-size="22" fill="${C.bad}">✕</text>`;
+      g+=`<text x="${(x0+x1)/2}" y="${y+24}" text-anchor="middle" font-family="ui-monospace,monospace" font-size="11" fill="${C.bad}">outage</text>`;
+    } else {
+      const th=2+s.f*2.2;
+      g+=`<line x1="${x0}" y1="${y}" x2="${x1-14}" y2="${y}" stroke="${C.flow}" stroke-width="${th}"/>`;
+      g+=`<path d="M${x1-16} ${y-7} L${x1-2} ${y} L${x1-16} ${y+7} Z" fill="${C.flow}"/>`;
+      g+=`<text x="${(x0+x1)/2}" y="${y-12}" text-anchor="middle" font-family="ui-monospace,monospace" font-size="11" fill="${C.flow}">${s.f.toFixed(1)} / ${(+cap.value)} GW</text>`;
+      g+=`<text x="${(x0+x1)/2}" y="${y+24}" text-anchor="middle" font-family="ui-monospace,monospace" font-size="10.5" fill="${C.slate}">flow →</text>`;
+    }
+    svg.innerHTML=g;
+    // readout
+    $("#capLab").textContent=(+cap.value)+" GW";
+    $("#pN").textContent="€"+Math.round(s.pN); $("#pS").textContent="€"+Math.round(s.pS);
+    $("#flow").textContent=s.f.toFixed(1)+" GW";
+    $("#rent").textContent="€"+Math.round(s.rent).toLocaleString("en-US");
+    const tag=$("#cTag");
+    if(s.coupled){tag.className="tag coupled";tag.textContent="coupled · one price";}
+    else{tag.className="tag split";tag.textContent="split · €"+Math.round(s.spread)+" spread";}
+  }
+  cap.addEventListener("input",draw);
+  function setOut(o){outage=o;$("#ok-out").setAttribute("aria-pressed",o);$("#ok-on").setAttribute("aria-pressed",!o);draw();}
+  $("#ok-on").addEventListener("click",()=>setOut(false));
+  $("#ok-out").addEventListener("click",()=>setOut(true));
+  draw();
+
+  $("#coupChoices").addEventListener("click",e=>{
+    const b=e.target.closest(".choice"); if(!b) return;
+    document.querySelectorAll("#coupChoices .choice").forEach(x=>x.setAttribute("aria-pressed","false"));
+    b.setAttribute("aria-pressed","true");
+    cap.value=5; setOut(false);
+    const v=$("#coupVerdict");
+    if(b.dataset.v==="conv"){v.className="verdict ok";v.textContent="Right — with room on the cable the auction flows 4 GW North→South and the prices meet at €50.";}
+    else{v.className="verdict bad";v.textContent="With capacity to spare, the auction flows power North→South until the prices converge — here, €50.";}
+    $("#coupCover").classList.add("gone");
+  });
+})();
+</script>
+</body>
+</html>

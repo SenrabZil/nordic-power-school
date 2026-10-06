@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lesson 14 — Virtual power plants · Nordic Power School</title>
+<style>
+  :root{
+    --frost:#EEF3F7; --panel:#FFFFFF; --ink:#13202E; --slate:#5A6A7A;
+    --line:#D3DDE6; --deep:#0E1F33; --deep-2:#16314E; --volt:#10B5C9; --volt-ink:#0A7E8E;
+    --ember:#E0913A; --ember-ink:#B16A12; --warm:#C2603F; --ok:#2FA980; --bad:#DD6457;
+    --mono: ui-monospace,"SF Mono","Cascadia Code",Consolas,"Roboto Mono",monospace;
+    --sans: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--frost);color:var(--ink);font-family:var(--sans);font-size:17px;line-height:1.62;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:860px;margin:0 auto;padding:0 24px}
+
+  header{position:sticky;top:0;z-index:20;background:rgba(238,243,247,.9);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+  .bar{display:flex;justify-content:space-between;align-items:center;height:52px;font-size:13px;letter-spacing:.04em;text-transform:uppercase}
+  .bar b{font-weight:700} .bar .r{font-family:var(--mono);color:var(--slate)}
+
+  .hero{padding:60px 0 26px}
+  .eyebrow{font-family:var(--mono);font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--volt-ink);margin-bottom:16px}
+  h1{font-size:clamp(32px,5.6vw,54px);line-height:1.03;letter-spacing:-.02em;margin:0 0 16px;font-weight:780}
+  .lead{font-size:clamp(18px,2.4vw,22px);color:var(--slate);max-width:42ch;margin:0}
+  .byline{margin-top:20px;font-size:14px;color:var(--slate)} .byline b{color:var(--ink)}
+
+  section{padding:36px 0;border-top:1px solid var(--line)}
+  .snum{font-family:var(--mono);font-size:13px;color:var(--volt-ink);letter-spacing:.1em}
+  h2{font-size:clamp(23px,3.3vw,32px);line-height:1.12;letter-spacing:-.015em;margin:6px 0 12px;font-weight:740}
+  p{margin:0 0 16px} .muted{color:var(--slate)}
+  .say{border-left:2px solid var(--volt);padding:2px 0 2px 18px;margin:18px 0}
+  .caution{border-left:2px solid var(--ember);padding:2px 0 2px 18px;margin:18px 0;color:var(--ember-ink);font-size:15px}
+
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px;margin:20px 0}
+  .stage{position:relative;border-radius:12px;overflow:hidden}
+  .cover{position:absolute;inset:0;background:linear-gradient(180deg,var(--deep),#0a1726);color:#cfe;display:flex;flex-direction:column;gap:14px;align-items:center;justify-content:center;text-align:center;padding:24px;transition:opacity .5s;z-index:4}
+  .cover.gone{opacity:0;pointer-events:none} .cover .q{font-size:16px;max-width:34ch;color:#dCEbF0}
+
+  .controls{display:flex;flex-wrap:wrap;gap:18px;margin-top:14px}
+  .ctl{display:flex;flex-direction:column;gap:6px;min-width:200px;flex:1}
+  .ctl label{font-family:var(--mono);font-size:12.5px;color:var(--slate);display:flex;justify-content:space-between} .ctl label b{color:var(--ink)}
+  #nass{accent-color:var(--volt)} #avail{accent-color:var(--ember)} input[type=range]{width:100%}
+
+  .readout{display:flex;flex-wrap:wrap;gap:8px 24px;align-items:baseline;margin-top:14px;border-top:1px dashed var(--line);padding-top:14px;font-family:var(--mono);font-size:13.5px;color:var(--slate)}
+  .readout b{color:var(--ink)} .readout .big{font-size:24px;font-weight:600}
+  .tag{font-family:var(--mono);font-size:11.5px;letter-spacing:.05em;text-transform:uppercase;border-radius:999px;padding:5px 11px}
+  .tag.ok{background:#e3f6ee;color:#1c7a59} .tag.no{background:#fbeae7;color:#b23a2c}
+
+  .choices{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0}
+  .choice{font-family:var(--mono);font-size:14px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 16px;cursor:pointer;color:var(--ink);transition:.15s}
+  .choice:hover{border-color:var(--volt)} .choice[aria-pressed=true]{background:var(--deep);color:#fff;border-color:var(--deep)}
+  .verdict{font-size:15px;margin-top:4px;min-height:1.4em} .verdict.ok{color:var(--ok)} .verdict.bad{color:var(--bad)}
+
+  .assets{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:8px 0}
+  .a{border:1px solid var(--line);border-radius:12px;padding:14px;background:#fff;text-align:center}
+  .a svg{width:26px;height:26px;stroke:var(--volt-ink);fill:none;stroke-width:1.6} .a h4{margin:8px 0 2px;font-size:14px} .a p{margin:0;font-size:12px;color:var(--slate)}
+
+  .disc{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px}
+  .d{border:1px solid var(--line);border-radius:12px;padding:14px 16px;background:#fff;font-size:14.5px} .d b{color:var(--volt-ink)}
+
+  .rule{background:var(--deep);color:#eaf6f8;border-radius:14px;padding:24px;margin-top:8px}
+  .rule h3{margin:0 0 10px;font-size:20px;color:#fff} .rule p{color:#bcd6dc;margin:0 0 10px} .rule p:last-child{margin:0}
+  .rule .k{color:var(--volt);font-family:var(--mono)}
+
+  footer{padding:48px 0;color:var(--slate);font-size:13px;border-top:1px solid var(--line)}
+  :focus-visible{outline:2px solid var(--volt);outline-offset:2px}
+  @media (max-width:640px){ .disc{grid-template-columns:1fr} .assets{grid-template-columns:repeat(2,1fr)} }
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header><div class="wrap bar"><b>Nordic Power School</b><span class="r">Lesson 14</span></div></header>
+
+<main class="wrap">
+  <div class="hero">
+    <div class="eyebrow">Lesson 14 · Virtual power plants</div>
+    <h1>A thousand small things,<br>one power plant.</h1>
+    <p class="lead">One home battery is too small to bid and too unreliable to trust. Pool a thousand of them and something firmer than any single asset emerges.</p>
+    <p class="byline">with <b>Elizabeth Cecilia</b>. Lesson 13 stacked one battery; this stacks a fleet &mdash; and the maths of crowds does the heavy lifting.</p>
+  </div>
+
+  <!-- 1 -->
+  <section>
+    <div class="snum">01</div>
+    <h2>What a VPP is</h2>
+    <p>A virtual power plant is software orchestrating many small, scattered resources &mdash; home batteries, EV chargers, heat pumps, flexible factories &mdash; so they act as one dispatchable plant. The aggregator sends signals, the assets respond, the market sees a single resource.</p>
+    <div class="assets">
+      <div class="a"><svg viewBox="0 0 24 24"><rect x="5" y="6" width="11" height="12" rx="2"/><path d="M16 9h3v6h-3"/></svg><h4>Batteries</h4><p>charge &amp; discharge</p></div>
+      <div class="a"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="14" height="10" rx="2"/><path d="M17 9l3 2v3M7 19h6"/></svg><h4>EV charging</h4><p>shift &amp; pause load</p></div>
+      <div class="a"><svg viewBox="0 0 24 24"><path d="M12 3v6M8 7l4-4 4 4"/><circle cx="12" cy="15" r="5"/></svg><h4>Heat pumps</h4><p>pre-heat, coast</p></div>
+      <div class="a"><svg viewBox="0 0 24 24"><path d="M4 18h16M6 18V9l6-4 6 4v9M10 18v-5h4v5"/></svg><h4>Flexible loads</h4><p>industrial demand</p></div>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section>
+    <div class="snum">02</div>
+    <h2>The market floor</h2>
+    <p>Reserve and energy markets have a <b>minimum bid size</b> &mdash; often around a megawatt. A 5&nbsp;kW home battery is two hundred times too small to enter on its own. Aggregate a thousand and you reach the floor; that&rsquo;s the first reason VPPs exist. The second is firmness &mdash; and it&rsquo;s the surprising one.</p>
+  </section>
+
+  <!-- 3 portfolio effect -->
+  <section>
+    <div class="snum">03</div>
+    <h2>The portfolio effect</h2>
+    <p>Each small asset is only sometimes available &mdash; the EV is unplugged, the battery is full, the factory is mid-run. Say any one is ready just 60% of the time. Individually, useless for a firm commitment.</p>
+    <p class="say"><b>Predict first:</b> pool 1,000 such assets, each only 60% likely to be available. Of the capacity you&rsquo;d expect on average, how much can you <i>firmly</i> promise the market?</p>
+    <div class="choices" id="pChoices" role="group" aria-label="Firm fraction of expected capacity">
+      <button class="choice" data-v="third">About a third</button>
+      <button class="choice" data-v="two">About two thirds</button>
+      <button class="choice" data-v="nine">About nine tenths</button>
+    </div>
+    <div class="verdict" id="pVerdict"></div>
+
+    <div class="panel">
+      <div class="stage">
+        <svg viewBox="0 0 720 280" width="100%" id="distSvg" role="img" aria-label="Distribution of available capacity as a share of expected"></svg>
+        <div class="cover" id="pCover"><div class="q">Predict above to aggregate the fleet and see the spread.</div></div>
+      </div>
+      <div class="controls">
+        <div class="ctl"><label>Assets in the pool <b id="nLab">1,000</b></label><input id="nass" type="range" min="0" max="100" value="74"></div>
+        <div class="ctl"><label>Each available <b><span id="aLab">60</span>%</b> of the time</label><input id="avail" type="range" min="30" max="90" value="60"></div>
+      </div>
+      <div class="readout">
+        <span><span class="muted">expected</span> <b id="expMW">3.0</b> MW</span>
+        <span><span class="muted">firmly commit</span> <span class="big" id="firmMW">2.8</span> MW <span class="muted">(<span id="firmPct">92</span>% of expected)</span></span>
+        <span class="tag ok" id="floorTag">clears the 1 MW floor</span>
+      </div>
+    </div>
+    <p class="muted">Drag the pool toward a handful of assets and the bell sprawls &mdash; you could end up with a fraction of what you promised. Drag it to thousands and it collapses to a spike: the spread shrinks with roughly the square root of the count. Flakiness becomes firmness.</p>
+  </section>
+
+  <!-- 4 catches -->
+  <section>
+    <div class="snum">04</div>
+    <h2>The aggregator&rsquo;s real job</h2>
+    <p>The statistics are the easy part. Running a VPP is mostly the constraints around them.</p>
+    <div class="disc">
+      <div class="d"><b>Owner comfort comes first.</b> The EV must be full by morning, the home kept warm. The VPP optimises around those limits &mdash; it doesn&rsquo;t override them.</div>
+      <div class="d"><b>Proof of delivery is hard.</b> You&rsquo;re paid against a counterfactual baseline &mdash; what <i>would</i> have happened. For demand response, that baseline is genuinely tricky to measure.</div>
+      <div class="d"><b>Communications are the spine.</b> Dispatching thousands of assets for fast reserves needs reliable, low-latency control and telemetry &mdash; or the firmness is only on paper.</div>
+      <div class="d"><b>The local grid still binds.</b> These assets sit behind the meter on a distribution network; the DSO&rsquo;s limits can cap what the fleet can actually deliver.</div>
+    </div>
+    <p class="caution">This explains how aggregation works in principle &mdash; not advice on operating a VPP, enrolling assets, or what to bid. Real portfolios live or die on contracts, comfort and network rules the school doesn&rsquo;t decide.</p>
+  </section>
+
+  <!-- 5 rule -->
+  <section>
+    <div class="snum">05</div>
+    <h2>The rule, in one breath</h2>
+    <div class="rule">
+      <h3>Aggregation turns many small, unreliable assets into one firm, market-ready plant.</h3>
+      <p>Pooling clears the minimum-bid floor, and the <span class="k">portfolio effect</span> shrinks the relative spread with the count &mdash; so a fleet of 60%-reliable assets can firmly commit nearly all its expected capacity. The hard part isn&rsquo;t the maths; it&rsquo;s comfort, measurement, comms and the grid.</p>
+      <p class="muted" style="color:#9fc0cb">Next: the capstone &mdash; read a full delivery day end to end and defend your reasoning, pulling every lesson together.</p>
+    </div>
+  </section>
+<nav class="lessonseq" style="max-width:860px;margin:0 auto;padding:30px 24px 0;display:flex;justify-content:space-between;gap:16px;font-family:var(--mono);font-size:13px;border-top:1px solid var(--line)"><a href="13_bess_value_stacking.html" style="color:var(--volt-ink);text-decoration:none;max-width:48%">&larr; Builds on &middot; BESS value stacking</a><a href="30_capstone_interactive.html" style="color:var(--volt-ink);text-decoration:none;max-width:48%;text-align:right">Next &middot; Final capstone: one hour, end to end &rarr;</a></nav>
+
+            <footer class="wrap">Nordic Power School · Lesson 14 — education only. No bids, no trades, no dispatch.</footer>
+</main>
+
+<script>
+(function(){
+  "use strict";
+  const $=s=>document.querySelector(s);
+  const C={fill:"#10B5C9",mean:"#13202E",firm:"#0A7E8E",risk:"#DD6457",line:"#D3DDE6",slate:"#5A6A7A"};
+  const Cperm=0.005;            // MW per asset (5 kW)
+  const FLOOR=1.0;              // MW minimum bid
+  const nass=$("#nass"), avail=$("#avail");
+  const Nof=()=>Math.round(10**(1+(+nass.value/100)*2.699));   // 10 .. ~5000
+  const Pof=()=>(+avail.value)/100;
+  function stats(){
+    const N=Nof(), p=Pof();
+    const cv=Math.sqrt((1-p)/(N*p));      // coefficient of variation
+    const sdPct=100*cv;
+    const firmPct=Math.max(0,100-3*sdPct);
+    const meanMW=N*p*Cperm;
+    return {N,p,cv,sdPct,firmPct,meanMW,firmMW:meanMW*firmPct/100};
+  }
+  const svg=$("#distSvg");
+  const X0=40,X1=706,Y0=18,Y1=232, XMAXPCT=140;
+  const xf=pct=>X0+pct/XMAXPCT*(X1-X0);
+  function draw(){
+    const s=stats();
+    const sd=Math.max(1.2,s.sdPct);       // floor for drawing a visible bell
+    const pdf=x=>Math.exp(-0.5*Math.pow((x-100)/sd,2));
+    // sample
+    const xs=[]; for(let x=0;x<=XMAXPCT;x+=2) xs.push(x);
+    const ys=xs.map(pdf); const peak=Math.max(...ys);
+    const yf=v=>Y1-(v/peak)*(Y1-Y0);
+    let g="";
+    // x ticks
+    [0,50,100].forEach(t=>{const x=xf(t);g+=`<line x1="${x}" y1="${Y1}" x2="${x}" y2="${Y1+5}" stroke="${C.line}"/><text x="${x}" y="${Y1+18}" text-anchor="middle" font-family="ui-monospace,monospace" font-size="10.5" fill="${C.slate}">${t}%</text>`;});
+    g+=`<text x="${xf(100)}" y="${Y1+31}" text-anchor="middle" font-family="ui-monospace,monospace" font-size="11" fill="${C.slate}">share of expected capacity delivered</text>`;
+    // shaded shortfall region (below firm line)
+    let fillPts=`${xf(0)},${Y1} `;
+    xs.forEach((x,i)=>{ if(x<=s.firmPct) fillPts+=`${xf(x).toFixed(1)},${yf(ys[i]).toFixed(1)} `; });
+    fillPts+=`${xf(Math.min(s.firmPct,XMAXPCT))},${Y1}`;
+    g+=`<polygon points="${fillPts}" fill="${C.risk}" opacity="0.13"/>`;
+    // bell
+    const line=xs.map((x,i)=>`${xf(x).toFixed(1)},${yf(ys[i]).toFixed(1)}`).join(" ");
+    g+=`<polyline points="${line}" fill="none" stroke="${C.fill}" stroke-width="2.6"/>`;
+    // mean line (100%)
+    g+=`<line x1="${xf(100)}" y1="${Y0}" x2="${xf(100)}" y2="${Y1}" stroke="${C.mean}" stroke-width="1.3" stroke-dasharray="3 3"/>`;
+    g+=`<text x="${xf(100)+5}" y="${Y0+12}" font-family="ui-monospace,monospace" font-size="10.5" fill="${C.mean}">expected</text>`;
+    // firm line
+    g+=`<line x1="${xf(s.firmPct)}" y1="${Y0}" x2="${xf(s.firmPct)}" y2="${Y1}" stroke="${C.firm}" stroke-width="1.8"/>`;
+    g+=`<text x="${xf(s.firmPct)-5}" y="${Y0+12}" text-anchor="end" font-family="ui-monospace,monospace" font-size="10.5" fill="${C.firm}">firm ${Math.round(s.firmPct)}%</text>`;
+    svg.innerHTML=g;
+    // labels + readout
+    const Nshow = s.N>=500?Math.round(s.N/100)*100 : s.N>=100?Math.round(s.N/10)*10 : s.N;
+    $("#nLab").textContent=Nshow.toLocaleString("en-US");
+    $("#aLab").textContent=avail.value;
+    $("#expMW").textContent=s.meanMW.toFixed(s.meanMW<1?2:1);
+    $("#firmMW").textContent=s.firmMW.toFixed(s.firmMW<1?2:1);
+    $("#firmPct").textContent=Math.round(s.firmPct);
+    const t=$("#floorTag"), clears=s.firmMW>=FLOOR;
+    t.className="tag "+(clears?"ok":"no");
+    t.textContent=clears?"clears the 1 MW floor":"below the 1 MW floor";
+  }
+  [nass,avail].forEach(el=>el.addEventListener("input",draw));
+  draw();
+
+  $("#pChoices").addEventListener("click",e=>{
+    const b=e.target.closest(".choice"); if(!b) return;
+    document.querySelectorAll("#pChoices .choice").forEach(x=>x.setAttribute("aria-pressed","false"));
+    b.setAttribute("aria-pressed","true");
+    nass.value=74; avail.value=60; draw();   // ~1000 assets, p=0.6
+    const v=$("#pVerdict");
+    if(b.dataset.v==="nine"){v.className="verdict ok";v.textContent="Right \u2014 about 92%. Across a thousand assets the spread collapses and almost all the expected capacity is firm.";}
+    else{v.className="verdict bad";v.textContent="Higher than instinct says \u2014 about 92%. With a thousand assets the relative spread is tiny, so nearly all of it is firm.";}
+    $("#pCover").classList.add("gone");
+  });
+})();
+</script>
+</body>
+</html>

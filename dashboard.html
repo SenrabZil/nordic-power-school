@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Curriculum · Nordic Power School</title>
+<style>
+  :root{
+    --frost:#EEF3F7; --panel:#FFFFFF; --ink:#13202E; --slate:#5A6A7A;
+    --line:#D3DDE6; --deep:#0E1F33; --volt:#10B5C9; --volt-ink:#0A7E8E;
+    --ember:#E0913A; --ember-ink:#B16A12; --ok:#2FA980; --ok-bg:#E3F6EE; --bad:#DD6457; --bad-bg:#FBEAE7;
+    --mono: ui-monospace,"SF Mono","Cascadia Code",Consolas,"Roboto Mono",monospace;
+    --sans: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--frost);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:860px;margin:0 auto;padding:28px 24px 64px}
+  a{color:var(--volt-ink);text-decoration:none}
+
+  .top{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:18px}
+  .brand{font-size:17px;font-weight:700} .brand small{display:block;font-size:13px;font-weight:400;color:var(--slate)}
+  .chip{font-family:var(--mono);font-size:12px;padding:6px 11px;border-radius:9px;border:1px solid var(--line);color:var(--slate);display:inline-flex;align-items:center;gap:7px}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--volt);display:inline-block}
+
+  .bar{display:flex;gap:16px;align-items:flex-end;flex-wrap:wrap;background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-bottom:22px}
+  .field{display:flex;flex-direction:column;gap:5px;font-size:12px;color:var(--slate)}
+  select,input[type=date]{font-family:var(--mono);font-size:14px;color:var(--ink);background:#fff;border:1px solid var(--line);border-radius:9px;padding:8px 10px}
+  select:focus,input:focus{outline:2px solid var(--volt);outline-offset:1px}
+
+  .card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:20px;margin-bottom:22px}
+  .lbl{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:600;color:var(--slate);margin:0 0 10px}
+  .ttl{font-size:18px;font-weight:700}
+  .meta{font-family:var(--mono);font-size:13px;color:var(--slate);margin-top:3px}
+
+  .seg{display:inline-flex;border:1px solid var(--line);border-radius:9px;overflow:hidden}
+  .seg button{font-family:var(--mono);font-size:13px;border:0;background:#fff;color:var(--slate);padding:8px 14px;cursor:pointer}
+  .seg button[aria-pressed=true]{background:var(--volt);color:#04222a}
+  .status{display:flex;align-items:center;gap:8px;color:var(--ink);font-size:14px}
+  .status .dotc{width:10px;height:10px;border-radius:50%;background:var(--volt)}
+  .start{margin-top:16px;font-family:var(--sans);font-weight:600;font-size:14px;border:1px solid var(--volt);color:var(--volt-ink);background:#fff;border-radius:10px;padding:10px 16px;cursor:pointer;display:inline-block}
+  .start:hover{background:#ecfbfd}
+  .start.disabled{opacity:.45;pointer-events:none;border-color:var(--line);color:var(--slate)}
+  .buildnote{font-family:var(--mono);font-size:11px;margin-top:8px}
+  .buildnote.ok{color:var(--volt-ink)} .buildnote.warn{color:var(--ember-ink)}
+  .cmdrow{display:flex;align-items:center;gap:8px;margin-top:5px;background:#fff;border:1px solid var(--line);border-radius:8px;padding:7px 9px}
+  .cmd{font-family:var(--mono);font-size:11.5px;color:var(--ink);white-space:nowrap;overflow-x:auto;flex:1}
+  .copy{flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border:1px solid var(--line);border-radius:6px;background:#fff;cursor:pointer;color:var(--slate)}
+  .copy:hover{background:var(--frost);color:var(--volt-ink)} .copy.copied{color:var(--ok);border-color:var(--ok)}
+
+  .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px}
+  .metric{background:var(--frost);border-radius:11px;padding:14px 16px}
+  .metric .k{font-size:13px;color:var(--slate)} .metric .v{font-size:24px;font-weight:600;font-family:var(--mono);margin-top:2px}
+
+  .row{display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-top:1px solid var(--line)}
+  .row:first-child{border-top:none}
+  .badge{font-family:var(--mono);font-size:11.5px;padding:3px 9px;border-radius:8px}
+  .badge.ok{background:var(--ok-bg);color:#1c7a59} .badge.bad{background:var(--bad-bg);color:#b23a2c}
+  .mono{font-family:var(--mono);font-size:13px}
+
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chips a,.chips .more{font-family:var(--mono);font-size:12.5px;padding:7px 12px;border-radius:9px;border:1px solid var(--line);color:var(--ink);background:#fff}
+  .chips a:hover{border-color:var(--volt)}
+
+  .ask{border:1px dashed var(--volt);background:#f4fcfd;border-radius:14px;padding:16px 18px;margin-bottom:22px}
+  .ask .hd{display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .ask .q{flex:1;border:1px solid var(--line);border-radius:9px;padding:9px 12px;font-size:13px;color:var(--slate);background:#fff}
+  .ask .send{border:1px solid var(--line);background:#fff;border-radius:9px;padding:9px 13px;cursor:pointer;color:var(--volt-ink)}
+
+  .foot{display:flex;align-items:center;justify-content:center;gap:8px;font-family:var(--mono);font-size:12px;color:var(--slate);margin-top:8px}
+
+  .tip{position:relative;display:inline-flex;align-items:center;cursor:help}
+  .tip .ic{width:16px;height:16px;border-radius:50%;border:1px solid var(--line);color:var(--slate);font-size:10px;font-style:normal;font-family:var(--mono);display:inline-flex;align-items:center;justify-content:center}
+  .tip .box{position:absolute;top:155%;left:0;width:248px;background:#fff;border:1px solid var(--line);border-radius:11px;padding:10px 12px;font-size:12.5px;line-height:1.5;color:var(--slate);font-weight:400;opacity:0;visibility:hidden;transition:opacity .14s;z-index:40;box-shadow:0 8px 28px rgba(14,31,51,.14)}
+  .tip:hover .box,.tip:focus-within .box{opacity:1;visibility:visible}
+  .tip.r .box{left:auto;right:0} .tip.up .box{top:auto;bottom:155%}
+  :focus-visible{outline:2px solid var(--volt);outline-offset:2px}
+</style>
+</head>
+<body>
+<main class="wrap">
+
+  <div class="top">
+    <div class="brand">Nordic Power School<small>Curriculum</small></div>
+  </div>
+  <div class="lbl">Curriculum · 32 lessons, all ready <span class="tip"><span class="ic">i</span><span class="box">The 32 lessons — the theory behind the drill, including bonus tracks and deep dives. Come back here whenever a day puzzles you.</span></span></div>
+  <div class="chips" style="margin-bottom:22px">
+    <a href="06_reading_the_replay.html">06 · Reading the replay</a>
+    <a href="08_spreads_duration.html">08 · Spreads &amp; duration</a>
+    <a href="15_capstone.html">15 · Reading checkpoint</a>
+    <a href="16_hydro_water_value.html">16 · Hydro</a>
+    <a href="17_cross_zonal_spreads.html">17 · Cross-zonal spreads</a>
+    <a href="18_intraday_market.html">18 · Intraday</a>
+    <a href="19_imbalance_settlement.html">19 · Imbalance settlement</a>
+    <a href="20_negative_prices.html">20 · Negative prices</a>
+    <a href="21_interconnectors_coupling.html">21 · Interconnectors</a>
+    <a href="22_edge_cases.html">22 · Edge cases</a>
+    <a href="23_algo_trading.html">23 · Algorithmic trading</a>
+    <a href="24_carbon_ets.html">24 · Carbon &amp; the ETS</a>
+    <a href="25_capture_price.html">25 · Capture price</a>
+    <a href="26_baltic_dimension.html">26 · The Baltic dimension</a>
+    <a href="27_storage_sun_wind.html">27 · Storage, sun &amp; wind</a>
+    <a href="28_intraday_interactive.html">28 · Intraday (interactive)</a>
+    <a href="29_imbalance_interactive.html">29 · Imbalance lab</a>
+    <a href="30_capstone_interactive.html">30 · Final capstone</a>
+    <a href="survey.html">&#9733; Tester survey</a>
+    <a class="more" href="index.html">Open library →</a>
+  </div>
+
+  <div class="ask">
+    <div class="hd">
+      <span style="display:flex;align-items:center;gap:7px;font-size:14px;font-weight:600">Ask Elizabeth Cecilia <span class="tip"><span class="ic">i</span><span class="box">Optional live mentor for open 'why' questions. Runs only if you enable the Claude API or claude -p; everything else works offline.</span></span></span>
+      <span style="font-family:var(--mono);font-size:12px;color:var(--slate)">optional · Claude API / claude -p</span>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <div class="q">Why did 18:00 clear so high today?</div>
+      <button class="send" aria-label="send">→</button>
+    </div>
+  </div>
+
+  <div class="foot">education only · no bids, no trades, no dispatch
+    <span class="tip up r"><span class="ic">i</span><span class="box">The system only ever outputs prediction, actual and error — never an action. This is reading practice, not trading.</span></span>
+  </div>
+
+</main>
+
+</body>
+</html>

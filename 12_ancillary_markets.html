@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lesson 12 — Ancillary markets · Nordic Power School</title>
+<style>
+  :root{
+    --frost:#EEF3F7; --panel:#FFFFFF; --ink:#13202E; --slate:#5A6A7A;
+    --line:#D3DDE6; --deep:#0E1F33; --deep-2:#16314E; --volt:#10B5C9; --volt-ink:#0A7E8E;
+    --ember:#E0913A; --ember-ink:#B16A12; --warm:#C2603F; --ok:#2FA980; --bad:#DD6457;
+    --mono: ui-monospace,"SF Mono","Cascadia Code",Consolas,"Roboto Mono",monospace;
+    --sans: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--frost);color:var(--ink);font-family:var(--sans);font-size:17px;line-height:1.62;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:860px;margin:0 auto;padding:0 24px}
+
+  header{position:sticky;top:0;z-index:20;background:rgba(238,243,247,.9);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+  .bar{display:flex;justify-content:space-between;align-items:center;height:52px;font-size:13px;letter-spacing:.04em;text-transform:uppercase}
+  .bar b{font-weight:700} .bar .r{font-family:var(--mono);color:var(--slate)}
+
+  .hero{padding:60px 0 26px}
+  .eyebrow{font-family:var(--mono);font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--volt-ink);margin-bottom:16px}
+  h1{font-size:clamp(32px,5.6vw,54px);line-height:1.03;letter-spacing:-.02em;margin:0 0 16px;font-weight:780}
+  .lead{font-size:clamp(18px,2.4vw,22px);color:var(--slate);max-width:42ch;margin:0}
+  .byline{margin-top:20px;font-size:14px;color:var(--slate)} .byline b{color:var(--ink)}
+
+  section{padding:36px 0;border-top:1px solid var(--line)}
+  .snum{font-family:var(--mono);font-size:13px;color:var(--volt-ink);letter-spacing:.1em}
+  h2{font-size:clamp(23px,3.3vw,32px);line-height:1.12;letter-spacing:-.015em;margin:6px 0 12px;font-weight:740}
+  p{margin:0 0 16px} .muted{color:var(--slate)}
+  .say{border-left:2px solid var(--volt);padding:2px 0 2px 18px;margin:18px 0}
+  .caution{border-left:2px solid var(--ember);padding:2px 0 2px 18px;margin:18px 0;color:var(--ember-ink);font-size:15px}
+
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px;margin:20px 0}
+  .stage{position:relative;border-radius:12px;overflow:hidden}
+  .cover{position:absolute;inset:0;background:linear-gradient(180deg,var(--deep),#0a1726);color:#cfe;display:flex;flex-direction:column;gap:14px;align-items:center;justify-content:center;text-align:center;padding:24px;transition:opacity .5s;z-index:4}
+  .cover.gone{opacity:0;pointer-events:none} .cover .q{font-size:16px;max-width:34ch;color:#dCEbF0}
+
+  .controls{display:flex;flex-wrap:wrap;gap:18px;margin-top:14px}
+  .ctl{display:flex;flex-direction:column;gap:6px;min-width:180px;flex:1}
+  .ctl label{font-family:var(--mono);font-size:12.5px;color:var(--slate);display:flex;justify-content:space-between} .ctl label b{color:var(--ink)}
+  #scar{accent-color:var(--volt-ink)} #spread{accent-color:var(--ember)} #alloc{accent-color:var(--ink)}
+  input[type=range]{width:100%}
+
+  .splitbar{display:flex;height:40px;border-radius:10px;overflow:hidden;border:1px solid var(--line);margin-top:12px}
+  .splitbar .arb{background:var(--ember)} .splitbar .fcr{background:var(--volt)}
+  .splitbar div{display:flex;align-items:center;justify-content:center;color:#fff;font-family:var(--mono);font-size:12px;white-space:nowrap;transition:width .2s}
+  .prices{display:flex;flex-wrap:wrap;gap:6px 22px;font-family:var(--mono);font-size:13px;color:var(--slate);margin-top:12px}
+  .prices b{color:var(--ink)} .prices .f{color:var(--volt-ink)} .prices .a{color:var(--ember-ink)}
+
+  .revbox{display:flex;flex-wrap:wrap;gap:8px 24px;align-items:baseline;margin-top:12px;border-top:1px dashed var(--line);padding-top:12px;font-family:var(--mono);font-size:13.5px;color:var(--slate)}
+  .revbox .big{font-size:24px;font-weight:600;color:var(--ink)}
+  .opt{font-size:13px;color:var(--volt-ink);font-family:var(--mono);margin-top:8px}
+  .btn{font-family:var(--sans);font-weight:600;font-size:14px;border:0;border-radius:10px;background:#fff;color:var(--volt-ink);border:1px solid var(--line);padding:9px 14px;cursor:pointer;margin-top:10px}
+  .btn:hover{border-color:var(--volt)}
+
+  .choices{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0}
+  .choice{font-family:var(--mono);font-size:14px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 16px;cursor:pointer;color:var(--ink);transition:.15s}
+  .choice:hover{border-color:var(--volt)} .choice[aria-pressed=true]{background:var(--deep);color:#fff;border-color:var(--deep)}
+  .verdict{font-size:15px;margin-top:4px;min-height:1.4em} .verdict.ok{color:var(--ok)} .verdict.bad{color:var(--bad)}
+
+  .disc{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px}
+  .d{border:1px solid var(--line);border-radius:12px;padding:14px 16px;background:#fff;font-size:14.5px} .d b{color:var(--volt-ink)}
+
+  .rule{background:var(--deep);color:#eaf6f8;border-radius:14px;padding:24px;margin-top:8px}
+  .rule h3{margin:0 0 10px;font-size:20px;color:#fff} .rule p{color:#bcd6dc;margin:0 0 10px} .rule p:last-child{margin:0}
+  .rule .k{color:var(--volt);font-family:var(--mono)}
+
+  footer{padding:48px 0;color:var(--slate);font-size:13px;border-top:1px solid var(--line)}
+  :focus-visible{outline:2px solid var(--volt);outline-offset:2px}
+  @media (max-width:640px){ .disc{grid-template-columns:1fr} }
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header><div class="wrap bar"><b>Nordic Power School</b><span class="r">Lesson 12</span></div></header>
+
+<main class="wrap">
+  <div class="hero">
+    <div class="eyebrow">Lesson 12 · Ancillary markets</div>
+    <h1>You can&rsquo;t sell the<br>same megawatt twice.</h1>
+    <p class="lead">Reserves are bought in markets, and the capacity price moves with scarcity. But an asset&rsquo;s power is finite &mdash; so every market it enters is a choice against the others.</p>
+    <p class="byline">with <b>Elizabeth Cecilia</b>. This allocation is the puzzle a battery solves every hour &mdash; and the heart of the next lesson.</p>
+  </div>
+
+  <!-- 1 -->
+  <section>
+    <div class="snum">01</div>
+    <h2>Procurement &amp; the capacity price</h2>
+    <p>The TSO needs a set volume of each reserve. Providers bid their capacity at a &euro;/MW price; the TSO stacks the bids cheapest-first and buys up to the requirement. The last bid taken sets the <b>capacity price</b> everyone clears at &mdash; merit order again, but for availability rather than energy.</p>
+    <p>So the price isn&rsquo;t fixed. When reserves are scarce &mdash; a low-inertia hour needing lots of fast response &mdash; the requirement reaches up a thinner stack and the price climbs.</p>
+  </section>
+
+  <!-- 2 + 3 instrument -->
+  <section>
+    <div class="snum">02</div>
+    <h2>Scarcity sets the price</h2>
+    <p class="say"><b>Predict first:</b> a low-inertia hour, reserves tight. What happens to the FCR capacity price?</p>
+    <div class="choices" id="scarChoices" role="group" aria-label="FCR price when reserves scarce">
+      <button class="choice" data-v="up">It climbs</button>
+      <button class="choice" data-v="flat">Unchanged</button>
+      <button class="choice" data-v="down">It falls</button>
+    </div>
+    <div class="verdict" id="scarVerdict"></div>
+
+    <div class="panel">
+      <div class="stage">
+        <div>
+          <div class="prices">
+            <span><span class="f">FCR price</span> <b>&euro;<span id="fcrP">16</span></b>/MW</span>
+            <span><span class="a">arbitrage opportunity</span> <b>&euro;<span id="arbP">25</span></b>/MW (first MW)</span>
+          </div>
+          <svg viewBox="0 0 720 220" width="100%" id="revSvg" role="img" aria-label="Total revenue vs how the battery's power is allocated"></svg>
+          <div class="splitbar">
+            <div class="arb" id="barArb" style="width:50%">arbitrage</div>
+            <div class="fcr" id="barFcr" style="width:50%">FCR</div>
+          </div>
+          <div class="revbox">
+            <span><span class="muted">arbitrage</span> &euro;<b id="arbRev">0</b></span>
+            <span><span class="muted">+ FCR</span> &euro;<b id="fcrRev">0</b></span>
+            <span><span class="muted">= total</span> <span class="big">&euro;<span id="tot">0</span></span>/h</span>
+          </div>
+          <div class="opt" id="optLine">best split: — MW to arbitrage</div>
+          <button class="btn" id="snap">Snap to the best split</button>
+        </div>
+        <div class="cover" id="instCover"><div class="q">Predict above to open the allocation desk.</div></div>
+      </div>
+      <div class="controls">
+        <div class="ctl"><label>Reserve scarcity <b id="scarLab">moderate</b></label><input id="scar" type="range" min="0" max="100" value="40"></div>
+        <div class="ctl"><label>Energy spread (arb opportunity) <b>&euro;<span id="spVal">25</span></b></label><input id="spread" type="range" min="5" max="45" value="25"></div>
+        <div class="ctl"><label>To arbitrage <b><span id="allVal">5</span> of 10 MW</b></label><input id="alloc" type="range" min="0" max="10" step="0.5" value="5"></div>
+      </div>
+    </div>
+
+    <div class="snum" style="margin-top:8px">03</div>
+    <h2>The same MW, one job</h2>
+    <p>Ten megawatts of battery. Hold 6 MW in FCR and only 4 remain for the energy spread &mdash; the reserved capacity must stay free to respond, so it can&rsquo;t also be trading. The split that pays most depends entirely on the two prices.</p>
+    <p class="say"><b>Predict:</b> FCR is paying richly tonight and the energy spread is thin. Where should the 10 MW go?</p>
+    <div class="choices" id="allocChoices" role="group" aria-label="Best allocation when FCR rich and spread thin">
+      <button class="choice" data-v="fcr">Mostly FCR</button>
+      <button class="choice" data-v="arb">Mostly arbitrage</button>
+      <button class="choice" data-v="even">Split evenly</button>
+    </div>
+    <div class="verdict" id="allocVerdict"></div>
+    <p class="muted">Drag the prices around and the peak of the revenue curve slides. Cheap FCR and a fat spread? Pour MW into arbitrage. Scarce reserves and a flat day? Hold them in FCR. That moving peak is co-optimisation.</p>
+    <p class="caution">This is how the markets are built and how allocation logic works &mdash; not advice on which market to bid into or how much. Qualification, risk and strategy aren&rsquo;t the school&rsquo;s to decide.</p>
+  </section>
+
+  <!-- 4 catches -->
+  <section>
+    <div class="snum">04</div>
+    <h2>The catches</h2>
+    <div class="disc">
+      <div class="d"><b>State of charge is a leash.</b> Symmetric reserves like FCR-N need you ready to go up <i>and</i> down &mdash; so you must sit mid-charge, which limits how deep you can arbitrage.</div>
+      <div class="d"><b>Markets clear in sequence.</b> Energy, then reserve capacity, then closer-to-real-time. You commit before you know everything &mdash; allocation under uncertainty.</div>
+      <div class="d"><b>Opportunity cost is the real price.</b> A MW in FCR costs you the arbitrage it could have earned. Compare margins per MW, not headline prices.</div>
+      <div class="d"><b>Power and energy both bind.</b> MW limits how much you can offer; MWh limits how long. Reserves and arbitrage compete for both.</div>
+    </div>
+  </section>
+
+  <!-- 5 rule -->
+  <section>
+    <div class="snum">05</div>
+    <h2>The rule, in one breath</h2>
+    <div class="rule">
+      <h3>Reserve prices clear by merit order and scarcity; finite power makes every market a choice against the others.</h3>
+      <p>Capacity is paid where the requirement meets the bid stack, so scarcity lifts the price. An asset then allocates its limited MW to wherever the margin is highest &mdash; FCR or the spread &mdash; never both with the same megawatt.</p>
+      <p class="muted" style="color:#9fc0cb">Next: BESS value stacking &mdash; running this allocation across energy, balancing and capacity together, over a whole day, to make a battery actually pay.</p>
+    </div>
+  </section>
+<nav class="lessonseq" style="max-width:860px;margin:0 auto;padding:30px 24px 0;display:flex;justify-content:space-between;gap:16px;font-family:var(--mono);font-size:13px;border-top:1px solid var(--line)"><a href="30_capstone_interactive.html" style="color:var(--volt-ink);text-decoration:none;max-width:48%">&larr; Builds on &middot; Final capstone: one hour, end to end</a><a href="22_edge_cases.html" style="color:var(--volt-ink);text-decoration:none;max-width:48%;text-align:right">Next &middot; Edge cases &rarr;</a></nav>
+
+            <footer class="wrap">Nordic Power School · Lesson 12 — education only. No bids, no trades, no dispatch.</footer>
+</main>
+
+<script>
+(function(){
+  "use strict";
+  const $=s=>document.querySelector(s);
+  const C={arb:"#E0913A",fcr:"#10B5C9",line:"#D3DDE6",slate:"#5A6A7A",ink:"#13202E"};
+  const P=10, K=3;
+  const scar=$("#scar"), spread=$("#spread"), alloc=$("#alloc");
+  const fcrPrice=()=>Math.round(4 + (+scar.value)*0.30);
+  const arbBase=()=>+spread.value;
+  const arbRevOf=a=>arbBase()*a - (K/2)*a*a;     // concave: diminishing returns
+  const fcrRevOf=a=>fcrPrice()*(P-a);
+  const totOf=a=>arbRevOf(a)+fcrRevOf(a);
+  const aStar=()=>Math.max(0,Math.min(P,(arbBase()-fcrPrice())/K));
+
+  const svg=$("#revSvg");
+  const X0=46,X1=702,Y0=14,Y1=178;
+  function draw(){
+    const a=+alloc.value, fcr=fcrPrice(), ab=arbBase(), opt=aStar();
+    // revenue curve sampling
+    const xs=[]; for(let x=0;x<=P;x+=0.5) xs.push(x);
+    const ys=xs.map(totOf); const ymin=Math.min(...ys,fcrRevOf(P)), ymax=Math.max(...ys);
+    const xf=v=>X0+v/P*(X1-X0), yf=v=>Y1-(v-ymin)/Math.max(1,(ymax-ymin))*(Y1-Y0);
+    let s="";
+    // axes
+    s+=`<line x1="${X0}" y1="${Y1}" x2="${X1}" y2="${Y1}" stroke="${C.line}"/>`;
+    for(let x=0;x<=P;x+=2){const px=xf(x);s+=`<line x1="${px}" y1="${Y1}" x2="${px}" y2="${Y1+5}" stroke="${C.line}"/><text x="${px}" y="${Y1+17}" text-anchor="middle" font-family="ui-monospace,monospace" font-size="10.5" fill="${C.slate}">${x}</text>`;}
+    s+=`<text x="${xf(P/2)}" y="${Y1+30}" text-anchor="middle" font-family="ui-monospace,monospace" font-size="11" fill="${C.slate}">MW to arbitrage \u2192</text>`;
+    s+=`<text x="${X0-4}" y="${Y0+2}" text-anchor="end" font-family="ui-monospace,monospace" font-size="11" fill="${C.slate}">\u20AC/h</text>`;
+    // curve
+    const pts=xs.map((x,i)=>`${xf(x).toFixed(1)},${yf(ys[i]).toFixed(1)}`).join(" ");
+    s+=`<polyline points="${pts}" fill="none" stroke="${C.ink}" stroke-width="2.4"/>`;
+    // optimum marker
+    s+=`<line x1="${xf(opt)}" y1="${Y0}" x2="${xf(opt)}" y2="${Y1}" stroke="${C.fcr}" stroke-width="1.4" stroke-dasharray="4 4"/>`;
+    s+=`<circle cx="${xf(opt)}" cy="${yf(totOf(opt))}" r="4.5" fill="${C.fcr}"/>`;
+    s+=`<text x="${xf(opt)}" y="${yf(totOf(opt))-9}" text-anchor="middle" font-family="ui-monospace,monospace" font-size="11" fill="${C.fcr}">best</text>`;
+    // current marker
+    s+=`<circle cx="${xf(a)}" cy="${yf(totOf(a))}" r="5" fill="${C.arb}" stroke="#fff" stroke-width="1.5"/>`;
+    svg.innerHTML=s;
+    // bar + readouts
+    $("#barArb").style.width=(a/P*100)+"%"; $("#barFcr").style.width=((P-a)/P*100)+"%";
+    $("#barArb").textContent = a>=2?`${a} MW arbitrage`:""; $("#barFcr").textContent = (P-a)>=2?`${P-a} MW FCR`:"";
+    $("#fcrP").textContent=fcr; $("#arbP").textContent=ab;
+    $("#spVal").textContent=ab; $("#allVal").textContent=a;
+    $("#scarLab").textContent=(+scar.value)>=70?"tight":(+scar.value)<=30?"ample":"moderate";
+    $("#arbRev").textContent=Math.round(arbRevOf(a)); $("#fcrRev").textContent=Math.round(fcrRevOf(a)); $("#tot").textContent=Math.round(totOf(a));
+    $("#optLine").textContent=`best split: ${opt.toFixed(1)} MW to arbitrage, ${(P-opt).toFixed(1)} MW to FCR \u2014 \u20AC${Math.round(totOf(opt))}/h`;
+  }
+  [scar,spread,alloc].forEach(el=>el.addEventListener("input",draw));
+  $("#snap").addEventListener("click",()=>{ alloc.value=Math.round(aStar()*2)/2; draw(); });
+  draw();
+
+  $("#scarChoices").addEventListener("click",e=>{
+    const b=e.target.closest(".choice"); if(!b) return;
+    document.querySelectorAll("#scarChoices .choice").forEach(x=>x.setAttribute("aria-pressed","false"));
+    b.setAttribute("aria-pressed","true");
+    const v=$("#scarVerdict");
+    if(b.dataset.v==="up"){v.className="verdict ok";v.textContent="Right \u2014 the requirement reaches up a thinner stack, so the capacity price climbs.";}
+    else{v.className="verdict bad";v.textContent="Scarce reserves mean the requirement clears higher up the bid stack \u2014 the price climbs.";}
+    scar.value=80; draw();
+    $("#instCover").classList.add("gone");
+  });
+  $("#allocChoices").addEventListener("click",e=>{
+    const b=e.target.closest(".choice"); if(!b) return;
+    document.querySelectorAll("#allocChoices .choice").forEach(x=>x.setAttribute("aria-pressed","false"));
+    b.setAttribute("aria-pressed","true");
+    scar.value=80; spread.value=12; draw();   // FCR rich, spread thin
+    const opt=aStar(); const v=$("#allocVerdict");
+    if(b.dataset.v==="fcr"){v.className="verdict ok";v.textContent=`Right \u2014 best split is just ${opt.toFixed(1)} MW to arbitrage; hold the rest in FCR.`;}
+    else{v.className="verdict bad";v.textContent=`With rich FCR and a thin spread, the peak sits at ${opt.toFixed(1)} MW to arbitrage \u2014 mostly FCR.`;}
+    alloc.value=Math.round(opt*2)/2; draw();
+    $("#instCover").classList.add("gone");
+    document.querySelector(".panel").scrollIntoView({behavior:"smooth",block:"center"});
+  });
+})();
+</script>
+</body>
+</html>

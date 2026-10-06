@@ -1,0 +1,399 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lesson 02 — Time is not what it looks like · Nordic Power School</title>
+<style>
+  :root{
+    --frost:#EEF3F7; --panel:#FFFFFF; --ink:#13202E; --slate:#5A6A7A;
+    --line:#D3DDE6; --deep:#0E1F33; --deep-2:#16314E; --volt:#10B5C9; --volt-ink:#0A7E8E;
+    --ember:#E0913A; --ok:#2FA980; --bad:#DD6457;
+    --mono: ui-monospace,"SF Mono","Cascadia Code",Consolas,"Roboto Mono",monospace;
+    --sans: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--frost);color:var(--ink);font-family:var(--sans);
+    line-height:1.62;-webkit-font-smoothing:antialiased;font-size:17px}
+  .wrap{max-width:860px;margin:0 auto;padding:0 24px}
+  a{color:var(--volt-ink)}
+
+  /* header */
+  header{position:sticky;top:0;z-index:20;background:rgba(238,243,247,.86);
+    backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+  .bar{display:flex;justify-content:space-between;align-items:center;height:52px;
+    font-size:13px;letter-spacing:.04em;text-transform:uppercase}
+  .bar b{font-weight:700} .bar .r{font-family:var(--mono);color:var(--slate)}
+
+  /* hero */
+  .hero{padding:64px 0 28px}
+  .eyebrow{font-family:var(--mono);font-size:13px;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--volt-ink);margin-bottom:18px}
+  h1{font-size:clamp(34px,6vw,58px);line-height:1.02;letter-spacing:-.02em;margin:0 0 18px;font-weight:780}
+  .lead{font-size:clamp(18px,2.4vw,22px);color:var(--slate);max-width:38ch;margin:0}
+  .byline{margin-top:22px;font-size:14px;color:var(--slate)}
+  .byline b{color:var(--ink)}
+
+  /* sections */
+  section{padding:40px 0;border-top:1px solid var(--line)}
+  .snum{font-family:var(--mono);font-size:13px;color:var(--volt-ink);letter-spacing:.1em}
+  h2{font-size:clamp(24px,3.5vw,34px);line-height:1.1;letter-spacing:-.015em;margin:6px 0 14px;font-weight:740}
+  p{margin:0 0 16px} .muted{color:var(--slate)}
+  .say{border-left:2px solid var(--volt);padding:2px 0 2px 18px;margin:18px 0;color:var(--ink)}
+
+  /* instrument panels */
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;
+    padding:22px;margin:22px 0;
+    background-image:repeating-linear-gradient(90deg, rgba(19,32,46,.025) 0 1px, transparent 1px 58px)}
+  .controls{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin-top:6px}
+  .seg{display:inline-flex;border:1px solid var(--line);border-radius:9px;overflow:hidden}
+  .seg button{font-family:var(--mono);font-size:13px;border:0;background:var(--panel);
+    color:var(--slate);padding:8px 14px;cursor:pointer}
+  .seg button[aria-pressed=true]{background:var(--deep);color:#fff}
+  input[type=range]{accent-color:var(--volt);width:240px;max-width:60vw}
+  .rangewrap{display:flex;align-items:center;gap:12px}
+  .rangewrap label{font-family:var(--mono);font-size:13px;color:var(--slate)}
+
+  /* clocks */
+  .clocks{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px}
+  .clock{border:1px solid var(--line);border-radius:12px;padding:16px;text-align:left;background:#fff}
+  .clock .tag{font-family:var(--mono);font-size:12px;letter-spacing:.08em;color:var(--slate)}
+  .clock .big{font-family:var(--mono);font-size:34px;font-weight:600;margin:6px 0 2px;letter-spacing:-.02em}
+  .clock .sub{font-family:var(--mono);font-size:12.5px;color:var(--slate)}
+  .clock.truth{border-color:var(--volt);box-shadow:0 0 0 1px var(--volt) inset}
+  .clock .zoneabbr{color:var(--volt-ink);font-weight:600}
+
+  /* timeline (svg) */
+  .figcap{font-size:13.5px;color:var(--slate);font-family:var(--mono);margin-top:10px}
+
+  /* day bar */
+  .daybar{display:flex;gap:3px;margin:18px 0 10px;height:54px;align-items:stretch}
+  .cell{flex:1;background:var(--deep);border-radius:3px;opacity:.92;transition:transform .35s ease, background .3s}
+  .cell.dst-add{background:var(--volt)} .cell.dst-gap{background:var(--ember)}
+  .count{font-family:var(--mono);font-size:15px;color:var(--ink)}
+  .count b{color:var(--volt-ink)}
+
+  /* choices / verdict */
+  .choices{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0}
+  .choice{font-family:var(--mono);font-size:14px;background:#fff;border:1px solid var(--line);
+    border-radius:10px;padding:10px 16px;cursor:pointer;color:var(--ink);transition:.15s}
+  .choice:hover{border-color:var(--volt)}
+  .choice[aria-pressed=true]{background:var(--deep);color:#fff;border-color:var(--deep)}
+  .verdict{font-size:15px;margin-top:6px;min-height:1.4em}
+  .verdict.ok{color:var(--ok)} .verdict.bad{color:var(--bad)}
+
+  /* gate chart */
+  .gate-stage{position:relative;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fff;margin-top:6px}
+  .curtain{position:absolute;inset:0;background:
+      linear-gradient(180deg,var(--deep),#0a1726);
+      display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;
+      color:#cfe;transition:transform .9s cubic-bezier(.7,0,.2,1);transform:translateX(0);z-index:3}
+  .curtain.lift{transform:translateX(101%)}
+  .curtain .lock{font-family:var(--mono);font-size:14px;letter-spacing:.06em;color:#9fc7d0}
+  .curtain .lock b{color:#fff}
+  .priceline{stroke:var(--volt);stroke-width:2.5;fill:none;
+    stroke-dasharray:2000;stroke-dashoffset:2000;transition:stroke-dashoffset 1s ease .35s}
+  .priceline.drawn{stroke-dashoffset:0}
+  .windline{stroke:var(--slate);stroke-width:1.6;fill:none;stroke-dasharray:4 4;opacity:.85}
+  .axis{stroke:var(--line);stroke-width:1} .axt{font-family:var(--mono);font-size:11px;fill:var(--slate)}
+  .legend{display:flex;gap:18px;font-family:var(--mono);font-size:12.5px;color:var(--slate);margin-top:10px;flex-wrap:wrap}
+  .legend .k{display:inline-block;width:22px;height:0;border-top:2.5px solid var(--volt);vertical-align:middle;margin-right:6px}
+  .legend .kw{border-top:1.6px dashed var(--slate)}
+
+  /* rule */
+  .rule{background:var(--deep);color:#eaf6f8;border-radius:14px;padding:26px 26px;margin-top:8px}
+  .rule h3{margin:0 0 10px;font-size:20px;color:#fff}
+  .rule p{color:#bcd6dc;margin:0}
+  .rule .k{color:var(--volt);font-family:var(--mono)}
+
+  .btn{font-family:var(--sans);font-weight:600;font-size:15px;border:0;border-radius:10px;
+    background:var(--volt);color:#04222a;padding:11px 18px;cursor:pointer}
+  .btn:hover{filter:brightness(1.05)}
+  .cards{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:8px}
+  .card{border:1px solid var(--line);border-radius:12px;padding:16px;background:#fff}
+  .card h4{margin:0 0 6px;font-size:15px} .card .api{color:var(--volt-ink)} .card .dh{color:var(--ember)}
+  .card code{font-family:var(--mono);font-size:13px;background:#eef3f7;padding:1px 5px;border-radius:4px}
+
+  footer{padding:50px 0;color:var(--slate);font-size:13px;border-top:1px solid var(--line)}
+  :focus-visible{outline:2px solid var(--volt);outline-offset:2px}
+  @media (max-width:640px){
+    .clocks{grid-template-columns:1fr} .cards{grid-template-columns:1fr}
+    .clock .big{font-size:30px}
+  }
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header><div class="wrap bar"><b>Nordic Power School</b><span class="r">Lesson 02</span></div></header>
+
+<main class="wrap">
+
+  <div class="hero">
+    <div class="eyebrow">Lesson 02 · Time</div>
+    <h1>Time is not what<br>it looks like.</h1>
+    <p class="lead">Most of the ugliest bugs in power data are time bugs. Before you read a single price, get fluent in three clocks — and in the days that aren&rsquo;t 24 hours long.</p>
+    <p class="byline">with <b>Elizabeth Cecilia</b>, your mentor. When I ask you to predict, actually predict &mdash; <i>before</i> you reveal. Guessing then checking is the whole point.</p>
+  </div>
+
+  <!-- 1. Three clocks -->
+  <section id="s1">
+    <div class="snum">01</div>
+    <h2>One instant, three faces</h2>
+    <p>There is exactly one truth: <b>UTC</b>. We store and compute in it, and convert to a local clock only at the edge. Two local clocks matter here: <b>CET</b>, the clock the coupled day-ahead market runs on, and <b>EET</b> &mdash; Finland&rsquo;s, one hour ahead of CET.</p>
+    <p class="say">Drag the moment. Switch winter to summer. Watch the same instant wear three different faces &mdash; and watch the zone names flip to <span style="font-family:var(--mono)">CEST</span> / <span style="font-family:var(--mono)">EEST</span> when daylight saving lands.</p>
+
+    <div class="panel">
+      <div class="controls">
+        <div class="seg" role="group" aria-label="Season">
+          <button id="seJan" aria-pressed="true">15 Jan</button>
+          <button id="seJul" aria-pressed="false">15 Jul</button>
+        </div>
+        <div class="rangewrap">
+          <input id="hr" type="range" min="0" max="23" value="12" aria-label="Hour (UTC)">
+          <label>UTC <span id="hrlab">12:00</span></label>
+        </div>
+      </div>
+      <div class="clocks">
+        <div class="clock truth"><div class="tag">UTC · the truth</div><div class="big" id="cUTC">12:00</div><div class="sub"><span id="dUTC">—</span> · <span class="zoneabbr" id="zUTC">UTC</span></div></div>
+        <div class="clock"><div class="tag">CET · the market</div><div class="big" id="cCET">13:00</div><div class="sub"><span id="dCET">—</span> · <span class="zoneabbr" id="zCET">CET</span></div></div>
+        <div class="clock"><div class="tag">EET · Finland</div><div class="big" id="cEET">14:00</div><div class="sub"><span id="dEET">—</span> · <span class="zoneabbr" id="zEET">EET</span></div></div>
+      </div>
+    </div>
+    <p class="muted">None is &ldquo;more correct&rdquo; &mdash; but only UTC is unambiguous. A timestamp with no zone attached is a bug until proven otherwise.</p>
+  </section>
+
+  <!-- 2. delivery day -->
+  <section id="s2">
+    <div class="snum">02</div>
+    <h2>The delivery day is CET &mdash; even in Finland</h2>
+    <p>Finland lives on EET, but its day-ahead <b>delivery day</b> is set by the coupled market, in CET. So the Finnish day-ahead &ldquo;day&rdquo; does not start at Finnish midnight. Line up the same hours on all three clocks and the gap jumps out:</p>
+    <div class="panel">
+      <svg viewBox="0 0 760 188" width="100%" role="img" aria-label="The delivery day 2026-01-10 across UTC, CET and EET">
+        <!-- gridlines every 3h -->
+        <g id="tlgrid"></g>
+        <!-- rows -->
+        <g font-family="ui-monospace,monospace" font-size="12">
+          <text x="0" y="44" fill="#5A6A7A">UTC</text>
+          <text x="0" y="98" fill="#5A6A7A">CET</text>
+          <text x="0" y="152" fill="#5A6A7A">EET</text>
+        </g>
+        <!-- delivery-day band (CET 00:00 -> 24:00 of 10 Jan) mapped onto each row -->
+        <g id="tlbands"></g>
+      </svg>
+      <div class="figcap">Day-ahead delivery day <b style="color:var(--volt-ink)">2026-01-10</b> begins at <b style="color:var(--volt-ink)">23:00Z</b> = <b style="color:var(--volt-ink)">01:00</b> in Helsinki &mdash; an hour after Finnish midnight (22:00Z).</div>
+    </div>
+    <p class="muted">Slice an FI series by &ldquo;Finnish calendar day&rdquo; and then compare it to a CET delivery day, and you are off by one hour on every record. Choose your clock on purpose.</p>
+  </section>
+
+  <!-- 3. API vs Datahub -->
+  <section id="s3">
+    <div class="snum">03</div>
+    <h2>Know your source&rsquo;s clock</h2>
+    <p>Two Fingrid systems, two clocks. Don&rsquo;t conflate them.</p>
+    <div class="cards">
+      <div class="card"><h4 class="api">Fingrid Open Data API</h4><p class="muted" style="margin:0">The feed this school reads. Timestamps are <b>UTC</b>, in and out (<code>...Z</code>). No conversion on ingest.</p></div>
+      <div class="card"><h4 class="dh">Fingrid Datahub</h4><p class="muted" style="margin:0">The retail metering exchange &mdash; a different system. Reports in <b>EET</b>. Not what we read here.</p></div>
+    </div>
+    <p class="say" style="margin-top:18px">Before you parse any feed, find the sentence in its docs that names the timezone. If you can&rsquo;t, assume nothing and test against a known instant.</p>
+  </section>
+
+  <!-- 4. DST -->
+  <section id="s4">
+    <div class="snum">04</div>
+    <h2>The days that aren&rsquo;t 24 hours</h2>
+    <p>Twice a year the clock jumps. We never assume 24 periods and never index by hour-of-day &mdash; we derive the count from the actual span.</p>
+    <p class="say"><b>Predict first:</b> on the last Sunday of October, when CET clocks go back, how long is that delivery day?</p>
+    <div class="choices" id="dstChoices" role="group" aria-label="Predict the fall-back day length">
+      <button class="choice" data-v="23">23 hours</button>
+      <button class="choice" data-v="24">24 hours</button>
+      <button class="choice" data-v="25">25 hours</button>
+    </div>
+    <div class="verdict" id="dstVerdict"></div>
+
+    <div class="panel">
+      <div class="controls" style="margin-bottom:6px">
+        <div class="seg" role="group" aria-label="Day type">
+          <button data-day="normal" aria-pressed="true">Normal</button>
+          <button data-day="spring" aria-pressed="false">Spring forward</button>
+          <button data-day="fall" aria-pressed="false">Fall back</button>
+        </div>
+      </div>
+      <div class="daybar" id="daybar" aria-hidden="true"></div>
+      <div class="count" id="dayCount">24 hours · <b>96</b> quarter-hours</div>
+    </div>
+    <p class="muted">Any code that hard-codes 24 (or 96) is wrong two days a year &mdash; and those are exactly the days with the wildest prices, so the bug hides where it hurts most.</p>
+  </section>
+
+  <!-- 5. the gate -->
+  <section id="s5">
+    <div class="snum">05</div>
+    <h2>The gate: what was knowable <i>when</i></h2>
+    <p>Day-ahead is an auction. Bids close at the gate (~12:00 CET on D&minus;1), the market couples, and prices publish after. So at the moment you&rsquo;d form a view, <b>tomorrow&rsquo;s price does not exist yet</b> &mdash; only what published before the gate. Below, the wind forecast is known. The cleared price is behind the curtain.</p>
+    <p class="say"><b>Predict:</b> wind ramps hard into midday and eases by evening. Where does the day-ahead price bottom out?</p>
+    <div class="choices" id="gateChoices" role="group" aria-label="Predict the price low">
+      <button class="choice" data-v="overnight">Overnight</button>
+      <button class="choice" data-v="midday">Midday</button>
+      <button class="choice" data-v="evening">Evening</button>
+    </div>
+    <div class="verdict" id="gateVerdict"></div>
+
+    <div class="gate-stage" id="gateStage">
+      <svg viewBox="0 0 720 320" width="100%" role="img" aria-label="Day-ahead price and wind forecast over a delivery day">
+        <g id="gateAxes"></g>
+        <polyline class="windline" id="windLine" points=""></polyline>
+        <polyline class="priceline" id="priceLine" points=""></polyline>
+      </svg>
+      <div class="curtain" id="curtain">
+        <div class="lock">&#128274; covered until the gate</div>
+        <div class="lock">forecasts are knowable &middot; <b>the price is not</b></div>
+      </div>
+    </div>
+    <div class="legend"><span><span class="k"></span>day-ahead price (revealed)</span><span><span class="k kw"></span>wind forecast (known before the gate)</span></div>
+    <p class="muted" style="margin-top:14px">The forecast was in your hands; the price was not, until you revealed it. That gap is the whole game &mdash; and it&rsquo;s why a price&rsquo;s publication time must sit <i>after</i> the gate.</p>
+  </section>
+
+  <!-- 6. the rule -->
+  <section id="s6">
+    <div class="snum">06</div>
+    <h2>The rule, in one breath</h2>
+    <div class="rule">
+      <h3>Store and compute in UTC.</h3>
+      <p>Convert to a local clock only at the edge, and choose that clock on purpose &mdash; <span class="k">CET</span> for the day-ahead delivery day, <span class="k">EET</span> for Finnish local framing. Carry the <span class="k">period resolution</span> and the <span class="k">publication time</span> on every record. Never count hours by hand, and never assume a day is 24 of them.</p>
+    </div>
+  </section>
+<nav class="lessonseq" style="max-width:860px;margin:0 auto;padding:30px 24px 0;display:flex;justify-content:space-between;gap:16px;font-family:var(--mono);font-size:13px;border-top:1px solid var(--line)"><a href="index.html" style="color:var(--volt-ink);text-decoration:none;max-width:48%">&larr; Curriculum</a><a href="31_market_structure.html" style="color:var(--volt-ink);text-decoration:none;max-width:48%;text-align:right">Next &middot; Who does what &rarr;</a></nav>
+
+            <footer class="wrap">Nordic Power School · Lesson 02 — education only. No bids, no trades, no dispatch.</footer>
+</main>
+
+<script>
+(function(){
+  "use strict";
+  const $ = s => document.querySelector(s);
+  const pad = n => String(n).padStart(2,"0");
+
+  /* ---------- 1. three clocks (uses the browser's tz data) ---------- */
+  let season = 0; // 0 = Jan, 6 = Jul
+  function clockParts(date, tz){
+    const f = new Intl.DateTimeFormat("en-GB",{timeZone:tz,hour:"2-digit",minute:"2-digit",
+      hour12:false,weekday:"short",day:"2-digit",month:"short",timeZoneName:"short"});
+    const p = {}; f.formatToParts(date).forEach(x=>p[x.type]=x.value);
+    return {t:`${p.hour}:${p.minute}`, d:`${p.weekday} ${p.day} ${p.month}`, z:p.timeZoneName};
+  }
+  function renderClocks(){
+    const h = +$("#hr").value;
+    $("#hrlab").textContent = pad(h)+":00";
+    const date = new Date(Date.UTC(2026, season, 15, h, 0, 0));
+    const map = [["UTC","UTC"],["CET","Europe/Stockholm"],["EET","Europe/Helsinki"]];
+    map.forEach(([id,tz])=>{
+      const c = clockParts(date,tz);
+      $("#c"+id).textContent = c.t; $("#d"+id).textContent = c.d; $("#z"+id).textContent = c.z;
+    });
+  }
+  $("#hr").addEventListener("input",renderClocks);
+  $("#seJan").addEventListener("click",()=>{season=0;$("#seJan").setAttribute("aria-pressed","true");$("#seJul").setAttribute("aria-pressed","false");renderClocks();});
+  $("#seJul").addEventListener("click",()=>{season=6;$("#seJul").setAttribute("aria-pressed","true");$("#seJan").setAttribute("aria-pressed","false");renderClocks();});
+  renderClocks();
+
+  /* ---------- 2. delivery-day timeline ---------- */
+  (function timeline(){
+    const x0=46, x1=748, W=x1-x0;
+    const grid=$("#tlgrid"), bands=$("#tlbands");
+    const rows={UTC:30,CET:84,EET:138};
+    // 24h scale, ticks every 3h
+    let g="";
+    for(let hh=0;hh<=24;hh+=3){
+      const x=x0+W*hh/24;
+      g+=`<line x1="${x}" y1="22" x2="${x}" y2="170" stroke="#D3DDE6" stroke-width="1"/>`;
+      g+=`<text x="${x}" y="184" text-anchor="middle" class="axt">${pad(hh%24)}</text>`;
+    }
+    grid.innerHTML=g;
+    // The CET delivery day for 10 Jan = 23:00Z(9th) -> 23:00Z(10th).
+    // Express each row's local-day start offset (in UTC hours from row's midnight):
+    // UTC row: band from 23:00(prev) shown as starting at -1h; CET row: 00->24; EET row: +1h.
+    function band(rowY,startH,label,color){
+      const sx=x0+W*Math.max(0,startH)/24, ex=x0+W*Math.min(24,startH+24)/24;
+      return `<rect x="${sx}" y="${rowY-16}" width="${ex-sx}" height="26" rx="5" fill="${color}" opacity=".16"/>`+
+             `<line x1="${sx}" y1="${rowY-20}" x2="${sx}" y2="${rowY+16}" stroke="${color}" stroke-width="2"/>`+
+             `<text x="${sx+6}" y="${rowY+1}" class="axt" fill="${color}">${label}</text>`;
+    }
+    bands.innerHTML =
+      band(rows.UTC, -1, "23:00Z \u2192 delivery day", "#10B5C9") +
+      band(rows.CET, 0,  "00:00 CET \u2192 24:00 CET",  "#10B5C9") +
+      band(rows.EET, 1,  "01:00 EET", "#10B5C9") +
+      // Finnish local midnight marker on the EET row (22:00Z = 00:00 EET sits one hour earlier)
+      `<line x1="${x0+W*0/24}" y1="${rows.EET-20}" x2="${x0+W*0/24}" y2="${rows.EET+16}" stroke="#E0913A" stroke-width="2" stroke-dasharray="3 3"/>`+
+      `<text x="${x0+4}" y="${rows.EET-24}" class="axt" fill="#E0913A">Finnish midnight</text>`;
+  })();
+
+  /* ---------- 4. DST day bar + predict ---------- */
+  const DAYS = {
+    normal:{hours:24,q:96,add:[],gap:[]},
+    spring:{hours:23,q:92,gap:[2]},     // 02:00 hour skipped
+    fall:{hours:25,q:100,add:[2]}       // 02:00 hour repeated
+  };
+  function renderDay(kind){
+    const d=DAYS[kind]; const bar=$("#daybar"); bar.innerHTML="";
+    for(let i=0;i<d.hours;i++){
+      const c=document.createElement("div"); c.className="cell";
+      if(d.add && d.add.includes(i)) c.className+=" dst-add";
+      bar.appendChild(c);
+    }
+    const extra = kind==="fall" ? " &middot; the 02:00 hour repeats" : kind==="spring" ? " &middot; the 02:00 hour vanishes" : "";
+    $("#dayCount").innerHTML = `${d.hours} hours &middot; <b>${d.q}</b> quarter-hours${extra}`;
+  }
+  document.querySelectorAll('.seg [data-day]').forEach(b=>{
+    b.addEventListener("click",()=>{
+      document.querySelectorAll('.seg [data-day]').forEach(x=>x.setAttribute("aria-pressed","false"));
+      b.setAttribute("aria-pressed","true"); renderDay(b.dataset.day);
+    });
+  });
+  renderDay("normal");
+
+  $("#dstChoices").addEventListener("click",e=>{
+    const b=e.target.closest(".choice"); if(!b) return;
+    document.querySelectorAll('#dstChoices .choice').forEach(x=>x.setAttribute("aria-pressed","false"));
+    b.setAttribute("aria-pressed","true");
+    const v=+b.dataset.v, ver=$("#dstVerdict");
+    if(v===25){ ver.className="verdict ok"; ver.textContent="Right — 25 hours, 100 quarter-hours at 15-minute MTU."; }
+    else { ver.className="verdict bad"; ver.textContent=`Not quite — going back adds an hour, so it's 25 (you picked ${v}).`; }
+    // show the fall-back day
+    document.querySelectorAll('.seg [data-day]').forEach(x=>x.setAttribute("aria-pressed", x.dataset.day==="fall"?"true":"false"));
+    renderDay("fall");
+  });
+
+  /* ---------- 5. gate chart + mask/reveal ---------- */
+  const price=[46,44,43,43,45,52,63,71,70,58,40,28,21,20,24,33,48,67,85,82,70,60,53,49];
+  const wind =[1500,1450,1500,1700,2000,2400,2900,3400,3900,4600,5300,5900,6200,6100,5600,4900,4100,3400,2900,2700,2500,2200,1900,1700];
+  (function gate(){
+    const x0=42,x1=706,y0=18,y1=286,W=x1-x0,H=y1-y0;
+    const xf=i=>x0+W*i/23;
+    const sc=(arr)=>{const mn=Math.min(...arr),mx=Math.max(...arr);return v=>y1-(v-mn)/(mx-mn)*H;};
+    const py=sc(price), wy=sc(wind);
+    $("#priceLine").setAttribute("points", price.map((v,i)=>`${xf(i).toFixed(1)},${py(v).toFixed(1)}`).join(" "));
+    $("#windLine").setAttribute("points", wind.map((v,i)=>`${xf(i).toFixed(1)},${wy(v).toFixed(1)}`).join(" "));
+    let ax=`<line class="axis" x1="${x0}" y1="${y1}" x2="${x1}" y2="${y1}"/>`;
+    for(let hh=0;hh<=24;hh+=6){const x=x0+W*hh/23;ax+=`<line class="axis" x1="${x}" y1="${y1}" x2="${x}" y2="${y1+5}"/><text class="axt" x="${x}" y="${y1+18}" text-anchor="middle">${pad(hh%24)}</text>`;}
+    ax+=`<text class="axt" x="${x0}" y="${y0+2}" >EUR/MWh</text>`;
+    $("#gateAxes").innerHTML=ax;
+  })();
+  let revealed=false;
+  function revealGate(){
+    if(revealed) return; revealed=true;
+    $("#curtain").classList.add("lift");
+    $("#priceLine").classList.add("drawn");
+  }
+  $("#gateChoices").addEventListener("click",e=>{
+    const b=e.target.closest(".choice"); if(!b) return;
+    document.querySelectorAll('#gateChoices .choice').forEach(x=>x.setAttribute("aria-pressed","false"));
+    b.setAttribute("aria-pressed","true");
+    const v=b.dataset.v, ver=$("#gateVerdict");
+    if(v==="midday"){ ver.className="verdict ok"; ver.textContent="Right — peak wind floods the market midday, so the curve bottoms there. Reveal it."; }
+    else { ver.className="verdict bad"; ver.textContent="Look again at the wind: it peaks midday, which is where the price gets pushed down. Revealing…"; }
+    setTimeout(revealGate, 220);
+  });
+})();
+</script>
+</body>
+</html>

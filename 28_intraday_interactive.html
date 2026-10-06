@@ -1,0 +1,1142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Nordic Intraday — the Auction and the Book</title>
+<style>
+  :root{
+  --frost:#EEF3F7;--panel:#FFFFFF;--ink:#13202E;--slate:#5A6A7A;
+  --line:#D3DDE6;--deep:#0E1F33;--volt:#10B5C9;--volt-ink:#0A7E8E;
+  --ember:#E0913A;--ember-ink:#B16A12;--warm:#C2603F;--ok:#2FA980;--bad:#DD6457;
+  --mono: ui-monospace,"SF Mono","Cascadia Code",Consolas,"Roboto Mono",monospace;
+  --sans: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --bg:var(--frost);--surface:var(--panel);--surface-alt:#F2F7FA;
+  --primary:var(--volt);--primary-deep:var(--deep);--muted:var(--slate);
+  --accent:var(--ember-ink);--accent-soft:#FBEEDF;
+  --good:var(--ok);--warn:var(--bad);--bid:var(--volt-ink);--ask:var(--warm);
+  --font-body:var(--sans);--font-data:var(--mono);
+  --maxw:860px;--readw:720px;
+}
+
+  * { box-sizing: border-box; }
+
+  html { -webkit-text-size-adjust: 100%; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 17px;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 22px 96px; }
+
+  .readw { max-width: var(--readw); }
+
+  /* ---- Eyebrow / data labels: monospace is the market vernacular ---- */
+  .eyebrow {
+    font-family: var(--font-data);
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--primary-deep);
+    margin: 0 0 10px;
+  }
+
+  /* ---- Header ---- */
+  header.lesson {
+    padding: 64px 0 30px;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 8px;
+  }
+  header.lesson h1 {
+    font-size: clamp(30px, 5.2vw, 46px);
+    line-height: 1.08;
+    letter-spacing: -0.02em;
+    font-weight: 800;
+    margin: 0 0 16px;
+    max-width: 14ch;
+  }
+  header.lesson .standfirst {
+    font-size: 19px;
+    color: var(--muted);
+    margin: 0;
+    max-width: 56ch;
+  }
+  .meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 18px;
+    margin-top: 26px;
+    font-family: var(--font-data);
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+  }
+  .meta-row span { white-space: nowrap; }
+
+  /* ---- Education banner ---- */
+  .banner {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    background: var(--accent-soft);
+    border: 1px solid #e7d2bf;
+    border-left: 3px solid var(--accent);
+    border-radius: 4px;
+    padding: 14px 16px;
+    margin: 28px 0 8px;
+    font-size: 15px;
+    color: #6b3f1c;
+  }
+  .banner strong { color: #5a3415; }
+  .banner .tag {
+    font-family: var(--font-data);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    background: var(--accent);
+    color: #fff;
+    padding: 3px 7px;
+    border-radius: 3px;
+    flex: 0 0 auto;
+    margin-top: 2px;
+  }
+
+  /* ---- Sections / beats ---- */
+  section { padding-top: 44px; }
+  h2 {
+    font-size: clamp(22px, 3.4vw, 28px);
+    line-height: 1.18;
+    letter-spacing: -0.015em;
+    font-weight: 750;
+    margin: 0 0 4px;
+  }
+  .beat-no {
+    font-family: var(--font-data);
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    color: var(--accent);
+    display: block;
+    margin-bottom: 8px;
+  }
+  p { margin: 0 0 18px; }
+  .readw p, .readw ul { max-width: var(--readw); }
+  ul { padding-left: 1.1em; margin: 0 0 18px; }
+  li { margin-bottom: 8px; }
+  strong { font-weight: 700; }
+  em.term { font-style: normal; font-weight: 650; color: var(--primary-deep); }
+
+  /* ---- Predict / Reveal ---- */
+  .predict {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 20px 22px;
+    margin: 22px 0;
+    box-shadow: 0 1px 2px rgba(22,33,43,0.04);
+  }
+  .predict .q-label {
+    font-family: var(--font-data);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--primary);
+    margin: 0 0 8px;
+  }
+  .predict .q { font-weight: 600; margin: 0 0 4px; }
+  .predict .nudge { color: var(--muted); font-size: 15px; margin: 6px 0 0; }
+  button.reveal-btn {
+    margin-top: 16px;
+    font-family: var(--font-data);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: var(--primary);
+    color: #fff;
+    border: 0;
+    border-radius: 4px;
+    padding: 9px 16px;
+    cursor: pointer;
+    transition: background .15s ease;
+  }
+  button.reveal-btn:hover { background: var(--primary-deep); }
+  button.reveal-btn:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  .answer {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px dashed var(--line);
+    overflow: hidden;
+    max-height: 0;
+    opacity: 0;
+    transition: max-height .35s ease, opacity .3s ease, margin .35s ease, padding .35s ease;
+    margin-top: 0; padding-top: 0;
+  }
+  .answer.open {
+    max-height: 1200px;
+    opacity: 1;
+    margin-top: 16px;
+    padding-top: 16px;
+  }
+  .answer .a-label {
+    font-family: var(--font-data);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 8px;
+  }
+  .answer p:last-child { margin-bottom: 0; }
+
+  /* ---- Demo panels ---- */
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 22px;
+    margin: 26px 0;
+  }
+  .panel h3 {
+    font-family: var(--font-data);
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0 0 4px;
+    font-weight: 600;
+  }
+  .panel .scenario { font-size: 15px; color: var(--muted); margin: 0 0 18px; }
+
+  .controls { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 18px; }
+  button.ctrl {
+    font-family: var(--font-data);
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    background: var(--surface-alt);
+    color: var(--ink);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 9px 15px;
+    cursor: pointer;
+    transition: border-color .15s, background .15s;
+  }
+  button.ctrl:hover { border-color: var(--primary); }
+  button.ctrl:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  button.ctrl.primary { background: var(--primary); color: #fff; border-color: var(--primary); }
+  button.ctrl.primary:hover { background: var(--primary-deep); }
+  button.ctrl:disabled { opacity: 0.4; cursor: default; }
+
+  .book-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+  }
+  @media (max-width: 620px) { .book-grid { grid-template-columns: 1fr; } }
+
+  .ladder h4 {
+    font-family: var(--font-data);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin: 0 0 8px;
+    color: var(--muted);
+  }
+  .ladder.bids h4 { color: var(--bid); }
+  .ladder.asks h4 { color: var(--ask); }
+  .level {
+    font-family: var(--font-data);
+    font-size: 14px;
+    display: flex;
+    justify-content: space-between;
+    padding: 5px 10px;
+    border-radius: 3px;
+    margin-bottom: 4px;
+  }
+  .ladder.bids .level { background: rgba(44,107,120,0.08); }
+  .ladder.asks .level { background: rgba(177,74,57,0.08); }
+  .level .px { font-weight: 700; }
+  .ladder.bids .px { color: var(--bid); }
+  .ladder.asks .px { color: var(--ask); }
+  .empty-level { font-family: var(--font-data); font-size: 13px; color: var(--muted); padding: 5px 10px; }
+
+  .tape {
+    margin-top: 20px;
+    border-top: 1px solid var(--line);
+    padding-top: 16px;
+  }
+  .tape h4 {
+    font-family: var(--font-data);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin: 0 0 10px;
+    color: var(--muted);
+  }
+  .trade-row {
+    font-family: var(--font-data);
+    font-size: 14px;
+    display: flex;
+    gap: 14px;
+    padding: 6px 10px;
+    border-radius: 3px;
+    align-items: baseline;
+  }
+  .trade-row.fresh { background: var(--accent-soft); animation: flash .8s ease; }
+  @keyframes flash { from { background: var(--accent); color:#fff;} to {} }
+  .trade-row .t-px { font-weight: 700; color: var(--accent); min-width: 72px; }
+  .trade-row .t-vol { color: var(--ink); min-width: 64px; }
+  .trade-row .t-note { color: var(--muted); font-size: 13px; }
+  .no-trades { font-family: var(--font-data); font-size: 13px; color: var(--muted); }
+
+  .measures {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-top: 20px;
+  }
+  @media (max-width: 560px) { .measures { grid-template-columns: 1fr; } }
+  .measure {
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 14px;
+    background: var(--surface-alt);
+  }
+  .measure .m-name {
+    font-family: var(--font-data);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0 0 6px;
+  }
+  .measure .m-val {
+    font-family: var(--font-data);
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--primary-deep);
+    margin: 0;
+  }
+  .measure .m-sub { font-size: 12px; color: var(--muted); margin: 4px 0 0; }
+
+  /* IDA auction panel */
+  .auction-result {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-top: 6px;
+  }
+  .clearing-price {
+    font-family: var(--font-data);
+    font-size: 40px;
+    font-weight: 800;
+    color: var(--good);
+    letter-spacing: -0.01em;
+  }
+  .clearing-sub { color: var(--muted); font-size: 15px; }
+  .curve-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--font-data);
+    font-size: 13px;
+    margin-top: 4px;
+  }
+  .curve-table th, .curve-table td {
+    text-align: left;
+    padding: 6px 10px;
+    border-bottom: 1px solid var(--line);
+  }
+  .curve-table th { color: var(--muted); font-weight: 600; letter-spacing: 0.04em; }
+  .curve-table td.matched { color: var(--good); font-weight: 700; }
+
+  .contrast {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin: 26px 0;
+  }
+  @media (max-width: 620px) { .contrast { grid-template-columns: 1fr; } }
+  .contrast .card {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 18px 20px;
+    background: var(--surface);
+  }
+  .contrast .card h4 {
+    margin: 0 0 8px;
+    font-size: 16px;
+  }
+  .contrast .card .kicker {
+    font-family: var(--font-data);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin: 0 0 6px;
+  }
+  .contrast .auction .kicker { color: var(--good); }
+  .contrast .book .kicker { color: var(--accent); }
+  .contrast .card p { font-size: 15px; margin: 0; color: var(--muted); }
+
+  /* gate timetable */
+  .gates {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--font-data);
+    font-size: 14px;
+    margin: 8px 0 18px;
+  }
+  .gates th, .gates td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--line); }
+  .gates th { color: var(--muted); font-weight: 600; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; }
+  .gates .g-name { color: var(--primary-deep); font-weight: 700; }
+
+  /* footer */
+  footer.lesson {
+    margin-top: 60px;
+    padding-top: 24px;
+    border-top: 1px solid var(--line);
+    font-family: var(--font-data);
+    font-size: 12px;
+    line-height: 1.7;
+    color: var(--muted);
+    letter-spacing: 0.02em;
+  }
+  footer.lesson .provenance { display: grid; gap: 2px; }
+
+  hr.rule { border: 0; border-top: 1px solid var(--line); margin: 0; }
+
+  /* Interactive predictions */
+  .choices { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+  .choice {
+    font-family: var(--font-data);
+    font-size: 13px;
+    letter-spacing: 0.02em;
+    background: var(--surface-alt);
+    color: var(--ink);
+    border: 1px solid var(--line);
+    border-radius: 5px;
+    padding: 10px 15px;
+    cursor: pointer;
+    transition: border-color .15s, background .15s, color .15s;
+  }
+  .choice:hover { border-color: var(--primary); }
+  .choice:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  .choice.selected { background: var(--primary); color: #fff; border-color: var(--primary); }
+  .choice.selected.correct { background: var(--good); border-color: var(--good); }
+  .choice.selected.rethink { background: var(--accent); border-color: var(--accent); }
+  .verdict {
+    margin: 16px 0 0;
+    font-size: 15.5px;
+    font-weight: 600;
+    color: var(--ink);
+    line-height: 1.55;
+  }
+  .verdict[hidden] { display: none; }
+  .vchip {
+    font-family: var(--font-data);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 3px 7px;
+    border-radius: 3px;
+    margin-right: 9px;
+    color: #fff;
+    white-space: nowrap;
+  }
+  .vchip-good { background: var(--good); }
+  .vchip-rethink { background: var(--accent); }
+  .vchip-open { background: var(--primary); }
+
+  /* BESS walk-the-book */
+  .bess-controls { margin-bottom: 18px; }
+  .bess-controls label {
+    display: block;
+    font-family: var(--font-data);
+    font-size: 13px;
+    color: var(--ink);
+    margin-bottom: 10px;
+    letter-spacing: 0.03em;
+  }
+  .bess-controls output { color: var(--accent); font-weight: 700; }
+  .bess-controls input[type="range"] {
+    width: 100%;
+    accent-color: var(--accent);
+    cursor: pointer;
+  }
+  .bess-controls input[type="range"]:focus-visible { outline: 3px solid var(--accent); outline-offset: 4px; }
+  .walk-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media (max-width: 640px) { .walk-grid { grid-template-columns: 1fr; } }
+  .bid-book h4 {
+    font-family: var(--font-data);
+    font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;
+    margin: 0 0 8px; color: var(--bid);
+  }
+  .walk-level {
+    font-family: var(--font-data); font-size: 14px;
+    border-radius: 3px; margin-bottom: 5px; overflow: hidden;
+    position: relative; background: rgba(44,107,120,0.08);
+  }
+  .walk-level .wl-bar {
+    position: absolute; top: 0; bottom: 0; left: 0;
+    background: var(--accent-soft);
+    border-right: 2px solid var(--accent);
+    z-index: 0;
+    transition: width .18s ease;
+  }
+  .walk-level .wl-text {
+    position: relative; z-index: 1;
+    display: flex; justify-content: space-between;
+    padding: 6px 10px;
+  }
+  .walk-level .wl-px { font-weight: 700; color: var(--bid); }
+  .walk-level.taken .wl-px { color: var(--accent); }
+  .walk-level .wl-eaten { color: var(--accent); font-size: 12px; }
+  .result-trio { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 16px; }
+  @media (max-width: 460px) { .result-trio { grid-template-columns: 1fr; } }
+  .result-trio .measure { padding: 12px; }
+  .result-trio .m-val { font-size: 20px; }
+  .fills { font-family: var(--font-data); font-size: 13px; color: var(--muted); line-height: 1.9; }
+  .fills .f-px { color: var(--accent); font-weight: 700; }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+    .answer { transition: none; }
+  }
+
+  /* ===== House theme overrides (Nordic Power School) ===== */
+  .topbar{position:sticky;top:0;z-index:50;background:rgba(238,243,247,.92);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+  .topbar .bar{display:flex;justify-content:space-between;align-items:center;height:52px;font-size:13px;letter-spacing:.04em;text-transform:uppercase;max-width:860px;margin:0 auto;padding:0 24px}
+  .topbar .bar b{font-weight:700}.topbar .bar .r{font-family:var(--mono);color:var(--slate)}
+  .topbar .bar a{color:var(--volt-ink);text-decoration:none}
+  .eyebrow{color:var(--volt-ink)}
+  .beat-no{color:var(--ember-ink)}
+  em.term{color:var(--volt-ink)}
+  .panel{border-radius:14px}
+  .choice{font-family:var(--mono);border-radius:10px}
+  .choice.selected,.choice[aria-pressed="true"]{background:var(--deep);color:#fff;border-color:var(--deep)}
+  .choice.selected.correct{background:var(--ok);border-color:var(--ok)}
+  .choice.selected.rethink{background:var(--ember);border-color:var(--ember)}
+  .vchip-good{background:var(--ok)}.vchip-rethink{background:var(--ember)}.vchip-open{background:var(--volt-ink)}
+  .answer{border-top:0}
+  .answer.open{background:var(--deep);color:#cfe0e6;border:0;border-radius:14px;padding:20px 22px;margin-top:18px;max-height:2200px;opacity:1}
+  .answer.open .a-label{color:var(--volt)}
+  .answer.open strong{color:#fff}.answer.open em.term{color:var(--volt)}
+  .answer.open .nudge{color:#9fbac9}
+</style>
+</head>
+<body>
+<header class="topbar"><div class="bar"><b>Nordic Power School</b><span class="r"><a href="index.html">← Curriculum</a> &nbsp;·&nbsp; Lesson 28 · Interactive</span></div></header>
+<div class="wrap">
+
+  <header class="lesson">
+    <p class="eyebrow">Nordic Power School · Spot Markets</p>
+    <h1>Nordic Intraday: the Auction and the Book</h1>
+    <p class="standfirst">Day-ahead gives you one price for an hour. Intraday gives you two entirely different ways of finding a price — and one of them refuses to give you a single number at all. This lesson is about why.</p>
+    <div class="meta-row">
+      <span>LEVEL · INTERMEDIATE</span>
+      <span>PREREQUISITE · DAY-AHEAD</span>
+      <span>MENTOR · ELIZABETH CECILIA</span>
+      <span>~25 MIN</span>
+    </div>
+  </header>
+
+  <div class="banner">
+    <span class="tag">Education only</span>
+    <p style="margin:0">This is a teaching environment. Nothing here is trading advice, a recommendation, or a signal to act on. We read what moves a price; we never tell you what to do with it. Every number below is <strong>synthetic and deterministic</strong> — built to illustrate market structure, not to reflect any live market.</p>
+  </div>
+
+  <div class="readw">
+
+  <section>
+    <p class="eyebrow">Where we are</p>
+    <h2>Why intraday exists at all</h2>
+    <p>Yesterday afternoon the day-ahead auction cleared. For every delivery hour tomorrow, every bidding zone got a single price, and everyone planned around it. Clean.</p>
+    <p>Then reality starts moving. The wind forecast for tomorrow evening softens. A nuclear unit in SE3 trips. Your customers' demand comes in higher than your model said. The day-ahead position you locked in no longer matches the power you'll actually need or produce — and delivery is getting closer by the hour.</p>
+    <p><strong>Intraday is the adjustment market.</strong> It runs after day-ahead has cleared and lets participants trade their way back into balance as information arrives, right up close to real time. Where day-ahead is one big synchronized auction, intraday has to cope with a continuous trickle of new information — and that shapes everything about how it works.</p>
+  </section>
+
+  <hr class="rule" />
+
+  <section>
+    <span class="beat-no">BEAT 01 — READ THE DRIVER</span>
+    <h2>A forecast moves. Which way does the price go?</h2>
+    <p>It's 13:00. Day-ahead for tomorrow has long since cleared. A fresh weather update drops the wind forecast for <strong>delivery hour 18</strong> by 2&nbsp;GW across the region.</p>
+    <div class="predict">
+      <p class="q-label">Predict — before you read on</p>
+      <p class="q">Which way do intraday prices for hour 18 move, and through whose hand?</p>
+      <p class="nudge">Don't reach for a number. Just reason it through: who is now in the wrong position, and what must they do about it?</p>
+      <div class="choices" role="group" aria-label="Which way do intraday prices for hour 18 move?" data-target="rev1" data-correct="rise">
+        <button class="choice" data-key="rise" data-lead="Up it is — and the mechanism behind it matters more than the direction.">Prices firm upward</button>
+        <button class="choice" data-key="fall" data-lead="Tempting — but think about who is now short, and what they're forced to do about it.">Prices soften</button>
+        <button class="choice" data-key="flat" data-lead="A 2 GW supply shock rarely leaves a single hour untouched — look again.">They barely move</button>
+      </div>
+      <p class="verdict" id="rev1-verdict" hidden></p>
+      <div class="answer" id="rev1">
+        <p class="a-label">Reveal</p>
+        <p>Less wind means less cheap generation for hour 18 than the market planned for. Anyone who <em class="term">sold</em> power day-ahead expecting that wind is now short — they have a delivery obligation and less supply behind it. To stay balanced they must <strong>buy power back</strong> in intraday for hour 18.</p>
+        <p>A wave of buyers chasing a now-scarcer hour lifts the price. So: <strong>intraday firms upward</strong>, driven by short positions covering. Notice what we did — we read the <em>driver</em> (a supply shock) and the <em>mechanism</em> (who must trade and why), not a chart. That's the habit this whole school is built on.</p>
+      </div>
+    </div>
+  </section>
+
+  <hr class="rule" />
+
+  <section>
+    <p class="eyebrow">The two mechanisms</p>
+    <h2>Intraday isn't one market — it's two</h2>
+    <p>Under the Single Intraday Coupling (SIDC) framework, the Nordic intraday timeframe is served by two genuinely different mechanisms running side by side.</p>
+    <p><strong>Intraday auctions (IDA)</strong> are periodic, centralized auctions — small siblings of the day-ahead auction. Everyone submits orders, the auction clears once, and it produces a <em class="term">single clearing price</em> per product. There are three in the day's schedule:</p>
+    <table class="gates">
+      <thead><tr><th>Auction</th><th>Gate closes</th><th>Covers delivery</th></tr></thead>
+      <tbody>
+        <tr><td class="g-name">IDA1</td><td>D-1 15:00 CET</td><td>all of day D</td></tr>
+        <tr><td class="g-name">IDA2</td><td>D-1 22:00 CET</td><td>all of day D</td></tr>
+        <tr><td class="g-name">IDA3</td><td>D 10:00 CET</td><td>afternoon/evening of day D</td></tr>
+      </tbody>
+    </table>
+    <p><strong>Continuous intraday (CID)</strong> is the other animal entirely: an always-on order book where buyers and sellers post bids and offers and trades match the instant two of them cross — much like a financial exchange. It runs from after day-ahead opening right up to roughly one hour before delivery. There is no scheduled clearing moment. Trades simply happen, one after another, whenever someone lifts an offer or hits a bid.</p>
+    <p>That last sentence has a consequence most people miss the first time. Let's make you find it yourself.</p>
+  </section>
+
+  <hr class="rule" />
+
+  </div><!-- /readw -->
+
+  <section>
+    <div class="readw">
+      <span class="beat-no">BEAT 02 — THE THING EVERYONE MISSES</span>
+      <h2>Two trades, three minutes apart, two different prices</h2>
+      <p>Below is a <strong>synthetic</strong> continuous book for delivery hour 18 — the hour whose wind just dropped. Step through the orders as they arrive and watch the trade tape on the right. Then answer the question underneath.</p>
+    </div>
+
+    <div class="panel">
+      <h3>Continuous order book — delivery hour 18 (synthetic)</h3>
+      <p class="scenario">Orders arrive one at a time, just as they would in the live book. A trade prints whenever an incoming order crosses a resting one; the resting order sets the price. Watch the tape.</p>
+      <div class="controls">
+        <button class="ctrl primary" id="ob-step">Submit next order</button>
+        <button class="ctrl" id="ob-run">Run to close</button>
+        <button class="ctrl" id="ob-reset">Reset</button>
+        <span id="ob-status" style="font-family:var(--font-data);font-size:12px;color:var(--muted);align-self:center"></span>
+      </div>
+      <div class="book-grid">
+        <div class="ladder bids">
+          <h4>Bids (buy) ▸ best on top</h4>
+          <div id="bids"></div>
+        </div>
+        <div class="ladder asks">
+          <h4>Asks (sell) ▸ best on top</h4>
+          <div id="asks"></div>
+        </div>
+      </div>
+      <div class="tape">
+        <h4>Trade tape ▸ price × volume</h4>
+        <div id="tape"><p class="no-trades">No trades yet — submit some orders.</p></div>
+      </div>
+    </div>
+
+    <div class="readw">
+      <div class="predict">
+        <p class="q-label">Predict</p>
+        <p class="q">You'll see trades for the same hour print at several different prices. Is one of them the "wrong" price?</p>
+        <div class="choices" role="group" aria-label="Is one of the two trades the wrong price?" data-target="rev2" data-correct="valid">
+        <button class="choice" data-key="wrong" data-lead="That's the day-ahead instinct talking — but the continuous book doesn't work that way.">Yes — one is mispriced</button>
+        <button class="choice" data-key="valid" data-lead="Exactly — each trade is its own agreement, at its own instant.">No — both are valid</button>
+      </div>
+      <p class="verdict" id="rev2-verdict" hidden></p>
+        <div class="answer" id="rev2">
+          <p class="a-label">Reveal</p>
+          <p>None of them is wrong. In a continuous book <strong>there is no single clearing price</strong> — each trade is its own private agreement between one buyer and one seller at the moment they crossed. A trade at 52 and a later trade at 55 are both completely valid; they just happened at different instants, against different resting orders, as the book firmed up.</p>
+          <p>This is the structural break from day-ahead. Day-ahead asks "what one price balances everybody at once?" The continuous book never asks that question. It just matches whoever is willing, whenever they're willing. So the phrase "<em>the</em> intraday price for hour 18" is, strictly, a fiction — and we'll have to deal with that fiction in Beat 04.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="rule" />
+
+  <section>
+    <div class="readw">
+      <p class="eyebrow">The contrast, made concrete</p>
+      <h2>Now run the same hour as an auction</h2>
+      <p>Here is a <strong>synthetic</strong> intraday auction for the same hour 18 — the IDA way. Participants submit buy and sell orders; the auction finds the one price where the most volume trades, and <em>everyone</em> transacts at that price. Run it and compare to the book you just watched.</p>
+    </div>
+
+    <div class="panel">
+      <h3>Intraday auction (IDA) — delivery hour 18 (synthetic)</h3>
+      <p class="scenario">Sell offers stack from cheapest up; buy bids stack from highest down. The auction clears where they meet — one price for all.</p>
+      <div class="controls">
+        <button class="ctrl primary" id="auc-run">Run the auction</button>
+        <button class="ctrl" id="auc-reset">Reset</button>
+      </div>
+      <div id="auc-curves"></div>
+      <div id="auc-out" style="margin-top:18px"></div>
+    </div>
+
+    <div class="contrast">
+      <div class="card auction">
+        <p class="kicker">The auction</p>
+        <h4>One price, one moment</h4>
+        <p>A single clearing price every participant pays or receives. Clean to quote, clean to settle — but you wait for the gate, and you only get one shot per auction.</p>
+      </div>
+      <div class="card book">
+        <p class="kicker">The book</p>
+        <h4>Many prices, all the time</h4>
+        <p>Trade the instant you want — but every fill is its own price, and "the price" has to be reconstructed after the fact from all the trades.</p>
+      </div>
+    </div>
+  </section>
+
+  <hr class="rule" />
+
+  <div class="readw">
+  <section>
+    <span class="beat-no">BEAT 03 — CHOOSING A MECHANISM</span>
+    <h2>It's 09:30 on delivery day. You're still adjusting hour 18.</h2>
+    <p>New information has just landed and your position for hour 18 is off. IDA3 hasn't gated yet (it closes at 10:00). The continuous book is open.</p>
+    <div class="predict">
+      <p class="q-label">Predict</p>
+      <p class="q">Auction or book — and what does each one cost you to use?</p>
+      <p class="nudge">There's no single right answer here. The point is to name the trade-off each mechanism forces.</p>
+      <div class="choices" role="group" aria-label="Auction or continuous book?" data-target="rev3">
+        <button class="choice" data-key="wait" data-lead="You'd take the clean single price — and pay for it in waiting.">Wait for IDA3</button>
+        <button class="choice" data-key="now" data-lead="You'd act this minute — and take your own, slightly slipping price.">Use the book now</button>
+      </div>
+      <p class="verdict" id="rev3-verdict" hidden></p>
+      <div class="answer" id="rev3">
+        <p class="a-label">Reveal</p>
+        <p>If you <strong>wait for IDA3</strong>, you get a clean single clearing price and the depth of everyone arriving at once — but you wait until the gate clears, and between now and then the information that worried you might move further. You're trading immediacy for a tidy price.</p>
+        <p>If you <strong>use the continuous book now</strong>, you act this minute — but you take whatever the book offers, at a price that's yours alone, and a big order may walk up through several levels (you saw that happen in Beat 02). You're trading a tidy price for immediacy.</p>
+        <p>That's the real decision intraday forces all day long: <em class="term">a clean price later, or my own price now</em>. Neither is "correct" — it depends on how much your information is moving and how badly you need to be done.</p>
+      </div>
+    </div>
+  </section>
+
+  <hr class="rule" />
+
+  <section>
+    <span class="beat-no">BEAT 04 — SO WHAT <em style="font-style:normal">IS</em> THE PRICE?</span>
+    <h2>Defining a number that doesn't exist</h2>
+    <p>Back to the fiction from Beat 02. Reporting, settlement, your own P&amp;L — they all want "the intraday price for hour 18." But the book gave us a <em>stream</em> of trades at different prices. So someone has to <strong>choose a rule</strong> for collapsing that stream into one number.</p>
+    <p>Here are three honest answers, all computed from the very same synthetic trades you generated above:</p>
+
+    <div class="panel">
+      <h3>Three definitions, same trades</h3>
+      <p class="scenario" id="measures-note">Run the book to the close in Beat 02 first, then these fill in.</p>
+      <div class="measures">
+        <div class="measure">
+          <p class="m-name">Last trade</p>
+          <p class="m-val" id="m-last">—</p>
+          <p class="m-sub">The most recent fill. Simple, but it's a single instant.</p>
+        </div>
+        <div class="measure">
+          <p class="m-name">VWAP (all day)</p>
+          <p class="m-val" id="m-vwap">—</p>
+          <p class="m-sub">Volume-weighted average of every trade. Smooth, but slow to reflect late moves.</p>
+        </div>
+        <div class="measure">
+          <p class="m-name">ID3-style*</p>
+          <p class="m-val" id="m-id3">—</p>
+          <p class="m-sub">*Stylized: VWAP of the final trades only, mimicking a "near-delivery" index.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="predict">
+      <p class="q-label">Predict</p>
+      <p class="q">These three numbers disagree. Which one is "the" intraday price?</p>
+      <div class="choices" role="group" aria-label="Which one is the intraday price?" data-target="rev4" data-correct="none">
+        <button class="choice" data-key="last" data-lead="One real number — but it's a single instant in a long session.">Last trade</button>
+        <button class="choice" data-key="vwap" data-lead="A fair whole-session summary — but slow to reflect late moves.">VWAP</button>
+        <button class="choice" data-key="id3" data-lead="Closest to how a market index is built — but still just one chosen rule.">ID3-style</button>
+        <button class="choice" data-key="none" data-lead="Right — there's no natural 'the price' at all, only the rule you pick.">None of them</button>
+      </div>
+      <p class="verdict" id="rev4-verdict" hidden></p>
+      <div class="answer" id="rev4">
+        <p class="a-label">Reveal</p>
+        <p>None of them, and all of them. There is no natural "the price" in a continuous book — there's only <strong>whichever rule you agreed to use</strong>, and the rule itself is a decision with consequences. Settlement might use one; a forecaster might use another; your risk system a third. They will not match, and that mismatch is real money.</p>
+        <p>This is also exactly why this lesson is built on synthetic data. The real Nordic intraday indices — the ones the market actually quotes — are <strong>commercial products</strong> from the exchanges, licensed and redistribution-restricted. We can teach you the <em>structure</em> for free; the live numbers themselves sit behind a contract. Knowing what those indices are <em>made of</em>, which is what you just did, is the part that's actually worth learning.</p>
+      </div>
+    </div>
+  </section>
+
+  </div><!-- /readw -->
+
+  <hr class="rule" />
+
+  <section>
+    <div class="readw">
+      <span class="beat-no">BEAT 05 — THE BATTERY WALKS THE BOOK</span>
+      <h2>Who feels this most: the battery</h2>
+      <p>Everything so far lands hardest on one kind of participant: the <em class="term">battery</em>. A grid-scale storage unit (a BESS) has no fuel cost and responds in seconds, so its whole economics are <strong>temporal arbitrage</strong> — move energy out of cheap intervals and into dear ones. The fast, information-driven price moves you've been watching aren't noise to a battery; they're the entire opportunity.</p>
+      <p>Our charged battery reads exactly what you read in Beat 01 — wind dropped, hour 18 is firming — and wants to discharge into it. So it sells into the continuous book. But it's selling <em>size</em>, and you already know what that does here.</p>
+      <div class="predict">
+        <p class="q-label">Predict — before you drag anything</p>
+        <p class="q">The best bid resting in the book is €57/MWh. The battery sells 10 MW into it. Does it get €57?</p>
+        <p class="nudge">Have a guess, then play with the widget below and come back.</p>
+        <div class="choices" role="group" aria-label="Does the battery get €57 for its 10 MW?" data-target="rev5" data-correct="no">
+          <button class="choice" data-key="yes" data-lead="Only for the first 3 MW — then it has to walk down the book.">Yes — €57</button>
+          <button class="choice" data-key="no" data-lead="Right — its realised price is a VWAP that sits below the top of book.">No — it gets less</button>
+        </div>
+        <p class="verdict" id="rev5-verdict" hidden></p>
+        <div class="answer" id="rev5">
+          <p class="a-label">Reveal</p>
+          <p>No — and the widget shows why. The battery takes the €57 bid first, but that bid is only 3 MW deep. To sell its full 10 MW it must <strong>walk down the book</strong>: 3 MW at €57, then 4 MW at €56, then 3 MW at €55. Its <em class="term">realised price is a VWAP</em> across those fills — €56.00, a full euro below the best bid, and slipping further the more it sells. That gap is <strong>slippage</strong>: the direct cost of taking size in a continuous book.</p>
+          <p>This is the Beat 02 insight turned into money. The battery could instead <strong>wait for IDA3</strong> and sell at a single clean clearing price — but waiting spends the closing window, and its state of charge plus the approaching gate make time itself expensive. A clean price later, or my own slipping price now: a battery lives that trade-off on every cycle.</p>
+          <p>And it rarely stops at intraday. A real BESS <strong>stacks revenue</strong> across day-ahead, intraday, and the balancing and ancillary markets — FCR-N, FCR-D, FFR, aFRR, mFRR — moving each MWh of energy and each MW of capacity to wherever it earns most at that moment. That multi-market puzzle is where the next lesson begins.</p>
+          <p class="nudge" style="margin-top:14px">As ever: we're describing how a battery's economics meet these mechanisms — not handing you a strategy.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3>Walk the book — battery selling into hour 18 (synthetic)</h3>
+      <p class="scenario">The battery sells into the resting bids, best price first. Drag the size: the more it sells, the deeper it walks, and the further its realised average slips below the top of book.</p>
+      <div class="bess-controls">
+        <label for="bess-size">Battery sells <output id="bess-size-out">10</output> MW into hour 18</label>
+        <input type="range" id="bess-size" min="1" max="22" value="10" step="1" aria-label="Battery sell size in MW" />
+      </div>
+      <div class="walk-grid">
+        <div class="bid-book">
+          <h4>Resting bids ▸ sold into top-first</h4>
+          <div id="bess-bids"></div>
+        </div>
+        <div class="walk-out">
+          <div class="result-trio">
+            <div class="measure"><p class="m-name">Best bid</p><p class="m-val" id="bess-best">—</p><p class="m-sub">top of book</p></div>
+            <div class="measure"><p class="m-name">Realised VWAP</p><p class="m-val" id="bess-vwap">—</p><p class="m-sub">what it actually gets</p></div>
+            <div class="measure"><p class="m-name">Slippage</p><p class="m-val" id="bess-slip">—</p><p class="m-sub">cost of size</p></div>
+          </div>
+          <div class="fills" id="bess-fills"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="rule" />
+
+  <div class="readw">
+
+  <section>
+    <p class="eyebrow">Carry this forward</p>
+    <h2>What to take with you</h2>
+    <ul>
+      <li><strong>Intraday is the adjustment market</strong> — it exists because information keeps arriving after day-ahead has cleared.</li>
+      <li><strong>It runs as two mechanisms.</strong> Auctions (IDA) give one clearing price at a gate; the continuous book (CID) gives immediate, per-trade prices all day.</li>
+      <li><strong>The continuous book has no single price.</strong> "The intraday price" is always a chosen rule applied after the fact, never a fact in itself.</li>
+      <li><strong>Choosing a mechanism is choosing a trade-off:</strong> a clean price later, or your own price now.</li>
+      <li><strong>The battery lives here.</strong> A BESS arbitrages these fast moves, but taking size means walking the book — its realised price is a VWAP, and slippage is what immediacy costs.</li>
+    </ul>
+    <p>Next door: the <strong>imbalance and balancing</strong> lesson, where we follow the power that's <em>still</em> out of position when the book closes and real time takes over — and where the battery's revenue stack (FCR-N, FCR-D, FFR, aFRR, mFRR) really comes into its own.</p>
+  </section>
+
+  </div><!-- /readw -->
+<div class="wrap" style="max-width:860px;margin:0 auto;padding:8px 24px 0"><p style="border-left:2px solid var(--volt);padding:4px 0 4px 18px;margin:18px 0;font-weight:600"><span style="font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--volt-ink);display:block;margin-bottom:4px">The rule, in one breath</span>An auction gives one price for the hour; the continuous book gives a different price for every trade — so “the” intraday price is only ever a rule you chose.</p></div>
+<nav class="lessonseq" style="max-width:860px;margin:0 auto;padding:30px 24px 0;display:flex;justify-content:space-between;gap:16px;font-family:var(--mono);font-size:13px;border-top:1px solid var(--line)"><a href="18_intraday_market.html" style="color:var(--volt-ink);text-decoration:none;max-width:48%">&larr; Builds on &middot; The intraday market</a><a href="05_balancing_imbalance.html" style="color:var(--volt-ink);text-decoration:none;max-width:48%;text-align:right">Next &middot; Balancing: when real time takes over &rarr;</a></nav>
+
+            <footer class="wrap" style="max-width:860px;margin:0 auto;padding:40px 24px;color:var(--slate);font-size:13px;border-top:1px solid var(--line)">Nordic Power School · Lesson 28 — education only. No bids, no trades, no dispatch. <span style="font-family:var(--mono)">Synthetic data · deterministic.</span></footer>
+
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ---------- Committed predictions + tailored verdicts ---------- */
+  document.querySelectorAll(".choices").forEach(function (group) {
+    var targetId = group.dataset.target;
+    var correct = group.dataset.correct || null;
+    var verdictEl = document.getElementById(targetId + "-verdict");
+    var answerEl = document.getElementById(targetId);
+    var btns = group.querySelectorAll(".choice");
+    btns.forEach(function (btn) {
+      btn.setAttribute("aria-pressed", "false");
+      btn.addEventListener("click", function () {
+        btns.forEach(function (b) {
+          b.classList.remove("selected", "correct", "rethink");
+          b.setAttribute("aria-pressed", "false");
+        });
+        btn.classList.add("selected");
+        btn.setAttribute("aria-pressed", "true");
+
+        var chip;
+        if (!correct) {
+          chip = '<span class="vchip vchip-open">Your call</span>';
+        } else if (btn.dataset.key === correct) {
+          chip = '<span class="vchip vchip-good">On the money</span>';
+          btn.classList.add("correct");
+        } else {
+          chip = '<span class="vchip vchip-rethink">Worth a look</span>';
+          btn.classList.add("rethink");
+        }
+        verdictEl.innerHTML = chip + (btn.dataset.lead || "");
+        verdictEl.hidden = false;
+        answerEl.classList.add("open");
+      });
+    });
+  });
+
+  /* ---------- Continuous order book (synthetic, deterministic) ---------- */
+  // Each order: {side, price (EUR/MWh), qty (MW)}. Arrival order is fixed.
+  var ORDERS = [
+    { side: "SELL", price: 52, qty: 10 },
+    { side: "SELL", price: 55, qty: 10 },
+    { side: "SELL", price: 58, qty: 10 },
+    { side: "BUY",  price: 50, qty: 5  },
+    { side: "BUY",  price: 53, qty: 8  },
+    { side: "BUY",  price: 56, qty: 6  },
+    { side: "SELL", price: 54, qty: 5  },
+    { side: "BUY",  price: 60, qty: 12 }
+  ];
+
+  var bids, asks, trades, idx;
+
+  function resetBook() {
+    bids = [];   // sorted desc by price (best = highest) then arrival
+    asks = [];   // sorted asc by price (best = lowest) then arrival
+    trades = [];
+    idx = 0;
+    renderBook(-1);
+    renderTape(-1);
+    updateMeasures(false);
+    setStatus();
+    stepBtn.disabled = false;
+    runBtn.disabled = false;
+  }
+
+  function submitNext() {
+    if (idx >= ORDERS.length) return false;
+    var o = { side: ORDERS[idx].side, price: ORDERS[idx].price, qty: ORDERS[idx].qty };
+    var firstNewTrade = trades.length;
+
+    if (o.side === "BUY") {
+      // match against cheapest asks that cross
+      while (o.qty > 0 && asks.length && asks[0].price <= o.price) {
+        var resting = asks[0];
+        var vol = Math.min(o.qty, resting.qty);
+        trades.push({ price: resting.price, qty: vol }); // resting sets price
+        o.qty -= vol; resting.qty -= vol;
+        if (resting.qty === 0) asks.shift();
+      }
+      if (o.qty > 0) {
+        bids.push(o);
+        bids.sort(function (a, b) { return b.price - a.price; });
+      }
+    } else {
+      // SELL: match against highest bids that cross
+      while (o.qty > 0 && bids.length && bids[0].price >= o.price) {
+        var rb = bids[0];
+        var v = Math.min(o.qty, rb.qty);
+        trades.push({ price: rb.price, qty: v });
+        o.qty -= v; rb.qty -= v;
+        if (rb.qty === 0) bids.shift();
+      }
+      if (o.qty > 0) {
+        asks.push(o);
+        asks.sort(function (a, b) { return a.price - b.price; });
+      }
+    }
+
+    idx++;
+    renderBook(firstNewTrade < trades.length ? firstNewTrade : -1);
+    renderTape(firstNewTrade);
+    if (idx >= ORDERS.length) { updateMeasures(true); }
+    setStatus();
+    if (idx >= ORDERS.length) { stepBtn.disabled = true; runBtn.disabled = true; }
+    return true;
+  }
+
+  function renderBook() {
+    var bidsEl = document.getElementById("bids");
+    var asksEl = document.getElementById("asks");
+    bidsEl.innerHTML = bids.length
+      ? bids.map(function (b) { return level(b); }).join("")
+      : '<p class="empty-level">— empty —</p>';
+    asksEl.innerHTML = asks.length
+      ? asks.map(function (a) { return level(a); }).join("")
+      : '<p class="empty-level">— empty —</p>';
+  }
+  function level(o) {
+    return '<div class="level"><span class="px">€' + o.price.toFixed(0) +
+           '</span><span class="vol">' + o.qty + ' MW</span></div>';
+  }
+
+  function renderTape(freshFrom) {
+    var tapeEl = document.getElementById("tape");
+    if (!trades.length) {
+      tapeEl.innerHTML = '<p class="no-trades">No trades yet — submit some orders.</p>';
+      return;
+    }
+    tapeEl.innerHTML = trades.map(function (t, i) {
+      var fresh = (freshFrom >= 0 && i >= freshFrom) ? " fresh" : "";
+      return '<div class="trade-row' + fresh + '">' +
+             '<span class="t-px">€' + t.price.toFixed(0) + '/MWh</span>' +
+             '<span class="t-vol">' + t.qty + ' MW</span>' +
+             '<span class="t-note">trade #' + (i + 1) + '</span></div>';
+    }).join("");
+  }
+
+  function updateMeasures(done) {
+    var last = document.getElementById("m-last");
+    var vwap = document.getElementById("m-vwap");
+    var id3 = document.getElementById("m-id3");
+    var note = document.getElementById("measures-note");
+    if (!done || !trades.length) {
+      last.textContent = vwap.textContent = id3.textContent = "—";
+      note.textContent = 'Run the book to the close in Beat 02 first, then these fill in.';
+      return;
+    }
+    var totVol = trades.reduce(function (s, t) { return s + t.qty; }, 0);
+    var totVal = trades.reduce(function (s, t) { return s + t.qty * t.price; }, 0);
+    var lastPx = trades[trades.length - 1].price;
+    // stylized ID3: VWAP of final three trades
+    var tail = trades.slice(-3);
+    var tv = tail.reduce(function (s, t) { return s + t.qty; }, 0);
+    var tval = tail.reduce(function (s, t) { return s + t.qty * t.price; }, 0);
+    last.textContent = "€" + lastPx.toFixed(2);
+    vwap.textContent = "€" + (totVal / totVol).toFixed(2);
+    id3.textContent = "€" + (tval / tv).toFixed(2);
+    note.textContent = "Same " + trades.length + " trades, " + totVol +
+      " MW total — three rules, three different answers.";
+  }
+
+  function setStatus() {
+    var s = document.getElementById("ob-status");
+    if (idx >= ORDERS.length) { s.textContent = "Book closed · " + trades.length + " trades"; }
+    else { s.textContent = "Order " + idx + " of " + ORDERS.length + " submitted"; }
+  }
+
+  var stepBtn = document.getElementById("ob-step");
+  var runBtn = document.getElementById("ob-run");
+  stepBtn.addEventListener("click", function () { submitNext(); });
+  runBtn.addEventListener("click", function () {
+    var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce) { while (submitNext()) {} return; }
+    var tick = setInterval(function () { if (!submitNext()) clearInterval(tick); }, 550);
+  });
+  document.getElementById("ob-reset").addEventListener("click", resetBook);
+  resetBook();
+
+  /* ---------- IDA uniform-price auction (synthetic) ---------- */
+  // Designed so supply and demand meet exactly at one price.
+  var SUPPLY = [ { price: 45, qty: 10 }, { price: 54, qty: 15 } ];     // sell, asc
+  var DEMAND = [ { price: 62, qty: 12 }, { price: 54, qty: 13 } ];     // buy, desc
+
+  function clearAuction() {
+    // build cumulative curves and find max volume where bid >= ask
+    var supply = SUPPLY.slice().sort(function (a, b) { return a.price - b.price; });
+    var demand = DEMAND.slice().sort(function (a, b) { return b.price - a.price; });
+    var cumS = [], cumD = [], cs = 0, cd = 0;
+    supply.forEach(function (s) { cs += s.qty; cumS.push({ price: s.price, cum: cs }); });
+    demand.forEach(function (d) { cd += d.qty; cumD.push({ price: d.price, cum: cd }); });
+
+    // walk volume up; clearing where marginal bid still >= marginal ask
+    var maxVol = Math.min(cs, cd);
+    var clearedVol = 0, clearPrice = null;
+    for (var v = 1; v <= maxVol; v++) {
+      var ask = priceAtVolume(cumS, v);
+      var bid = priceAtVolume(cumD, v);
+      if (bid >= ask) { clearedVol = v; clearPrice = ask === bid ? ask : ask; }
+      else break;
+    }
+    // in this synthetic set the marginal bid and ask coincide at 54
+    var marginalAsk = priceAtVolume(cumS, clearedVol);
+    var marginalBid = priceAtVolume(cumD, clearedVol);
+    clearPrice = (marginalAsk === marginalBid) ? marginalAsk
+               : Math.round((marginalAsk + marginalBid) / 2);
+    return { clearedVol: clearedVol, clearPrice: clearPrice, supply: supply, demand: demand };
+  }
+  function priceAtVolume(cum, v) {
+    for (var i = 0; i < cum.length; i++) { if (v <= cum[i].cum) return cum[i].price; }
+    return cum[cum.length - 1].price;
+  }
+
+  function renderAuction() {
+    var r = clearAuction();
+    var curvesEl = document.getElementById("auc-curves");
+    var rows = "";
+    rows += '<tr><th>Sell offers (supply)</th><th>Buy bids (demand)</th></tr>';
+    var n = Math.max(r.supply.length, r.demand.length);
+    for (var i = 0; i < n; i++) {
+      var s = r.supply[i], d = r.demand[i];
+      var sCell = s ? ("€" + s.price + " × " + s.qty + " MW") : "";
+      var dCell = d ? ("€" + d.price + " × " + d.qty + " MW") : "";
+      var sMatched = s && s.price <= r.clearPrice ? " class=\"matched\"" : "";
+      var dMatched = d && d.price >= r.clearPrice ? " class=\"matched\"" : "";
+      rows += "<tr><td" + sMatched + ">" + sCell + "</td><td" + dMatched + ">" + dCell + "</td></tr>";
+    }
+    curvesEl.innerHTML = '<table class="curve-table">' + rows + "</table>";
+
+    document.getElementById("auc-out").innerHTML =
+      '<div class="auction-result"><span class="clearing-price">€' + r.clearPrice.toFixed(0) +
+      '/MWh</span><span class="clearing-sub">single clearing price · ' + r.clearedVol +
+      ' MW cleared · <strong>every participant transacts here</strong></span></div>';
+  }
+
+  document.getElementById("auc-run").addEventListener("click", renderAuction);
+  document.getElementById("auc-reset").addEventListener("click", function () {
+    document.getElementById("auc-curves").innerHTML = "";
+    document.getElementById("auc-out").innerHTML = "";
+  });
+
+  /* ---------- BESS: walk the book (synthetic) ---------- */
+  var RESTING_BIDS = [
+    { price: 57, qty: 3 },
+    { price: 56, qty: 4 },
+    { price: 55, qty: 5 },
+    { price: 53, qty: 4 },
+    { price: 51, qty: 5 },
+    { price: 49, qty: 6 }
+  ];
+  var bessSlider = document.getElementById("bess-size");
+
+  function renderWalk() {
+    var size = parseInt(bessSlider.value, 10);
+    document.getElementById("bess-size-out").textContent = size;
+
+    var remaining = size, fills = [], consumed = [];
+    for (var i = 0; i < RESTING_BIDS.length; i++) {
+      var lvl = RESTING_BIDS[i];
+      var take = remaining > 0 ? Math.min(remaining, lvl.qty) : 0;
+      consumed.push(take);
+      if (take > 0) fills.push({ price: lvl.price, qty: take });
+      remaining -= take;
+    }
+    var filled = size - remaining;
+    var val = fills.reduce(function (s, f) { return s + f.price * f.qty; }, 0);
+    var vwap = filled > 0 ? val / filled : 0;
+    var best = RESTING_BIDS[0].price;
+
+    document.getElementById("bess-bids").innerHTML = RESTING_BIDS.map(function (lvl, i) {
+      var eaten = consumed[i] || 0;
+      var pct = Math.round((eaten / lvl.qty) * 100);
+      var taken = eaten > 0 ? " taken" : "";
+      return '<div class="walk-level' + taken + '">' +
+        '<div class="wl-bar" style="width:' + pct + '%"></div>' +
+        '<div class="wl-text"><span class="wl-px">\u20ac' + lvl.price + '</span>' +
+        '<span>' + lvl.qty + ' MW' +
+        (eaten > 0 ? ' <span class="wl-eaten">(' + eaten + ' sold)</span>' : '') +
+        '</span></div></div>';
+    }).join("");
+
+    document.getElementById("bess-best").textContent = "\u20ac" + best.toFixed(2);
+    document.getElementById("bess-vwap").textContent = "\u20ac" + vwap.toFixed(2);
+    var slip = best - vwap;
+    document.getElementById("bess-slip").textContent = slip <= 0.005 ? "\u20ac0.00" : "\u2212\u20ac" + slip.toFixed(2);
+
+    document.getElementById("bess-fills").innerHTML =
+      "<strong style=\"color:var(--ink)\">Fills:</strong> " +
+      fills.map(function (f) { return '<span class="f-px">' + f.qty + ' MW @ \u20ac' + f.price + '</span>'; }).join(" &middot; ");
+  }
+
+  if (bessSlider) {
+    bessSlider.addEventListener("input", renderWalk);
+    renderWalk();
+  }
+
+})();
+</script>
+</body>
+</html>

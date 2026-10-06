@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lesson 31 — The market is a stack of jobs. · Nordic Power School</title>
+<style>
+  :root{
+    --frost:#EEF3F7; --panel:#FFFFFF; --ink:#13202E; --slate:#5A6A7A;
+    --line:#D3DDE6; --deep:#0E1F33; --deep-2:#16314E; --volt:#10B5C9; --volt-ink:#0A7E8E;
+    --ember:#E0913A; --ember-ink:#B16A12; --ok:#2FA980; --bad:#DD6457;
+    --mono: ui-monospace,"SF Mono","Cascadia Code",Consolas,"Roboto Mono",monospace;
+    --sans: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--frost);color:var(--ink);font-family:var(--sans);line-height:1.62;-webkit-font-smoothing:antialiased;font-size:17px}
+  .wrap{max-width:860px;margin:0 auto;padding:0 24px}
+  a{color:var(--volt-ink)}
+  header{position:sticky;top:0;z-index:20;background:rgba(238,243,247,.86);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+  .bar{display:flex;justify-content:space-between;align-items:center;height:52px;font-size:13px;letter-spacing:.04em;text-transform:uppercase}
+  .bar b{font-weight:700} .bar .r{font-family:var(--mono);color:var(--slate)}
+  .hero{padding:64px 0 28px}
+  .eyebrow{font-family:var(--mono);font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--volt-ink);margin-bottom:18px}
+  h1{font-size:clamp(34px,6vw,58px);line-height:1.02;letter-spacing:-.02em;margin:0 0 18px;font-weight:780}
+  .lead{font-size:clamp(18px,2.4vw,22px);color:var(--slate);max-width:44ch;margin:0}
+  .byline{margin-top:22px;font-size:14px;color:var(--slate)}
+  .byline b{color:var(--ink)}
+  section{padding:40px 0;border-top:1px solid var(--line)}
+  .snum{font-family:var(--mono);font-size:13px;color:var(--volt-ink);letter-spacing:.1em}
+  h2{font-size:clamp(24px,3.5vw,34px);line-height:1.1;letter-spacing:-.015em;margin:6px 0 14px;font-weight:740}
+  p{margin:0 0 16px} .muted{color:var(--slate)}
+  .say{border-left:2px solid var(--volt);padding:2px 0 2px 18px;margin:18px 0;color:var(--ink)}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px;margin:22px 0}
+  .figcap{font-size:13.5px;color:var(--slate);font-family:var(--mono);margin-top:10px}
+  .choices{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0}
+  .choice{font-family:var(--mono);font-size:14px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 16px;cursor:pointer;color:var(--ink);transition:.15s}
+  .choice:hover{border-color:var(--volt)}
+  .choice[aria-pressed=true]{background:var(--deep);color:#fff;border-color:var(--deep)}
+  .verdict{font-size:15px;margin-top:6px;min-height:1.4em}
+  .verdict.ok{color:var(--ok)} .verdict.bad{color:var(--bad)}
+  .reveal{display:none;margin-top:6px;color:var(--slate);font-size:15.5px} .reveal.show{display:block}
+  .rule{background:var(--deep);color:#eaf6f8;border-radius:14px;padding:26px;margin-top:8px}
+  .rule h3{margin:0 0 10px;font-size:20px;color:#fff}
+  .rule p{color:#bcd6dc;margin:0}
+  .rule .k{color:var(--volt);font-family:var(--mono)}
+  .cards{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:8px}
+  .card{border:1px solid var(--line);border-radius:12px;padding:16px;background:#fff}
+  .card .tag{font-family:var(--mono);font-size:12px;color:var(--volt-ink);letter-spacing:.04em}
+  .card h4{margin:3px 0 6px;font-size:15.5px}
+  .card p{margin:0;font-size:14.5px;color:var(--slate)}
+  footer{padding:50px 0;color:var(--slate);font-size:13px;border-top:1px solid var(--line)}
+  :focus-visible{outline:2px solid var(--volt);outline-offset:2px}
+  .dwrap{overflow-x:auto}
+  .lane{font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;fill:var(--slate)}
+  .box{fill:#fff;stroke:var(--line);stroke-width:1.4}
+  .boxt{font-family:var(--sans);font-size:14px;font-weight:600;fill:var(--ink)}
+  .boxs{font-family:var(--mono);font-size:11px;fill:var(--slate)}
+  .flowarr{stroke:var(--slate);stroke-width:1.6;fill:none;marker-end:url(#ar)}
+  .dlabel{font-family:var(--mono);font-size:12px;fill:var(--slate)} .dlabel.k{fill:var(--volt-ink)}
+  .edge{stroke:#9fb4c2;stroke-width:1.4} .edge.ext{stroke:#c2d0db;stroke-dasharray:3 4}
+  .node{fill:#163a4d;stroke:var(--volt);stroke-width:1.6} .node-c{fill:var(--volt)}
+  .zlabel{font-family:var(--mono);font-size:12.5px;fill:#1f4456;font-weight:600}
+  .flow{stroke:var(--volt);stroke-width:2;fill:none;stroke-dasharray:5 9;stroke-linecap:round;animation:dash linear infinite;opacity:.9}
+  @keyframes dash{to{stroke-dashoffset:-140}}
+  .tlaxis{stroke:var(--slate);stroke-width:1.6;marker-end:url(#ar)}
+  .tldot{fill:#fff;stroke:var(--slate);stroke-width:2} .tldot.hl{fill:var(--volt);stroke:var(--volt-ink)}
+  .tlstem{stroke:var(--line);stroke-width:1.4}
+  @media(max-width:640px){.cards{grid-template-columns:1fr}}
+  @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<header><div class="wrap bar"><b>Nordic Power School</b><span class="r">Lesson 31</span></div></header>
+
+<main class="wrap">
+
+  <div class="hero">
+    <div class="eyebrow">Lesson 31 · Market structure</div>
+    <h1>The market is a stack of jobs.</h1>
+    <p class="lead">&ldquo;The power market&rdquo; is not one thing. Between the turbine and your meter sits a chain of roles, each answerable for a different slice. Learn the stack, and every later lesson has somewhere to sit.</p>
+    <p class="byline">with <b>Elizabeth Cecilia</b>, your mentor. When I ask you to predict, actually predict &mdash; <i>before</i> you reveal.</p>
+  </div>
+
+  <section id="s1">
+    <div class="snum">01</div>
+    <h2>Two stories at once</h2>
+    <p>&ldquo;The power market&rdquo; is really two stories told over the same wire. One is <b>physical</b>: electrons leave a generator, cross the transmission grid, step down through distribution, and reach a meter. The other is <b>commercial</b>: a plan is sold, matched and settled in money &mdash; and someone is held responsible when reality drifts from the plan.</p>
+    <div class="panel"><div class="dwrap"><svg viewBox="0 0 760 296" width="100%" role="img" aria-label="Physical and commercial roles in the power market"><defs><marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#5A6A7A"/></marker></defs><text class="lane" x="22" y="34">Physical &mdash; the electrons</text><rect class="box" x="22" y="46" width="146" height="54" rx="10"/><text class="boxt" x="95" y="70" text-anchor="middle">Generator</text><text class="boxs" x="95" y="87" text-anchor="middle">makes MW</text><rect class="box" x="212" y="46" width="146" height="54" rx="10"/><text class="boxt" x="285" y="70" text-anchor="middle">Transmission</text><text class="boxs" x="285" y="87" text-anchor="middle">grid &middot; TSO</text><rect class="box" x="402" y="46" width="146" height="54" rx="10"/><text class="boxt" x="475" y="70" text-anchor="middle">Distribution</text><text class="boxs" x="475" y="87" text-anchor="middle">grid &middot; DSO</text><rect class="box" x="592" y="46" width="146" height="54" rx="10"/><text class="boxt" x="665" y="70" text-anchor="middle">Consumer</text><text class="boxs" x="665" y="87" text-anchor="middle">draws MW</text><line class="flowarr" x1="168" y1="73" x2="209" y2="73"/><line class="flowarr" x1="358" y1="73" x2="399" y2="73"/><line class="flowarr" x1="548" y1="73" x2="589" y2="73"/><text class="lane" x="22" y="158">Commercial &mdash; the money &amp; the blame</text><rect class="box" x="22" y="170" width="146" height="54" rx="10"/><text class="boxt" x="95" y="194" text-anchor="middle">Producer / Trader</text><text class="boxs" x="95" y="211" text-anchor="middle">sells the plan</text><rect class="box" x="212" y="170" width="146" height="54" rx="10"/><text class="boxt" x="285" y="194" text-anchor="middle">Exchange</text><text class="boxs" x="285" y="211" text-anchor="middle">Nord Pool &middot; clears</text><rect class="box" x="402" y="170" width="146" height="54" rx="10"/><text class="boxt" x="475" y="194" text-anchor="middle">Supplier</text><text class="boxs" x="475" y="211" text-anchor="middle">buys &amp; bills</text><rect class="box" x="592" y="170" width="146" height="54" rx="10"/><text class="boxt" x="665" y="194" text-anchor="middle">Consumer</text><text class="boxs" x="665" y="211" text-anchor="middle">pays</text><line class="flowarr" x1="168" y1="197" x2="209" y2="197"/><line class="flowarr" x1="358" y1="197" x2="399" y2="197"/><line class="flowarr" x1="548" y1="197" x2="589" y2="197"/><line x1="95" y1="100" x2="95" y2="170" stroke="#B8C6D2" stroke-width="1.4" stroke-dasharray="4 4"/><text class="dlabel" x="103" y="139">same asset, two roles</text><path d="M22 236 L22 243 L548 243 L548 236" fill="none" stroke="#0A7E8E" stroke-width="1.4"/><text class="dlabel k" x="285" y="260" text-anchor="middle">Balance Responsible Party &mdash; answers for the plan and every deviation</text></svg></div><div class="figcap">The same company can be a generator (top) and a trader (bottom) at once &mdash; the asset is physical, the responsibility is commercial.</div></div>
+    <div class="qa">
+      <p class="say"><b>Predict:</b> a wind farm sells 100 MWh in the day-ahead auction. The wind drops; it makes only 80. Whose problem is the missing 20?</p>
+      <div class="choices" role="group"><button class="choice" data-correct="0" data-exp="Not quite &mdash; the TSO fixes the <i>physical</i> balance, but the cost lands on whoever carried the plan.">The TSO&rsquo;s</button><button class="choice" data-correct="1" data-exp="Right &mdash; the BRP carries the plan and answers for every deviation. The shortfall shows up in imbalance settlement against that BRP.">The Balance Responsible Party&rsquo;s</button><button class="choice" data-correct="0" data-exp="Not quite &mdash; the consumer pays a supplier a contracted price; the deviation sits with the party responsible for balance.">The consumer&rsquo;s</button></div>
+      <div class="verdict"></div>
+      <div class="reveal">Every generator and trader sits behind a <b>Balance Responsible Party</b>. The TSO acts physically in real time; the BRP pays for the gap afterwards.</div>
+    </div>
+  </section>
+
+  <section id="s2">
+    <div class="snum">02</div>
+    <h2>The role stack, named</h2>
+    <p>Hold these apart and the rest of the course stops being a soup of acronyms. Each role owns one job.</p>
+    <div class="cards"><div class="card"><div class="tag">operates the grid</div><h4>TSO</h4><p>Transmission System Operator (Fingrid, Statnett&hellip;). Runs the high-voltage grid and keeps the system balanced in real time.</p></div><div class="card"><div class="tag">operates the grid</div><h4>DSO</h4><p>Distribution System Operator. Runs the local low-voltage network that reaches homes and businesses.</p></div><div class="card"><div class="tag">carries the plan</div><h4>BRP</h4><p>Balance Responsible Party. Financially answerable for the difference between what its portfolio planned and what it actually did.</p></div><div class="card"><div class="tag">sells flexibility</div><h4>BSP</h4><p>Balancing Service Provider. Offers reserves &mdash; up or down regulation &mdash; into the balancing markets.</p></div><div class="card"><div class="tag">makes the MW</div><h4>Generator</h4><p>Owns and runs production: hydro, wind, nuclear, thermal, batteries.</p></div><div class="card"><div class="tag">trades the plan</div><h4>Trader</h4><p>Buys and sells energy across day-ahead, intraday and forwards to shape a position.</p></div><div class="card"><div class="tag">sells to end users</div><h4>Supplier</h4><p>Buys wholesale, sells a retail contract, and bills the consumer.</p></div><div class="card"><div class="tag">pools the small</div><h4>Aggregator</h4><p>Bundles many small assets or loads into one market-ready unit (see VPPs).</p></div><div class="card"><div class="tag">matches &amp; clears</div><h4>Exchange</h4><p>Nord Pool and the clearing house: where bids meet and trades are guaranteed.</p></div><div class="card"><div class="tag">settles the money</div><h4>eSett</h4><p>The Nordic imbalance settlement body &mdash; nets every BRP&rsquo;s deviation into a bill.</p></div></div>
+  </section>
+
+  <section id="s3">
+    <div class="snum">03</div>
+    <h2>The same megawatt, two paths</h2>
+    <p>A single megawatt-hour travels two routes that never quite line up. <b>Physically</b> it flows wherever the laws of the grid send it &mdash; you cannot label an electron. <b>Commercially</b> it is wrapped in contracts: who sold it, who is responsible for it, who pays for it. Confusing the two is the source of most beginner errors: a cable does not &ldquo;carry your trade&rdquo;, and your contract does not move an electron.</p>
+    <p class="say">When a lesson later says &ldquo;Finland imported from Sweden,&rdquo; it means the <i>physical</i> flow. When it says &ldquo;the BRP was short,&rdquo; it means the <i>commercial</i> story. Keep the two ledgers separate.</p>
+  </section>
+
+  <section id="s4">
+    <div class="snum">04</div>
+    <h2>Why it is many markets</h2>
+    <p>There is no single &ldquo;power market.&rdquo; A delivery hour passes through a sequence of venues &mdash; forwards, day-ahead, intraday, balancing &mdash; and is then settled. Each is a separate process; the BRP is the thread that runs through all of them.</p>
+    <div class="qa">
+      <p class="say"><b>Predict:</b> for a given delivery hour, which of these clears <i>first</i>?</p>
+      <div class="choices" role="group"><button class="choice" data-correct="0" data-exp="Not quite &mdash; balancing happens in real time, last of all.">Balancing</button><button class="choice" data-correct="1" data-exp="Right &mdash; the day-ahead auction clears around midday the day before; intraday then refines it, and balancing is real-time. Settlement comes after the fact.">Day-ahead</button><button class="choice" data-correct="0" data-exp="Not quite &mdash; intraday runs <i>after</i> day-ahead, to repair the plan as forecasts move.">Intraday</button></div>
+      <div class="verdict"></div>
+      <div class="reveal">Order of events: forwards (months out) &rarr; day-ahead (D&minus;1) &rarr; intraday (up to delivery) &rarr; balancing (real time) &rarr; settlement (after). Lesson 33 walks this whole arc.</div>
+    </div>
+  </section>
+
+  <section id="s5">
+    <div class="snum">05</div>
+    <h2>The rule, in one breath</h2>
+    <div class="rule">
+      <h3>Name the role, and the rest follows.</h3>
+      <p>Someone owns the asset, someone trades the plan, someone balances the deviation, someone operates the grid, and someone settles the money. Every later lesson &mdash; <span class="k">eSett</span>, <span class="k">BRPs</span>, reserve markets, imbalance settlement, VPPs &mdash; is just one of these roles, doing its one job.</p>
+    </div>
+  </section>
+<nav class="lessonseq" style="max-width:860px;margin:0 auto;padding:30px 24px 0;display:flex;justify-content:space-between;gap:16px;font-family:var(--mono);font-size:13px;border-top:1px solid var(--line)"><a href="02_time_zones_and_dst.html" style="color:var(--volt-ink);text-decoration:none;max-width:48%">&larr; Builds on &middot; Time &amp; zones</a><a href="32_market_map.html" style="color:var(--volt-ink);text-decoration:none;max-width:48%;text-align:right">Next &middot; The Nordic/Baltic map &rarr;</a></nav>
+
+            <footer class="wrap">Nordic Power School · Lesson 31 — education only. No bids, no trades, no dispatch.</footer>
+</main>
+
+<script>
+(function(){
+  document.querySelectorAll('.choices').forEach(function(group){
+    group.addEventListener('click',function(e){
+      var b=e.target.closest('.choice'); if(!b) return;
+      group.querySelectorAll('.choice').forEach(function(x){x.setAttribute('aria-pressed','false');});
+      b.setAttribute('aria-pressed','true');
+      var ok=b.dataset.correct==='1';
+      var qa=group.parentNode;
+      var ver=qa.querySelector('.verdict');
+      if(ver){ ver.className='verdict '+(ok?'ok':'bad'); ver.innerHTML=b.dataset.exp||(ok?'Right.':'Not quite.'); }
+      var rev=qa.querySelector('.reveal'); if(rev) rev.classList.add('show');
+    });
+  });
+})();
+</script>
+
+</body>
+</html>

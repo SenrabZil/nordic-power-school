@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lesson 15 — Market reading checkpoint · Nordic Power School</title>
+<style>
+  :root{
+    --frost:#EEF3F7; --panel:#FFFFFF; --ink:#13202E; --slate:#5A6A7A;
+    --line:#D3DDE6; --deep:#0E1F33; --deep-2:#16314E; --volt:#10B5C9; --volt-ink:#0A7E8E;
+    --ember:#E0913A; --ember-ink:#B16A12; --warm:#C2603F; --ok:#2FA980; --bad:#DD6457;
+    --mono: ui-monospace,"SF Mono","Cascadia Code",Consolas,"Roboto Mono",monospace;
+    --sans: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--frost);color:var(--ink);font-family:var(--sans);font-size:17px;line-height:1.62;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:860px;margin:0 auto;padding:0 24px}
+
+  header{position:sticky;top:0;z-index:20;background:rgba(238,243,247,.9);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+  .bar{display:flex;justify-content:space-between;align-items:center;height:52px;font-size:13px;letter-spacing:.04em;text-transform:uppercase}
+  .bar b{font-weight:700} .bar .r{font-family:var(--mono);color:var(--slate)}
+
+  .hero{padding:60px 0 26px}
+  .eyebrow{font-family:var(--mono);font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--volt-ink);margin-bottom:16px}
+  h1{font-size:clamp(32px,5.6vw,54px);line-height:1.03;letter-spacing:-.02em;margin:0 0 16px;font-weight:780}
+  .lead{font-size:clamp(18px,2.4vw,22px);color:var(--slate);max-width:42ch;margin:0}
+  .byline{margin-top:20px;font-size:14px;color:var(--slate)} .byline b{color:var(--ink)}
+
+  section{padding:36px 0;border-top:1px solid var(--line)}
+  .snum{font-family:var(--mono);font-size:13px;color:var(--volt-ink);letter-spacing:.1em}
+  h2{font-size:clamp(23px,3.3vw,32px);line-height:1.12;letter-spacing:-.015em;margin:6px 0 12px;font-weight:740}
+  p{margin:0 0 16px} .muted{color:var(--slate)}
+  .say{border-left:2px solid var(--volt);padding:2px 0 2px 18px;margin:18px 0}
+  .caution{border-left:2px solid var(--ember);padding:2px 0 2px 18px;margin:18px 0;color:var(--ember-ink);font-size:15px}
+
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px;margin:20px 0}
+  .legend{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:8px;font-family:var(--mono);font-size:12px;color:var(--slate)}
+  .legend span{display:inline-flex;align-items:center;gap:6px} .legend i{width:14px;height:3px;border-radius:2px;display:inline-block}
+
+  .step{margin-top:16px;border-top:1px dashed var(--line);padding-top:16px}
+  .stepmeta{font-family:var(--mono);font-size:12.5px;color:var(--volt-ink);letter-spacing:.08em;text-transform:uppercase}
+  .stepq{font-size:18px;font-weight:600;margin:6px 0 4px}
+  .choices{display:flex;flex-wrap:wrap;gap:10px;margin:12px 0}
+  .choice{font-family:var(--mono);font-size:14px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 16px;cursor:pointer;color:var(--ink);transition:.15s;text-align:left}
+  .choice:hover{border-color:var(--volt)} .choice[aria-pressed=true]{background:var(--deep);color:#fff;border-color:var(--deep)}
+  .choice:disabled{opacity:.55;cursor:default}
+  .reveal{font-size:15px;margin-top:6px;min-height:1.2em;color:var(--ink)} .reveal.ok b{color:var(--ok)} .reveal.bad b{color:var(--bad)}
+  .btn{font-family:var(--sans);font-weight:600;font-size:14px;border:0;border-radius:10px;background:var(--deep);color:#fff;padding:10px 18px;cursor:pointer;margin-top:12px}
+  .btn:disabled{opacity:.4;cursor:default}
+
+  .log{margin-top:18px;border-top:1px solid var(--line);padding-top:14px}
+  .log h4{margin:0 0 8px;font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--slate)}
+  .log ol{margin:0;padding-left:0;list-style:none;display:flex;flex-direction:column;gap:6px}
+  .log li{font-family:var(--mono);font-size:13px;color:var(--ink);padding-left:22px;position:relative}
+  .log li::before{content:"\2713";position:absolute;left:0;color:var(--volt-ink);font-weight:700}
+  .log li.empty{color:var(--slate)} .log li.empty::before{content:"\2022";color:var(--line)}
+
+  .synth{background:var(--deep);color:#eaf6f8;border-radius:14px;padding:22px;margin-top:18px;display:none}
+  .synth.show{display:block} .synth h3{margin:0 0 10px;color:#fff;font-size:19px} .synth p{color:#cfe3e8;margin:0 0 10px} .synth p:last-child{margin:0}
+  textarea{width:100%;min-height:80px;font-family:var(--sans);font-size:15px;border:1px solid var(--line);border-radius:10px;padding:12px;resize:vertical;margin-top:8px;background:#0a1726;color:#eaf6f8}
+  .model{margin-top:12px;font-size:15px;color:#bcd6dc;border-left:2px solid var(--volt);padding-left:14px;display:none} .model.show{display:block}
+  .btn.ghost{background:transparent;border:1px solid var(--volt);color:var(--volt);margin-top:10px}
+
+  .rule{background:var(--deep);color:#eaf6f8;border-radius:14px;padding:24px;margin-top:8px}
+  .rule h3{margin:0 0 10px;font-size:20px;color:#fff} .rule p{color:#bcd6dc;margin:0 0 10px} .rule p:last-child{margin:0} .rule .k{color:var(--volt);font-family:var(--mono)}
+
+  footer{padding:48px 0;color:var(--slate);font-size:13px;border-top:1px solid var(--line)}
+  :focus-visible{outline:2px solid var(--volt);outline-offset:2px}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header><div class="wrap bar"><b>Nordic Power School</b><span class="r">Lesson 15 · Checkpoint</span></div></header>
+
+<main class="wrap">
+  <div class="hero">
+    <div class="eyebrow">Lesson 15 · Checkpoint</div>
+    <h1>The delivery day.</h1>
+    <p class="lead">No new ideas here. One recorded day, read end to end &mdash; demand and wind into a price shape, the spread, the honest net, the asset&rsquo;s plan. Everything you&rsquo;ve learned, on a single curve.</p>
+    <p class="byline">with <b>Elizabeth Cecilia</b>. You have the knowable cues. Call each turn before the market shows its hand.</p>
+  </div>
+
+  <section>
+    <div class="snum">00</div>
+    <h2>How to read it</h2>
+    <p>Below is one day: the day-ahead price across the top, and beneath it the two cues you&rsquo;d have known in advance &mdash; demand and wind. Work left to right. At each stage, make the call, then let the day reveal whether your read held. Your reasoning builds into a record on the right.</p>
+  </section>
+
+  <section style="border-top:none;padding-top:0">
+    <div class="panel">
+      <svg viewBox="0 0 720 380" width="100%" id="daySvg" role="img" aria-label="A full delivery day: price, demand and wind"></svg>
+      <div class="legend">
+        <span><i style="background:#13202E"></i>price &euro;/MWh</span>
+        <span><i style="background:#5A6A7A"></i>demand</span>
+        <span><i style="background:#10B5C9"></i>wind</span>
+        <span id="resLeg" style="display:none"><i style="background:#E0913A"></i>residual load (demand &minus; wind), scaled</span>
+      </div>
+
+      <div class="step" id="stepBox">
+        <div class="stepmeta" id="stepMeta">Stage 1 of 5</div>
+        <div class="stepq" id="stepQ"></div>
+        <div class="choices" id="stepChoices"></div>
+        <div class="reveal" id="stepReveal"></div>
+        <button class="btn" id="nextBtn" disabled>Next stage</button>
+      </div>
+
+      <div class="log">
+        <h4>Your read of the day</h4>
+        <ol id="logList"></ol>
+      </div>
+
+      <div class="synth" id="synth">
+        <h3>The whole day, read.</h3>
+        <p>You read demand and wind into a price shape, found the spread, netted it honestly, and planned the asset across the day. The amber line is residual load &mdash; demand minus wind &mdash; and price tracked it the whole way. That&rsquo;s the entire curriculum, on one curve.</p>
+        <p>Now defend it. Write your one-line read of the day, then compare.</p>
+        <textarea id="userRead" placeholder="e.g. A wind-driven day: residual load bottomed around the midday wind, then climbed to an evening peak, and price followed it&hellip;"></textarea>
+        <button class="btn ghost" id="cmpBtn">Compare with Elizabeth&rsquo;s read</button>
+        <div class="model" id="modelRead"><b>Elizabeth&rsquo;s read:</b> A wind-driven day. Demand and wind set a residual-load shape that bottoms at midday and peaks at 18:00 &mdash; and price followed it, &euro;20 to &euro;85. The spread was wide and clean: a cycle nets about &euro;57/MWh after losses. The asset&rsquo;s day picks itself &mdash; FCR through the quiet hours, arbitrage into the evening peak, capacity throughout. Nothing here needed a tip; the cues told the story.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- bridge -->
+  <section>
+    <div class="snum">&rarr;</div>
+    <h2>Live is this, minus the hindsight</h2>
+    <p>Everything you just did, you did on a day that had already happened &mdash; so the market could confirm each call. That&rsquo;s the replay engine: a recorded day, masked, revealed step by step.</p>
+    <p>Phase 2 points the same engine at fresh publications instead of a recording. The reads are identical; the only difference is that the reveal hasn&rsquo;t been printed yet. If you can read the replay, you can read today.</p>
+    <p class="caution">This is reading practice on recorded data &mdash; not a signal, a recommendation, or a forecast you should act on. The school builds judgement; it does not place bids, trades or dispatch.</p>
+  </section>
+
+  <!-- rule -->
+  <section>
+    <div class="snum">&#9632;</div>
+    <h2>The rule, in one breath</h2>
+    <div class="rule">
+      <h3>Read the cues into the shape; the price is the consequence, not the start.</h3>
+      <p>Demand and wind give residual load; residual load gives the merit-order clear; the clear gives the spread; the spread, netted honestly, gives the trade; and finite power, stacked across the day, gives the plan. Read in that order and the day explains itself.</p>
+      <p class="muted" style="color:#9fc0cb">That&rsquo;s the reading method, proven on one day. The rest of the course adds the complications &mdash; geography, real time, assets &mdash; then one final hour, end to end.</p>
+    </div>
+  </section>
+<nav class="lessonseq" style="max-width:860px;margin:0 auto;padding:30px 24px 0;display:flex;justify-content:space-between;gap:16px;font-family:var(--mono);font-size:13px;border-top:1px solid var(--line)"><a href="08_spreads_duration.html" style="color:var(--volt-ink);text-decoration:none;max-width:48%">&larr; Builds on &middot; Spreads &amp; the duration curve</a><a href="04_zonal_pricing.html" style="color:var(--volt-ink);text-decoration:none;max-width:48%;text-align:right">Next &middot; Zonal pricing &rarr;</a></nav>
+
+            <footer class="wrap">Nordic Power School · Lesson 15 — education only. No bids, no trades, no dispatch.</footer>
+</main>
+
+<script>
+(function(){
+  "use strict";
+  const $=s=>document.querySelector(s);
+  const C={price:"#13202E",dem:"#5A6A7A",wind:"#10B5C9",res:"#E0913A",line:"#D3DDE6",slate:"#5A6A7A",band:"#10B5C9",ok:"#2FA980",bad:"#DD6457"};
+  const _D = (typeof window!=="undefined" && window.DRILL) ? window.DRILL : null;
+  const PRICE = (_D && _D.reveal && _D.reveal.price)  || [46,44,43,43,45,52,63,71,70,58,40,28,21,20,24,33,48,67,85,82,70,60,53,49];
+  const DEMAND= (_D && _D.cues   && _D.cues.demand)   || [9.0,8.6,8.4,8.3,8.6,9.4,10.6,11.8,12.2,11.9,11.4,11.0,10.7,10.6,10.9,11.4,12.2,13.2,13.9,13.7,13.0,12.0,10.8,9.8];
+  const WIND  = (_D && _D.cues   && _D.cues.wind)     || [4.5,4.8,5.0,5.2,5.0,4.6,4.2,3.8,4.0,5.0,6.2,7.0,7.6,7.8,7.2,6.0,4.5,3.0,2.2,2.4,3.0,3.8,4.4,4.8];
+  const RES=DEMAND.map((d,i)=>d-WIND[i]);
+  const TROUGH=PRICE.indexOf(Math.min(...PRICE));   // 13
+  const PEAK=PRICE.indexOf(Math.max(...PRICE));      // 18
+
+  // ---- tier-2: narrative anchors, derived from whichever day is loaded ----
+  const Tr=TROUGH, Pk=PEAK;
+  const trV=Math.round(PRICE[Tr]), pkV=Math.round(PRICE[Pk]);
+  const RT=0.85, CYC=4;                                  // round-trip efficiency, cycle cost
+  const NET=Math.round(pkV - trV/RT - CYC);              // arbitrage net, EUR/MWh
+  const clamp=h=>Math.max(0,Math.min(23,h));
+  const hh=h=>String(h).padStart(2,"0")+":00";
+  // bands track the day's own shape (reduce to [5,9]/[10,15]/[16,20] on the sample day)
+  const mBand=[clamp(Tr-8),clamp(Tr-4)];                 // morning run-up, before the trough
+  const dBand=[clamp(Tr-3),clamp(Tr+2)];                 // around the trough
+  const eBand=[clamp(Pk-2),clamp(Pk+2)];                 // around the peak
+  // morning direction, read from the price curve itself
+  const mRise=PRICE[mBand[1]]-PRICE[mBand[0]];
+  const mDir = mRise>3 ? 0 : (mRise<-3 ? 2 : 1);         // 0 rise | 1 flat | 2 fall
+  const mWord = mDir===0?"rises":mDir===2?"eases":"holds roughly flat";
+  const mWhy  = mDir===0
+      ? "demand wakes faster than wind builds, so residual load climbs and the market clears higher up the merit order"
+      : mDir===2
+      ? "wind builds faster than demand wakes, so residual load falls and the clear slips down the stack"
+      : "demand and wind move in step, so residual load barely shifts and the clear holds";
+  const payIdx = NET>5?0:(NET>0?1:2);                    // 0 pays | 1 marginal | 2 no
+  const payTail = NET>5 ? "A wide, clean spread \u2014 well worth a cycle."
+                : NET>0 ? "A thin spread \u2014 it only just clears the losses."
+                : "Losses and cost swallow the spread \u2014 not worth a cycle.";
+  // optional build-time LLM read, baked into the reveal side; escaped before display
+  const NARR=(_D && _D.reveal && _D.reveal.narrative) || null;
+  const esc=s=>String(s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+
+  // layout
+  const X0=46,X1=706;
+  const P0=30,P1=205;   // price panel
+  const D0=250,D1=348;  // cue panel
+  const xf=h=>X0+h/23*(X1-X0);
+  function niceStep(x){var p=Math.pow(10,Math.floor(Math.log10(x||1)));var f=(x||1)/p;return (f<1.5?1:f<3?2:f<7?5:10)*p;}
+  function niceDomain(lo,hi){var pad=((hi-lo)*0.08)||1;hi+=pad;if(lo<0)lo-=pad;var step=niceStep((hi-lo)/4);return {lo:(lo<0?Math.floor(lo/step)*step:0),hi:Math.ceil(hi/step)*step,step:step};}
+  const PD=niceDomain(Math.min(0,...PRICE),Math.max(...PRICE));  // zero baseline unless the day goes negative
+  const pyf=p=>P1-(p-PD.lo)/(PD.hi-PD.lo)*(P1-P0);
+  const CHI=(Math.max(...DEMAND,...WIND)*1.1)||1;                // cue-panel headroom, auto
+  const cyf=g=>D1-g/CHI*(D1-D0);
+  // residual overlay is shape-only — mapped across the price panel, not onto the price axis
+  const rMin=Math.min(...RES), rMax=Math.max(...RES), rSpan=(rMax-rMin)||1;
+  const ryf=r=>P1-(r-rMin)/rSpan*(P1-P0);
+
+  const state={hl:null, showTrough:false, showPeak:false, showRes:false};
+
+  function poly(arr,fn){return arr.map((v,i)=>`${xf(i).toFixed(1)},${fn(v).toFixed(1)}`).join(" ");}
+
+  function draw(){
+    let s="";
+    // highlight band
+    if(state.hl){const x0=xf(state.hl[0]-0.5),x1=xf(state.hl[1]+0.5);s+=`<rect x="${x0}" y="${P0}" width="${x1-x0}" height="${D1-P0}" fill="${C.band}" opacity="0.08"/>`;}
+    // price axis
+    // price axis (auto-scaled; zero line emphasised when the day dips negative)
+    for(let av=PD.lo; av<=PD.hi+1e-9; av+=PD.step){const y=pyf(av);const z=(Math.abs(av)<1e-9&&PD.lo<0);s+=`<line x1="${X0}" y1="${y}" x2="${X1}" y2="${y}" stroke="${z?C.slate:C.line}" opacity="${z?0.55:0.6}"/><text x="${X0-6}" y="${y+3}" text-anchor="end" font-family="ui-monospace,monospace" font-size="10.5" fill="${C.slate}">${Math.round(av)}</text>`;}
+    s+=`<text x="${X0-6}" y="${P0-6}" text-anchor="end" font-family="ui-monospace,monospace" font-size="10.5" fill="${C.slate}">\u20AC</text>`;
+    // residual overlay (under price)
+    if(state.showRes){ s+=`<polyline points="${poly(RES,ryf)}" fill="none" stroke="${C.res}" stroke-width="2" stroke-dasharray="5 4" opacity="0.9"/>`; }
+    // price curve
+    s+=`<polyline points="${poly(PRICE,pyf)}" fill="none" stroke="${C.price}" stroke-width="2.6"/>`;
+    // markers
+    if(state.showTrough){const x=xf(TROUGH),y=pyf(PRICE[TROUGH]);s+=`<circle cx="${x}" cy="${y}" r="5" fill="${C.wind}"/><text x="${x}" y="${y+18}" text-anchor="middle" font-family="ui-monospace,monospace" font-size="11" fill="${C.volt}">\u20AC${PRICE[TROUGH]} \u00b7 ${TROUGH}:00</text>`;}
+    if(state.showPeak){const x=xf(PEAK),y=pyf(PRICE[PEAK]);s+=`<circle cx="${x}" cy="${y}" r="5" fill="${C.bad}"/><text x="${x}" y="${y-10}" text-anchor="middle" font-family="ui-monospace,monospace" font-size="11" fill="${C.bad}">\u20AC${PRICE[PEAK]} \u00b7 ${PEAK}:00</text>`;}
+    // cue panel divider + lines
+    s+=`<line x1="${X0}" y1="${D0-8}" x2="${X1}" y2="${D0-8}" stroke="${C.line}"/>`;
+    s+=`<text x="${X0}" y="${D0+2}" font-family="ui-monospace,monospace" font-size="10.5" fill="${C.slate}">cues you'd know in advance \u2014 GW</text>`;
+    s+=`<polyline points="${poly(DEMAND,cyf)}" fill="none" stroke="${C.dem}" stroke-width="2"/>`;
+    s+=`<polyline points="${poly(WIND,cyf)}" fill="none" stroke="${C.wind}" stroke-width="2"/>`;
+    s+=`<text x="${xf(20)}" y="${cyf(DEMAND[20])-6}" font-family="ui-monospace,monospace" font-size="10.5" fill="${C.dem}">demand</text>`;
+    s+=`<text x="${xf(13)}" y="${cyf(WIND[13])-6}" font-family="ui-monospace,monospace" font-size="10.5" fill="${C.volt}">wind</text>`;
+    // hour ticks
+    [0,6,12,18,23].forEach(h=>{const x=xf(h);s+=`<text x="${x}" y="${D1+16}" text-anchor="middle" font-family="ui-monospace,monospace" font-size="10.5" fill="${C.slate}">${String(h).padStart(2,'0')}</text>`;});
+    $("#daySvg").innerHTML=s;
+  }
+
+  const steps=[
+    { hl:mBand, meta:"Stage 1 of 5 \u00b7 the morning ramp",
+      q:"Demand is waking and wind is shifting. What should the price do into the morning?",
+      opts:["Rise","Stay flat","Fall"], correct:mDir,
+      reveal:`Reading the cues: ${mWhy}. Price ${mWord} into the morning.`,
+      log:`Morning \u2014 the clear ${mWord}.` },
+    { hl:dBand, meta:"Stage 2 of 5 \u00b7 the midday dip",
+      q:"Wind builds while demand stays moderate. Where does the clearing price go?",
+      opts:["It spikes","Down to the day's low","It barely moves"], correct:1,
+      reveal:`Wind floods cheap supply and residual load bottoms near ${hh(Tr)} \u2014 the merit-order effect pushes the clear down to \u20AC${trV}, the day's low.`,
+      log:`Midday \u2014 wind suppresses the clear to the day's low (\u20AC${trV}).`, on:()=>{state.showTrough=true;} },
+    { hl:eBand, meta:"Stage 3 of 5 \u00b7 the evening peak",
+      q:"Wind eases just as demand climbs toward its high. Where is the day's peak?",
+      opts:["Still around the low","Late overnight",`The ${hh(Pk)} high`], correct:2,
+      reveal:`Residual load tops out near ${hh(Pk)} \u2014 price climbs the stack to \u20AC${pkV}, the widest point from the trough.`,
+      log:`Evening \u2014 residual peak drives \u20AC${pkV} at ${hh(Pk)}.`, on:()=>{state.showPeak=true;} },
+    { hl:null, meta:"Stage 4 of 5 \u00b7 net it honestly",
+      q:`Buy the \u20AC${trV} trough, sell the \u20AC${pkV} peak. Round-trip efficiency 85%, cost \u20AC4/MWh. Does cycling pay?`,
+      opts:["Yes \u2014 it clears","Marginal","No \u2014 losses eat it"], correct:payIdx,
+      reveal:`Net = ${pkV} \u2212 ${trV}\u00f70.85 \u2212 4 \u2248 \u20AC${NET}/MWh. ${payTail}`,
+      log:`Arbitrage \u2014 \u20AC${NET}/MWh net.` },
+    { hl:null, meta:"Stage 5 of 5 \u00b7 plan the asset",
+      q:"How should a battery run this whole day?",
+      opts:["Arbitrage only","FCR all day",`FCR overnight + arbitrage into the ${hh(Pk)} peak`], correct:2,
+      reveal:`Hold FCR through the thin overnight hours, swing into arbitrage for the ${hh(Pk)} peak, keep capacity available throughout \u2014 value stacked across the day.`,
+      log:`Plan \u2014 FCR overnight, arbitrage the ${hh(Pk)} peak, capacity throughout.` }
+  ];
+  const logEntries=[];
+  let idx=0, answered=false;
+
+  function renderLog(){
+    let h="";
+    steps.forEach((st,i)=>{ h += i<logEntries.length ? `<li>${logEntries[i]}</li>` : `<li class="empty">${st.meta.split("\u00b7")[1].trim()}</li>`; });
+    $("#logList").innerHTML=h;
+  }
+  function renderStep(){
+    const st=steps[idx];
+    state.hl=st.hl; draw();
+    $("#stepMeta").textContent=st.meta;
+    $("#stepQ").textContent=st.q;
+    $("#stepReveal").textContent=""; $("#stepReveal").className="reveal";
+    let h=""; st.opts.forEach((o,i)=>h+=`<button class="choice" data-i="${i}">${o}</button>`);
+    $("#stepChoices").innerHTML=h;
+    $("#nextBtn").disabled=true;
+    $("#nextBtn").textContent = idx===steps.length-1?"Reveal the whole day":"Next stage";
+    answered=false;
+  }
+  $("#stepChoices").addEventListener("click",e=>{
+    const b=e.target.closest(".choice"); if(!b||answered) return;
+    answered=true;
+    const st=steps[idx], chosen=+b.dataset.i, right=chosen===st.correct;
+    document.querySelectorAll("#stepChoices .choice").forEach(x=>{x.disabled=true; if(+x.dataset.i===st.correct)x.setAttribute("aria-pressed","true");});
+    if(!right) b.style.opacity="0.55";
+    const rv=$("#stepReveal"); rv.className="reveal "+(right?"ok":"bad");
+    rv.innerHTML=(right?"<b>Read held.</b> ":"<b>Not quite.</b> ")+st.reveal;
+    if(st.on)st.on();
+    logEntries[idx]=st.log; renderLog();
+    $("#nextBtn").disabled=false; draw();
+  });
+  $("#nextBtn").addEventListener("click",()=>{
+    if(idx<steps.length-1){ idx++; renderStep(); }
+    else{ // finish
+      state.hl=null; state.showRes=true; draw();
+      $("#resLeg").style.display="inline-flex";
+      $("#stepBox").style.display="none";
+      $("#synth").classList.add("show");
+      $("#synth").scrollIntoView({behavior:"smooth",block:"center"});
+    }
+  });
+  $("#cmpBtn").addEventListener("click",()=>$("#modelRead").classList.add("show"));
+
+  const _templatedRead = `A day the cues call without a tip. Demand and wind set a residual-load shape that bottoms near ${hh(Tr)} and lifts to a high near ${hh(Pk)} \u2014 and price followed it, \u20AC${trV} to \u20AC${pkV}. ${NET>0?`The spread nets about \u20AC${NET}/MWh after losses`:`The spread doesn\u2019t clear the losses (\u20AC${NET}/MWh)`}. The asset\u2019s day picks itself \u2014 FCR through the quiet hours, ${NET>5?`arbitrage into the ${hh(Pk)} peak`:"capacity ahead of arbitrage"}, capacity throughout. Nothing here needed hindsight; the cues told the story.`;
+  $("#modelRead").innerHTML = `<b>Elizabeth\u2019s read:</b> ${NARR ? esc(NARR) : _templatedRead}`;
+
+  renderLog(); renderStep();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lesson 32 — One auction, fifteen prices. · Nordic Power School</title>
+<style>
+  :root{
+    --frost:#EEF3F7; --panel:#FFFFFF; --ink:#13202E; --slate:#5A6A7A;
+    --line:#D3DDE6; --deep:#0E1F33; --deep-2:#16314E; --volt:#10B5C9; --volt-ink:#0A7E8E;
+    --ember:#E0913A; --ember-ink:#B16A12; --ok:#2FA980; --bad:#DD6457;
+    --mono: ui-monospace,"SF Mono","Cascadia Code",Consolas,"Roboto Mono",monospace;
+    --sans: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--frost);color:var(--ink);font-family:var(--sans);line-height:1.62;-webkit-font-smoothing:antialiased;font-size:17px}
+  .wrap{max-width:860px;margin:0 auto;padding:0 24px}
+  a{color:var(--volt-ink)}
+  header{position:sticky;top:0;z-index:20;background:rgba(238,243,247,.86);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+  .bar{display:flex;justify-content:space-between;align-items:center;height:52px;font-size:13px;letter-spacing:.04em;text-transform:uppercase}
+  .bar b{font-weight:700} .bar .r{font-family:var(--mono);color:var(--slate)}
+  .hero{padding:64px 0 28px}
+  .eyebrow{font-family:var(--mono);font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--volt-ink);margin-bottom:18px}
+  h1{font-size:clamp(34px,6vw,58px);line-height:1.02;letter-spacing:-.02em;margin:0 0 18px;font-weight:780}
+  .lead{font-size:clamp(18px,2.4vw,22px);color:var(--slate);max-width:44ch;margin:0}
+  .byline{margin-top:22px;font-size:14px;color:var(--slate)}
+  .byline b{color:var(--ink)}
+  section{padding:40px 0;border-top:1px solid var(--line)}
+  .snum{font-family:var(--mono);font-size:13px;color:var(--volt-ink);letter-spacing:.1em}
+  h2{font-size:clamp(24px,3.5vw,34px);line-height:1.1;letter-spacing:-.015em;margin:6px 0 14px;font-weight:740}
+  p{margin:0 0 16px} .muted{color:var(--slate)}
+  .say{border-left:2px solid var(--volt);padding:2px 0 2px 18px;margin:18px 0;color:var(--ink)}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px;margin:22px 0}
+  .figcap{font-size:13.5px;color:var(--slate);font-family:var(--mono);margin-top:10px}
+  .choices{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0}
+  .choice{font-family:var(--mono);font-size:14px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 16px;cursor:pointer;color:var(--ink);transition:.15s}
+  .choice:hover{border-color:var(--volt)}
+  .choice[aria-pressed=true]{background:var(--deep);color:#fff;border-color:var(--deep)}
+  .verdict{font-size:15px;margin-top:6px;min-height:1.4em}
+  .verdict.ok{color:var(--ok)} .verdict.bad{color:var(--bad)}
+  .reveal{display:none;margin-top:6px;color:var(--slate);font-size:15.5px} .reveal.show{display:block}
+  .rule{background:var(--deep);color:#eaf6f8;border-radius:14px;padding:26px;margin-top:8px}
+  .rule h3{margin:0 0 10px;font-size:20px;color:#fff}
+  .rule p{color:#bcd6dc;margin:0}
+  .rule .k{color:var(--volt);font-family:var(--mono)}
+  .cards{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:8px}
+  .card{border:1px solid var(--line);border-radius:12px;padding:16px;background:#fff}
+  .card .tag{font-family:var(--mono);font-size:12px;color:var(--volt-ink);letter-spacing:.04em}
+  .card h4{margin:3px 0 6px;font-size:15.5px}
+  .card p{margin:0;font-size:14.5px;color:var(--slate)}
+  footer{padding:50px 0;color:var(--slate);font-size:13px;border-top:1px solid var(--line)}
+  :focus-visible{outline:2px solid var(--volt);outline-offset:2px}
+  .dwrap{overflow-x:auto}
+  .lane{font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;fill:var(--slate)}
+  .box{fill:#fff;stroke:var(--line);stroke-width:1.4}
+  .boxt{font-family:var(--sans);font-size:14px;font-weight:600;fill:var(--ink)}
+  .boxs{font-family:var(--mono);font-size:11px;fill:var(--slate)}
+  .flowarr{stroke:var(--slate);stroke-width:1.6;fill:none;marker-end:url(#ar)}
+  .dlabel{font-family:var(--mono);font-size:12px;fill:var(--slate)} .dlabel.k{fill:var(--volt-ink)}
+  .edge{stroke:#9fb4c2;stroke-width:1.4} .edge.ext{stroke:#c2d0db;stroke-dasharray:3 4}
+  .node{fill:#163a4d;stroke:var(--volt);stroke-width:1.6} .node-c{fill:var(--volt)}
+  .zlabel{font-family:var(--mono);font-size:12.5px;fill:#1f4456;font-weight:600}
+  .flow{stroke:var(--volt);stroke-width:2;fill:none;stroke-dasharray:5 9;stroke-linecap:round;animation:dash linear infinite;opacity:.9}
+  @keyframes dash{to{stroke-dashoffset:-140}}
+  .tlaxis{stroke:var(--slate);stroke-width:1.6;marker-end:url(#ar)}
+  .tldot{fill:#fff;stroke:var(--slate);stroke-width:2} .tldot.hl{fill:var(--volt);stroke:var(--volt-ink)}
+  .tlstem{stroke:var(--line);stroke-width:1.4}
+  @media(max-width:640px){.cards{grid-template-columns:1fr}}
+  @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<header><div class="wrap bar"><b>Nordic Power School</b><span class="r">Lesson 32</span></div></header>
+
+<main class="wrap">
+
+  <div class="hero">
+    <div class="eyebrow">Lesson 32 · Market structure</div>
+    <h1>One auction, fifteen prices.</h1>
+    <p class="lead">A single coupled auction runs the day-ahead market &mdash; yet the answer comes out different in NO1 than in LT. Zones, borders, cables and TSOs turn one European auction into many regional prices. Here is the map.</p>
+    <p class="byline">with <b>Elizabeth Cecilia</b>, your mentor. When I ask you to predict, actually predict &mdash; <i>before</i> you reveal.</p>
+  </div>
+
+  <section id="s1">
+    <div class="snum">01</div>
+    <h2>The bidding zones</h2>
+    <p>One coupled auction runs the Nordic and Baltic day-ahead market &mdash; yet the cleared price can differ from one area to the next. The market is carved into <b>bidding zones</b>, and each zone can hold its own price when the wires between them fill up.</p>
+    <div class="panel"><div class="dwrap"><svg viewBox="0 0 1060 460" width="100%" role="img" aria-label="Nordic and Baltic bidding zones and interconnectors"><rect x="0" y="0" width="1060" height="460" rx="16" fill="#f2f7fa"/><g transform="translate(40,8)"><line class="edge" x1="250" y1="72" x2="220" y2="152"/><line class="edge" x1="220" y1="152" x2="168" y2="238"/><line class="edge" x1="220" y1="152" x2="292" y2="250"/><line class="edge" x1="168" y1="238" x2="292" y2="250"/><line class="edge" x1="292" y1="250" x2="236" y2="332"/><line class="edge" x1="168" y1="238" x2="236" y2="332"/><line class="edge" x1="250" y1="72" x2="432" y2="62"/><line class="edge" x1="220" y1="152" x2="410" y2="150"/><line class="edge" x1="292" y1="250" x2="450" y2="244"/><line class="edge" x1="432" y1="62" x2="410" y2="150"/><line class="edge" x1="410" y1="150" x2="450" y2="244"/><line class="edge" x1="450" y1="244" x2="470" y2="336"/><line class="edge" x1="432" y1="62" x2="656" y2="120"/><line class="edge" x1="450" y1="244" x2="656" y2="120"/><line class="edge" x1="236" y1="332" x2="322" y2="396"/><line class="edge" x1="450" y1="244" x2="322" y2="396"/><line class="edge" x1="470" y1="336" x2="434" y2="402"/><line class="edge" x1="322" y1="396" x2="434" y2="402"/><line class="edge" x1="656" y1="120" x2="792" y2="208"/><line class="edge" x1="792" y1="208" x2="826" y2="294"/><line class="edge" x1="826" y1="294" x2="806" y2="380"/><line class="edge" x1="470" y1="336" x2="806" y2="380"/><line class="edge ext" x1="236" y1="332" x2="72" y2="330"/><line class="edge ext" x1="322" y1="396" x2="520" y2="424"/><line class="edge ext" x1="434" y1="402" x2="520" y2="424"/><line class="edge ext" x1="470" y1="336" x2="694" y2="418"/><line class="edge ext" x1="806" y1="380" x2="694" y2="418"/><line class="flow" style="animation-duration:3s" x1="410" y1="150" x2="450" y2="244"/><line class="flow" style="animation-duration:3.8s" x1="450" y1="244" x2="656" y2="120"/><line class="flow" style="animation-duration:3.5s" x1="656" y1="120" x2="792" y2="208"/><line class="flow" style="animation-duration:4s" x1="470" y1="336" x2="806" y2="380"/><circle class="node" cx="250" cy="72" r="6"/><circle class="node-c" cx="250" cy="72" r="2.4"/><circle class="node" cx="220" cy="152" r="6"/><circle class="node-c" cx="220" cy="152" r="2.4"/><circle class="node" cx="168" cy="238" r="6"/><circle class="node-c" cx="168" cy="238" r="2.4"/><circle class="node" cx="292" cy="250" r="7"/><circle class="node-c" cx="292" cy="250" r="2.8"/><circle class="node" cx="236" cy="332" r="6"/><circle class="node-c" cx="236" cy="332" r="2.4"/><circle class="node" cx="432" cy="62" r="6"/><circle class="node-c" cx="432" cy="62" r="2.4"/><circle class="node" cx="410" cy="150" r="6"/><circle class="node-c" cx="410" cy="150" r="2.4"/><circle class="node" cx="450" cy="244" r="7"/><circle class="node-c" cx="450" cy="244" r="2.8"/><circle class="node" cx="470" cy="336" r="6"/><circle class="node-c" cx="470" cy="336" r="2.4"/><circle class="node" cx="656" cy="120" r="7"/><circle class="node-c" cx="656" cy="120" r="2.8"/><circle class="node" cx="322" cy="396" r="6"/><circle class="node-c" cx="322" cy="396" r="2.4"/><circle class="node" cx="434" cy="402" r="6"/><circle class="node-c" cx="434" cy="402" r="2.4"/><circle class="node" cx="792" cy="208" r="6"/><circle class="node-c" cx="792" cy="208" r="2.4"/><circle class="node" cx="826" cy="294" r="6"/><circle class="node-c" cx="826" cy="294" r="2.4"/><circle class="node" cx="806" cy="380" r="6"/><circle class="node-c" cx="806" cy="380" r="2.4"/><circle cx="72" cy="330" r="4" fill="#dbe6ee" stroke="#9fb4c2" stroke-width="1.2"/><circle cx="520" cy="424" r="4" fill="#dbe6ee" stroke="#9fb4c2" stroke-width="1.2"/><circle cx="694" cy="418" r="4" fill="#dbe6ee" stroke="#9fb4c2" stroke-width="1.2"/><text class="zlabel" x="262" y="76" text-anchor="start">NO4</text><text class="zlabel" x="208" y="156" text-anchor="end">NO3</text><text class="zlabel" x="156" y="242" text-anchor="end">NO5</text><text class="zlabel" x="305" y="254" text-anchor="start">NO1</text><text class="zlabel" x="224" y="336" text-anchor="end">NO2</text><text class="zlabel" x="445" y="55" text-anchor="start">SE1</text><text class="zlabel" x="423" y="154" text-anchor="start">SE2</text><text class="zlabel" x="465" y="248" text-anchor="start">SE3</text><text class="zlabel" x="485" y="340" text-anchor="start">SE4</text><text class="zlabel" x="669" y="124" text-anchor="start">FI</text><text class="zlabel" x="310" y="400" text-anchor="end">DK1</text><text class="zlabel" x="440" y="420" text-anchor="middle">DK2</text><text class="zlabel" x="805" y="212" text-anchor="start">EE</text><text class="zlabel" x="839" y="298" text-anchor="start">LV</text><text class="zlabel" x="819" y="384" text-anchor="start">LT</text><text class="zlabel" style="fill:#8aa0ad" x="60" y="334" text-anchor="end">GB</text><text class="zlabel" style="fill:#8aa0ad" x="520" y="443" text-anchor="middle">DE</text><text class="zlabel" style="fill:#8aa0ad" x="707" y="422" text-anchor="start">PL</text></g></svg></div><div class="figcap">The Nordic and Baltic bidding zones, wired by interconnectors, with the faint links out to GB, DE and PL. A schematic, not a survey map.</div></div>
+    <div class="qa">
+      <p class="say"><b>Predict:</b> how many bidding zones cover the Nordics and the Baltics together?</p>
+      <div class="choices" role="group"><button class="choice" data-correct="0" data-exp="Too few &mdash; Norway alone has five.">Seven</button><button class="choice" data-correct="0" data-exp="Close, but not enough &mdash; count the Baltic three as well.">Eleven</button><button class="choice" data-correct="1" data-exp="Right &mdash; NO1&ndash;5, SE1&ndash;4, FI, DK1&ndash;2, EE, LV, LT: fifteen zones, each able to hold its own price.">Fifteen</button></div>
+      <div class="verdict"></div>
+      <div class="reveal">Norway 5, Sweden 4, Finland 1, Denmark 2, plus Estonia, Latvia and Lithuania &mdash; fifteen in all. Lesson 04 shows <i>why</i> a single price splits along these borders.</div>
+    </div>
+  </section>
+
+  <section id="s2">
+    <div class="snum">02</div>
+    <h2>Who runs each wire</h2>
+    <p>Every zone sits inside a national grid run by a Transmission System Operator. They operate the system, publish much of the open data this school reads, and procure the reserves that keep it balanced.</p>
+    <div class="cards"><div class="card"><div class="tag">Norway</div><h4>Statnett</h4><p>Operates the Norwegian grid across zones NO1&ndash;NO5.</p></div><div class="card"><div class="tag">Sweden</div><h4>Svenska kraftn&auml;t</h4><p>Operates SE1&ndash;SE4.</p></div><div class="card"><div class="tag">Finland</div><h4>Fingrid</h4><p>Operates FI; its open data feed is the one this school reads.</p></div><div class="card"><div class="tag">Denmark</div><h4>Energinet</h4><p>Operates DK1 (west) and DK2 (east).</p></div><div class="card"><div class="tag">Estonia</div><h4>Elering</h4><p>Operates EE.</p></div><div class="card"><div class="tag">Latvia</div><h4>AST</h4><p>Operates LV.</p></div><div class="card"><div class="tag">Lithuania</div><h4>Litgrid</h4><p>Operates LT; the Baltic gateway toward Poland.</p></div><div class="card"><div class="tag">all of them</div><h4>ENTSO-E</h4><p>The European association whose Transparency Platform publishes cross-border data.</p></div></div>
+  </section>
+
+  <section id="s3">
+    <div class="snum">03</div>
+    <h2>Marketplace and settlement</h2>
+    <p>Trading and settlement are different institutions. <b>Nord Pool</b> is the exchange where the day-ahead and intraday markets run, coupled to the rest of Europe (SDAC for day-ahead, SIDC for intraday). <b>eSett</b> is the central body that settles imbalances across the Nordics &mdash; it never trades; it nets what each BRP owes or is owed.</p>
+    <div class="qa">
+      <p class="say"><b>Predict:</b> when your portfolio ends a delivery hour out of balance, who settles the bill?</p>
+      <div class="choices" role="group"><button class="choice" data-correct="0" data-exp="Not quite &mdash; the exchange runs the auctions; it does not settle imbalances.">Nord Pool</button><button class="choice" data-correct="1" data-exp="Right &mdash; imbalance is settled centrally by eSett, against your BRP, at the single imbalance price.">eSett</button><button class="choice" data-correct="0" data-exp="Not quite &mdash; the TSO acts physically, but the money is settled centrally through eSett.">Your TSO, directly</button></div>
+      <div class="verdict"></div>
+      <div class="reveal">Trade on the exchange; balance with the TSO in real time; settle the deviation through eSett. Three institutions, three jobs.</div>
+    </div>
+  </section>
+
+  <section id="s4">
+    <div class="snum">04</div>
+    <h2>The wires out</h2>
+    <p>The region is not an island. High-voltage links reach Germany, Poland, the Netherlands and Great Britain, and the day-ahead auction allocates them implicitly &mdash; cheap power flows toward dear, until the cable fills. That is why a border is not administrative trivia: it is a <b>price engine</b>. When a wire saturates, the price splits across it; when it has room, the two sides converge.</p>
+    <p class="muted">Lesson 04 (zonal pricing) and Lesson 21 (interconnectors &amp; coupling) take this apart in detail; Lesson 26 covers the Baltic corner and its 2025 switch to continental synchronisation.</p>
+  </section>
+
+  <section id="s5">
+    <div class="snum">05</div>
+    <h2>The rule, in one breath</h2>
+    <div class="rule">
+      <h3>Prices are local because the grid is local.</h3>
+      <p>Zones, borders, cables and TSOs turn one European auction into many regional prices. Read a Nordic price and you are really reading a <span class="k">zone</span>, the <span class="k">wires</span> around it, and how full they are.</p>
+    </div>
+  </section>
+<nav class="lessonseq" style="max-width:860px;margin:0 auto;padding:30px 24px 0;display:flex;justify-content:space-between;gap:16px;font-family:var(--mono);font-size:13px;border-top:1px solid var(--line)"><a href="31_market_structure.html" style="color:var(--volt-ink);text-decoration:none;max-width:48%">&larr; Builds on &middot; Who does what</a><a href="33_delivery_lifecycle.html" style="color:var(--volt-ink);text-decoration:none;max-width:48%;text-align:right">Next &middot; The delivery-hour lifecycle &rarr;</a></nav>
+
+            <footer class="wrap">Nordic Power School · Lesson 32 — education only. No bids, no trades, no dispatch.</footer>
+</main>
+
+<script>
+(function(){
+  document.querySelectorAll('.choices').forEach(function(group){
+    group.addEventListener('click',function(e){
+      var b=e.target.closest('.choice'); if(!b) return;
+      group.querySelectorAll('.choice').forEach(function(x){x.setAttribute('aria-pressed','false');});
+      b.setAttribute('aria-pressed','true');
+      var ok=b.dataset.correct==='1';
+      var qa=group.parentNode;
+      var ver=qa.querySelector('.verdict');
+      if(ver){ ver.className='verdict '+(ok?'ok':'bad'); ver.innerHTML=b.dataset.exp||(ok?'Right.':'Not quite.'); }
+      var rev=qa.querySelector('.reveal'); if(rev) rev.classList.add('show');
+    });
+  });
+})();
+</script>
+
+</body>
+</html>

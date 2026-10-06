@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lesson 17 — Cross-zonal spreads · Nordic Power School</title>
+<style>
+  :root{
+    --frost:#EEF3F7; --panel:#FFFFFF; --ink:#13202E; --slate:#5A6A7A;
+    --line:#D3DDE6; --deep:#0E1F33; --volt:#10B5C9; --volt-ink:#0A7E8E;
+    --ember:#E0913A; --ember-ink:#B16A12; --warm:#C2603F; --ok:#2FA980; --bad:#DD6457;
+    --mono: ui-monospace,"SF Mono","Cascadia Code",Consolas,"Roboto Mono",monospace;
+    --sans: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--frost);color:var(--ink);font-family:var(--sans);font-size:17px;line-height:1.62;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:860px;margin:0 auto;padding:0 24px}
+  header{position:sticky;top:0;z-index:20;background:rgba(238,243,247,.9);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+  .bar{display:flex;justify-content:space-between;align-items:center;height:52px;font-size:13px;letter-spacing:.04em;text-transform:uppercase}
+  .bar b{font-weight:700} .bar .r{font-family:var(--mono);color:var(--slate)}
+  .hero{padding:60px 0 26px}
+  .eyebrow{font-family:var(--mono);font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--volt-ink);margin-bottom:16px}
+  h1{font-size:clamp(32px,5.6vw,54px);line-height:1.03;letter-spacing:-.02em;margin:0 0 16px;font-weight:780}
+  .lead{font-size:clamp(18px,2.4vw,22px);color:var(--slate);max-width:42ch;margin:0}
+  .byline{margin-top:20px;font-size:14px;color:var(--slate)} .byline b{color:var(--ink)}
+  section{padding:36px 0;border-top:1px solid var(--line)}
+  .snum{font-family:var(--mono);font-size:13px;color:var(--volt-ink);letter-spacing:.1em}
+  h2{font-size:clamp(23px,3.3vw,32px);line-height:1.12;letter-spacing:-.015em;margin:6px 0 12px;font-weight:740}
+  p{margin:0 0 16px} .muted{color:var(--slate)}
+  .say{border-left:2px solid var(--volt);padding:2px 0 2px 18px;margin:18px 0}
+  .caution{border-left:2px solid var(--ember);padding:2px 0 2px 18px;margin:18px 0;color:var(--ember-ink);font-size:15px}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px;margin:20px 0}
+  .stage{position:relative;border-radius:12px;overflow:hidden}
+  .cover{position:absolute;inset:0;background:linear-gradient(180deg,var(--deep),#0a1726);color:#cfe;display:flex;flex-direction:column;gap:14px;align-items:center;justify-content:center;text-align:center;padding:24px;transition:opacity .5s;z-index:4}
+  .cover.gone{opacity:0;pointer-events:none} .cover .q{font-size:16px;max-width:34ch;color:#dCEbF0}
+  .controls{display:flex;flex-wrap:wrap;gap:18px;align-items:center;margin-top:14px}
+  .ctl{display:flex;flex-direction:column;gap:6px;min-width:240px;flex:1}
+  .ctl label{font-family:var(--mono);font-size:12.5px;color:var(--slate);display:flex;justify-content:space-between} .ctl label b{color:var(--ink)}
+  #cap{accent-color:var(--volt)} input[type=range]{width:100%}
+  .readout{display:flex;flex-wrap:wrap;gap:8px 24px;align-items:baseline;margin-top:14px;border-top:1px dashed var(--line);padding-top:14px;font-family:var(--mono);font-size:13.5px;color:var(--slate)}
+  .readout b{color:var(--ink)} .readout .big{font-size:22px;font-weight:600}
+  .tag{font-family:var(--mono);font-size:11.5px;letter-spacing:.05em;text-transform:uppercase;border-radius:999px;padding:5px 11px}
+  .tag.split{background:#fbeae7;color:#b23a2c} .tag.coupled{background:#e3f6ee;color:#1c7a59}
+  .choices{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0}
+  .choice{font-family:var(--mono);font-size:14px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 16px;cursor:pointer;color:var(--ink);transition:.15s}
+  .choice:hover{border-color:var(--volt)} .choice[aria-pressed=true]{background:var(--deep);color:#fff;border-color:var(--deep)}
+  .verdict{font-size:15px;margin-top:4px;min-height:1.4em} .verdict.ok{color:var(--ok)} .verdict.bad{color:var(--bad)}
+  .rule{background:var(--deep);color:#eaf6f8;border-radius:14px;padding:24px;margin-top:8px}
+  .rule h3{margin:0 0 10px;font-size:20px;color:#fff} .rule p{color:#bcd6dc;margin:0 0 10px} .rule p:last-child{margin:0} .rule .k{color:var(--volt);font-family:var(--mono)}
+  footer{padding:48px 0;color:var(--slate);font-size:13px;border-top:1px solid var(--line)}
+  :focus-visible{outline:2px solid var(--volt);outline-offset:2px}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header><div class="wrap bar"><b>Nordic Power School</b><span class="r">Lesson 17 · Bonus</span></div></header>
+
+<main class="wrap">
+  <div class="hero">
+    <div class="eyebrow">Lesson 17 · Cross-zonal</div>
+    <h1>Two prices,<br>one wire.</h1>
+    <p class="lead">Neighbouring zones share a price only as far as the wire between them can carry. When the surplus outruns the cable, the border splits &mdash; and a spread opens you can read.</p>
+    <p class="byline">with <b>Elizabeth Cecilia</b>. This is Lesson 04&rsquo;s split, watched across a whole day.</p>
+  </div>
+  <p class="buildson" style="font-family:var(--mono);font-size:12.5px;color:var(--slate);margin:0 0 26px;letter-spacing:.02em">Builds on &middot; <a href="04_zonal_pricing.html" style="color:var(--volt-ink);text-decoration:none">04 Zonal pricing</a> &middot; <a href="08_spreads_duration.html" style="color:var(--volt-ink);text-decoration:none">08 Spreads & duration</a></p>
+
+
+  <section>
+    <div class="snum">01</div>
+    <h2>The wire couples — until it can&rsquo;t</h2>
+    <p>Each bidding zone clears its own price. An interconnector lets cheap power flow from a surplus zone to a deficit one, pulling the two prices together &mdash; perfect coupling, one price, while there&rsquo;s room on the cable. The moment the flow the market <i>wants</i> exceeds the cable&rsquo;s <b>capacity</b>, the surplus is trapped: the exporting zone stays cheap, the importing zone stays dear, and a <b>spread</b> opens.</p>
+    <p>So the spread is the market&rsquo;s asymmetry minus whatever the wire can carry away.</p>
+  </section>
+
+  <section>
+    <div class="snum">02</div>
+    <h2>The border splits</h2>
+    <p>Take a wind-rich <b>North</b> and a demand-heavy <b>South</b>, one cable between them. Overnight the asymmetry is small and the wire copes &mdash; one price. Then the day arrives.</p>
+    <p class="say"><b>Predict first:</b> through the windy, demand-heavy daytime, with the cable limited &mdash; what do the two prices do?</p>
+    <div class="choices" id="splitChoices" role="group" aria-label="What the two prices do by day">
+      <button class="choice" data-v="split">They split — South dearer</button>
+      <button class="choice" data-v="same">Stay one price</button>
+      <button class="choice" data-v="north">They split — North dearer</button>
+    </div>
+    <div class="verdict" id="splitVerdict"></div>
+
+    <div class="panel">
+      <div class="stage">
+        <svg viewBox="0 0 720 320" width="100%" id="spreadSvg" role="img" aria-label="North and South prices across a day, with the spread shaded"></svg>
+        <div class="cover" id="splitCover"><div class="q">Predict above to run the two zones through a day.</div></div>
+      </div>
+      <div class="controls">
+        <div class="ctl"><label>Interconnector capacity <b id="capLab">moderate</b></label><input id="cap" type="range" min="5" max="45" value="25"></div>
+      </div>
+      <div class="readout">
+        <span class="tag split" id="spTag">15 h split</span>
+        <span><span class="muted">widest spread</span> <span class="big" id="spMax">€6</span>/MWh</span>
+        <span><span class="muted">avg when split</span> <b id="spAvg">€4</b></span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="snum">03</div>
+    <h2>Capacity versus asymmetry</h2>
+    <p>Slide the capacity. Build the cable bigger and the spread shrinks toward zero &mdash; the wire carries the whole asymmetry and the zones converge. Starve it and the spread widens and spreads across more hours. The border price difference is a tug-of-war: how unbalanced the two zones are, against how much the wire can move. Read both and you can anticipate the split before it prints.</p>
+  </section>
+
+  <section>
+    <div class="snum">04</div>
+    <h2>The spread duration curve</h2>
+    <p>Sort the day&rsquo;s hourly spreads from widest to narrowest and you get the same duration curve idea from Lesson 08, now <b>locational</b>: not how high a price climbs, but how <b>often</b> a border is worth watching. A few wide hours, a long tail of coupling. Structural cuts &mdash; the classic Swedish SE2&ndash;SE3 north-to-south congestion, hydro and wind in the north, demand in the south &mdash; sit wide for many hours, year after year.</p>
+    <div class="panel">
+      <svg viewBox="0 0 720 230" width="100%" id="durSvg" role="img" aria-label="Spread duration curve"></svg>
+    </div>
+    <p class="caution">This explains how and when a spread opens &mdash; not advice on trading cross-zonal positions or transmission rights. Whether and how to act on a spread is a decision the school doesn&rsquo;t make.</p>
+  </section>
+
+  <section>
+    <div class="snum">05</div>
+    <h2>The rule, in one breath</h2>
+    <div class="rule">
+      <h3>The cross-zonal spread is the asymmetry the wire can&rsquo;t carry.</h3>
+      <p>Zones couple while the interconnector has room and split when the wanted flow exceeds it &mdash; exporter cheap, importer dear. Read the surplus-versus-deficit asymmetry against the <span class="k">capacity</span>, and the spread&rsquo;s width and its hours follow.</p>
+      <p class="muted" style="color:#9fc0cb">Bonus track: next, the intraday market &mdash; trading the change after the day-ahead has cleared.</p>
+    </div>
+  </section>
+<nav class="lessonseq" style="max-width:860px;margin:0 auto;padding:30px 24px 0;display:flex;justify-content:space-between;gap:16px;font-family:var(--mono);font-size:13px;border-top:1px solid var(--line)"><a href="04_zonal_pricing.html" style="color:var(--volt-ink);text-decoration:none;max-width:48%">&larr; Builds on &middot; Zonal pricing</a><a href="21_interconnectors_coupling.html" style="color:var(--volt-ink);text-decoration:none;max-width:48%;text-align:right">Next &middot; Interconnectors &amp; coupling &rarr;</a></nav>
+
+            <footer class="wrap">Nordic Power School · Lesson 17 — education only. No bids, no trades, no dispatch.</footer>
+</main>
+
+<script>
+(function(){
+  "use strict";
+  const $=s=>document.querySelector(s);
+  const C={north:"#10B5C9",south:"#C2603F",fill:"#C2603F",line:"#D3DDE6",slate:"#5A6A7A",ink:"#13202E",ok:"#2FA980"};
+  const windN=[.8,.85,.9,.9,.85,.7,.55,.45,.5,.65,.8,.9,.95,.95,.9,.75,.55,.35,.25,.3,.45,.6,.7,.78];
+  const demS =[.3,.25,.22,.2,.25,.35,.55,.72,.78,.7,.6,.5,.45,.43,.48,.58,.72,.85,.95,.92,.8,.65,.5,.38];
+  const cap=$("#cap");
+  function day(K){const out=[];for(let h=0;h<24;h++){const Ni=55-30*windN[h],Si=35+45*demS[h];const gap=Si-Ni,spread=Math.max(0,gap-K),mid=(Ni+Si)/2;out.push({north:mid-spread/2,south:mid+spread/2,spread});}return out;}
+
+  const svg=$("#spreadSvg"), X0=40,X1=706,Y0=18,Y1=262;
+  const xf=h=>X0+h/23*(X1-X0), yf=p=>Y1-p/90*(Y1-Y0);
+  function draw(){
+    const K=+cap.value, d=day(K);
+    let s="";
+    [0,30,60,90].forEach(v=>{const y=yf(v);s+=`<line x1="${X0}" y1="${y}" x2="${X1}" y2="${y}" stroke="${C.line}" opacity="0.5"/><text x="${X0-6}" y="${y+3}" text-anchor="end" font-family="ui-monospace,monospace" font-size="10.5" fill="${C.slate}">${v}</text>`;});
+    s+=`<text x="${X0-6}" y="${Y0-4}" text-anchor="end" font-family="ui-monospace,monospace" font-size="10.5" fill="${C.slate}">€</text>`;
+    [0,6,12,18,23].forEach(h=>{const x=xf(h);s+=`<text x="${x}" y="${Y1+18}" text-anchor="middle" font-family="ui-monospace,monospace" font-size="10.5" fill="${C.slate}">${String(h).padStart(2,'0')}</text>`;});
+    // spread fill between the two lines
+    let top=d.map((p,i)=>`${xf(i).toFixed(1)},${yf(p.south).toFixed(1)}`).join(" ");
+    let bot=d.map((p,i)=>`${xf(i).toFixed(1)},${yf(p.north).toFixed(1)}`).reverse().join(" ");
+    s+=`<polygon points="${top} ${bot}" fill="${C.fill}" opacity="0.12"/>`;
+    // lines
+    s+=`<polyline points="${d.map((p,i)=>`${xf(i).toFixed(1)},${yf(p.south).toFixed(1)}`).join(" ")}" fill="none" stroke="${C.south}" stroke-width="2.4"/>`;
+    s+=`<polyline points="${d.map((p,i)=>`${xf(i).toFixed(1)},${yf(p.north).toFixed(1)}`).join(" ")}" fill="none" stroke="${C.north}" stroke-width="2.4"/>`;
+    s+=`<text x="${xf(19)}" y="${yf(d[19].south)-7}" font-family="ui-monospace,monospace" font-size="11" fill="${C.south}">South</text>`;
+    s+=`<text x="${xf(13)}" y="${yf(d[13].north)+15}" font-family="ui-monospace,monospace" font-size="11" fill="${C.north}">North</text>`;
+    svg.innerHTML=s;
+    // readout
+    const splits=d.filter(p=>p.spread>0.5), nSplit=splits.length;
+    const mx=Math.max(...d.map(p=>p.spread));
+    const avg=splits.length?splits.reduce((a,p)=>a+p.spread,0)/splits.length:0;
+    const tag=$("#spTag");
+    if(nSplit===0){tag.className="tag coupled";tag.textContent="coupled all day";}
+    else{tag.className="tag split";tag.textContent=nSplit+" h split";}
+    $("#capLab").textContent=(+cap.value)>=38?"large":(+cap.value)<=15?"tight":"moderate";
+    $("#spMax").textContent="€"+mx.toFixed(0); $("#spAvg").textContent="€"+avg.toFixed(0);
+    drawDur(d);
+  }
+  // duration curve in §4
+  const dsvg=$("#durSvg"), DX0=40,DX1=706,DY0=16,DY1=188;
+  function drawDur(d){
+    const sorted=d.map(p=>p.spread).sort((a,b)=>b-a);
+    const maxS=Math.max(8,Math.max(...sorted));
+    const xf2=i=>DX0+i/23*(DX1-DX0), yf2=v=>DY1-v/maxS*(DY1-DY0);
+    let s="";
+    [0,Math.round(maxS/2),Math.round(maxS)].forEach(v=>{const y=yf2(v);s+=`<line x1="${DX0}" y1="${y}" x2="${DX1}" y2="${y}" stroke="${C.line}" opacity="0.5"/><text x="${DX0-6}" y="${y+3}" text-anchor="end" font-family="ui-monospace,monospace" font-size="10.5" fill="${C.slate}">€${v}</text>`;});
+    // area
+    let pts=`${xf2(0)},${DY1} `+sorted.map((v,i)=>`${xf2(i).toFixed(1)},${yf2(v).toFixed(1)}`).join(" ")+` ${xf2(23)},${DY1}`;
+    s+=`<polygon points="${pts}" fill="${C.south}" opacity="0.14"/>`;
+    s+=`<polyline points="${sorted.map((v,i)=>`${xf2(i).toFixed(1)},${yf2(v).toFixed(1)}`).join(" ")}" fill="none" stroke="${C.south}" stroke-width="2.4"/>`;
+    // threshold €3
+    const ty=yf2(3); s+=`<line x1="${DX0}" y1="${ty}" x2="${DX1}" y2="${ty}" stroke="${C.ink}" stroke-width="1" stroke-dasharray="5 4"/>`;
+    const nAbove=sorted.filter(v=>v>3).length;
+    s+=`<text x="${DX1}" y="${ty-6}" text-anchor="end" font-family="ui-monospace,monospace" font-size="11" fill="${C.ink}">${nAbove} h wider than €3</text>`;
+    s+=`<text x="${(DX0+DX1)/2}" y="${DY1+20}" text-anchor="middle" font-family="ui-monospace,monospace" font-size="10.5" fill="${C.slate}">hours, widest → narrowest</text>`;
+    dsvg.innerHTML=s;
+  }
+  cap.addEventListener("input",draw);
+  draw();
+
+  $("#splitChoices").addEventListener("click",e=>{
+    const b=e.target.closest(".choice"); if(!b) return;
+    document.querySelectorAll("#splitChoices .choice").forEach(x=>x.setAttribute("aria-pressed","false"));
+    b.setAttribute("aria-pressed","true");
+    const v=$("#splitVerdict");
+    if(b.dataset.v==="split"){v.className="verdict ok";v.textContent="Right — the wanted flow outruns the cable, so the surplus is trapped North (cheap) and South stays dear. The spread opens.";}
+    else{v.className="verdict bad";v.textContent="The wire can't carry the whole asymmetry by day, so it splits — North cheap, South dear.";}
+    cap.value=25; draw();
+    $("#splitCover").classList.add("gone");
+  });
+})();
+</script>
+</body>
+</html>

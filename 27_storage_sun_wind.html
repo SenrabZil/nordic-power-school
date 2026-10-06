@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lesson 27 — Storage, sun &amp; wind · Nordic Power School</title>
+<style>
+  :root{
+    --frost:#EEF3F7; --panel:#FFFFFF; --ink:#13202E; --slate:#5A6A7A;
+    --line:#D3DDE6; --deep:#0E1F33; --volt:#10B5C9; --volt-ink:#0A7E8E;
+    --ember:#E0913A; --ember-ink:#B16A12; --warm:#C2603F; --warm-ink:#A8472A; --ok:#2FA980; --bad:#DD6457;
+    --mono: ui-monospace,"SF Mono","Cascadia Code",Consolas,"Roboto Mono",monospace;
+    --sans: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--frost);color:var(--ink);font-family:var(--sans);font-size:17px;line-height:1.62;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:860px;margin:0 auto;padding:0 24px}
+  header{position:sticky;top:0;z-index:20;background:rgba(238,243,247,.9);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+  .bar{display:flex;justify-content:space-between;align-items:center;height:52px;font-size:13px;letter-spacing:.04em;text-transform:uppercase}
+  .bar b{font-weight:700} .bar .r{font-family:var(--mono);color:var(--slate)}
+  .hero{padding:60px 0 26px}
+  .eyebrow{font-family:var(--mono);font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--volt-ink);margin-bottom:16px}
+  h1{font-size:clamp(32px,5.6vw,54px);line-height:1.03;letter-spacing:-.02em;margin:0 0 16px;font-weight:780}
+  .lead{font-size:clamp(18px,2.4vw,22px);color:var(--slate);max-width:48ch;margin:0}
+  .byline{margin-top:20px;font-size:14px;color:var(--slate)} .byline b{color:var(--ink)}
+  section{padding:36px 0;border-top:1px solid var(--line)}
+  .snum{font-family:var(--mono);font-size:13px;color:var(--volt-ink);letter-spacing:.1em}
+  h2{font-size:clamp(23px,3.3vw,32px);line-height:1.12;letter-spacing:-.015em;margin:6px 0 12px;font-weight:740}
+  p{margin:0 0 16px} .muted{color:var(--slate)}
+  .say{border-left:2px solid var(--volt);padding:2px 0 2px 18px;margin:18px 0}
+  .caution{border-left:2px solid var(--ember);padding:8px 0 8px 18px;margin:18px 0;color:var(--ember-ink);font-size:15px}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px;margin:18px 0}
+  .stage{position:relative;border-radius:12px;overflow:hidden;background:#fff;min-height:60px}
+  .answer{padding:18px 20px;font-size:15.5px;color:var(--ink)} .answer b{color:var(--ink)}
+  .cover{position:absolute;inset:0;background:linear-gradient(180deg,var(--deep),#0a1726);color:#cfe;display:flex;align-items:center;justify-content:center;text-align:center;padding:20px;transition:opacity .5s;z-index:4}
+  .cover.gone{opacity:0;pointer-events:none} .cover .q{font-size:15px;max-width:42ch;color:#dCEbF0}
+  .cap{font-family:var(--mono);font-size:12px;color:var(--slate);margin-top:10px} .cap b{color:var(--ink)}
+  .choices{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0}
+  .choice{font-family:var(--mono);font-size:14px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 16px;cursor:pointer;color:var(--ink);transition:.15s}
+  .choice:hover{border-color:var(--volt)} .choice[aria-pressed=true]{background:var(--deep);color:#fff;border-color:var(--deep)}
+  .verdict{font-size:15px;margin-top:4px;min-height:1.4em} .verdict.ok{color:var(--ok)} .verdict.bad{color:var(--bad)}
+  .xref{font-size:14px;color:var(--slate)} .xref a{color:var(--volt-ink);text-decoration:none;border-bottom:1px solid var(--line)} .xref a:hover{border-color:var(--volt)}
+  .rule{background:var(--deep);color:#eaf6f8;border-radius:14px;padding:24px;margin-top:8px}
+  .rule h3{margin:0 0 10px;font-size:20px;color:#fff} .rule p{color:#bcd6dc;margin:0 0 10px} .rule p:last-child{margin:0} .rule .k{color:var(--volt);font-family:var(--mono)}
+  footer{padding:48px 0;color:var(--slate);font-size:13px;border-top:1px solid var(--line)}
+  :focus-visible{outline:2px solid var(--volt);outline-offset:2px}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header><div class="wrap bar"><b>Nordic Power School</b><span class="r">Lesson 27 · Deep dive</span></div></header>
+
+<main class="wrap">
+  <div class="hero">
+    <div class="eyebrow">Lesson 27 · Storage, sun &amp; wind</div>
+    <h1>Sun, wind, and<br>the battery between.</h1>
+    <p class="lead">Solar and wind draw the shape of the day. A battery trades that shape &mdash; and by trading it, redraws it. These three aren&rsquo;t separate assets bidding side by side; they&rsquo;re one coupled system, each one&rsquo;s value set by the others.</p>
+    <p class="byline">with <b>Elizabeth Cecilia</b>. How renewables make storage valuable, how storage erodes its own spread, and how it all gets captured.</p>
+  </div>
+  <p class="buildson" style="font-family:var(--mono);font-size:12.5px;color:var(--slate);margin:0 0 26px;letter-spacing:.02em">Builds on &middot; <a href="13_bess_value_stacking.html" style="color:var(--volt-ink);text-decoration:none">13 BESS value stacking</a> &middot; <a href="08_spreads_duration.html" style="color:var(--volt-ink);text-decoration:none">08 Spreads & duration</a></p>
+
+
+  <section>
+    <div class="snum">01</div>
+    <h2>Three technologies, one curve</h2>
+    <p>You&rsquo;ve met all three already, separately. Solar digs a deep midday trough as every panel floods supply at once (Lesson 22, Lesson 25). Wind pushes residual load low at any hour and adds the day-to-day volatility (Lesson 20). A battery does the one thing neither can: it moves energy across time, buying when power is cheap and selling when it&rsquo;s dear (Lesson 13).</p>
+    <p>The point of this lesson is that they meet on the same curve, and they need each other. The battery has nothing to trade without the troughs and peaks that solar and wind carve. And the troughs and peaks don&rsquo;t stay put once a battery starts trading them. Read them together.</p>
+  </section>
+
+  <section>
+    <div class="snum">02</div>
+    <h2>Renewables manufacture the opportunity</h2>
+    <p>A battery&rsquo;s energy revenue is a <b>spread</b>: the gap between the price it charges at and the price it discharges at. Anything that widens that gap makes the battery more valuable &mdash; and that&rsquo;s exactly what solar and wind do. Solar craters the midday price; the evening ramp lifts the peak; wind throws in low-residual hours at odd times. Variable renewables don&rsquo;t just coexist with storage &mdash; they manufacture the volatility storage lives on.</p>
+    <p class="say"><b>Predict first:</b> a zone builds a lot more solar. What happens to a battery&rsquo;s arbitrage revenue?</p>
+    <div class="choices" data-reveal="covSolar" role="group" aria-label="Effect of more solar on battery revenue">
+      <button class="choice" data-v="up">It rises</button>
+      <button class="choice" data-v="flat">No change</button>
+      <button class="choice" data-v="down">It falls</button>
+    </div>
+    <div class="verdict" data-for="covSolar"></div>
+    <div class="panel"><div class="stage"><div class="answer"><b>It rises.</b> More solar means a deeper, more frequent midday trough and a sharper evening ramp &mdash; a wider spread for the battery to arbitrage. The more renewables a zone adds, the more valuable the first batteries become. Storage and solar are born partners: the resource that ruins solar&rsquo;s own capture price (Lesson 25) is the resource that feeds the battery.</div><div class="cover" id="covSolar"><div class="q">Make the call to reveal the answer.</div></div></div></div>
+  </section>
+
+  <section>
+    <div class="snum">03</div>
+    <h2>The daily dance</h2>
+    <p>Put a battery on a high-solar day and its schedule writes itself from the curve. Through the cheap midday hours it charges &mdash; sometimes paid to take power, when the trough goes negative. As solar drops and demand climbs into the evening, it discharges into the peak. Its state of charge is a mirror image of the price: fill in the valley, empty on the hill.</p>
+    <div class="panel"><svg viewBox="0 0 680 150" width="100%" id="dDance" role="img" aria-label="A price curve with a deep midday trough and evening peak, and a battery charging in the trough and discharging into the peak"></svg>
+      <div class="cap"><span style="color:#13202E">━ price</span> &middot; <span style="color:#0A7E8E">▮ charge</span> &middot; <span style="color:#B16A12">▮ discharge</span> &middot; <span style="color:#5A6A7A">┄ state of charge</span> &mdash; the battery&rsquo;s day is the price curve, read upside down.</div></div>
+    <p>Wind shifts the choreography. A windy night can be the cheapest window of all, so the battery charges overnight instead; a windless evening makes the peak sharper, so it saves its energy for then. The asset doesn&rsquo;t have a fixed routine &mdash; it has a routine dictated by that day&rsquo;s sun and wind.</p>
+  </section>
+
+  <section>
+    <div class="snum">04</div>
+    <h2>The battery flattens what it trades</h2>
+    <p>Here&rsquo;s the twist that makes this a system and not a one-way street. When the battery charges in the trough, it adds demand there and lifts the price. When it discharges into the peak, it adds supply there and lowers it. The very act of capturing the spread <i>narrows</i> the spread &mdash; it raises the floor and caps the ceiling.</p>
+    <p>That has a generous side effect: by lifting the midday trough, the battery raises the price solar captures in its own hours. Storage is the single best antidote to solar&rsquo;s cannibalisation (Lesson 25) &mdash; it buys exactly the energy solar is dumping, exactly when solar is dumping it. The two technologies improve each other&rsquo;s economics while quietly eroding the gap the battery feeds on.</p>
+    <p class="xref">Connects to <a href="25_capture_price.html">Lesson 25 · capture price</a> and <a href="13_bess_value_stacking.html">Lesson 13 · BESS value-stacking</a>.</p>
+  </section>
+
+  <section>
+    <div class="snum">05</div>
+    <h2>The spread is a shared, shrinking resource</h2>
+    <p>If one battery narrows the spread a little, a fleet of them narrows it a lot. The arbitrage spread is a common pool: every battery that charges the trough and sells the peak takes a slice and leaves less for the next one. As storage builds out, spreads compress &mdash; toward the point where the marginal battery only just covers its round-trip losses and degradation.</p>
+    <div class="panel"><svg viewBox="0 0 680 140" width="100%" id="dSpread" role="img" aria-label="The arbitrage spread falling as installed storage rises, flattening toward a break-even floor"></svg>
+      <div class="cap"><b>Spread vs storage.</b> Each gigawatt of storage shaves the spread; the curve flattens toward the marginal battery&rsquo;s break-even.</div></div>
+    <p class="say"><b>Predict first:</b> the same solar-heavy zone now also adds a large battery fleet. What happens to the arbitrage spread?</p>
+    <div class="choices" data-reveal="covBatt" role="group" aria-label="Effect of more storage on the spread">
+      <button class="choice" data-v="up">It widens</button>
+      <button class="choice" data-v="down">It shrinks</button>
+      <button class="choice" data-v="flat">Unchanged</button>
+    </div>
+    <div class="verdict" data-for="covBatt"></div>
+    <div class="panel"><div class="stage"><div class="answer"><b>It shrinks.</b> Every battery lifts the trough and caps the peak, so the spread they all share narrows &mdash; until the next battery barely breaks even after losses and wear. Storage erodes the opportunity it chases. This is the same merit-order logic as solar cannibalising itself: success competes the margin away.</div><div class="cover" id="covBatt"><div class="q">Make the call to reveal the answer.</div></div></div></div>
+  </section>
+
+  <section>
+    <div class="snum">06</div>
+    <h2>Why they&rsquo;re built together</h2>
+    <p>Because the three are so coupled, they&rsquo;re increasingly built as one project. <b>Solar-plus-storage</b> is the canonical pairing: the midday trough is predictable, so a co-located battery can soak the panels&rsquo; own output behind a shared grid connection, dodge curtailment, and shift it to the evening &mdash; turning a cannibalised midday megawatt into an evening-peak one. <b>Wind-plus-storage</b> is looser, because wind is less predictably shaped, but the battery firms a variable output and smooths its intraday swings. Either way the logic is the same: pair the thing that makes volatility with the thing that monetises it.</p>
+  </section>
+
+  <section>
+    <div class="snum">07</div>
+    <h2>How the spread is actually captured</h2>
+    <p>A battery doesn&rsquo;t earn the single lowest trough price and the single highest peak print. It fills its charge and its discharge over a <i>window</i>, across many trades in the continuous intraday book. So what it really earns is the volume-weighted average price &mdash; the VWAP &mdash; of its charge window against the VWAP of its discharge window. Its margin is discharge-VWAP minus charge-VWAP, minus losses. The VWAP isn&rsquo;t a benchmark bolted on afterwards; it&rsquo;s the literal shape of the battery&rsquo;s revenue.</p>
+    <p class="say"><b>Predict first:</b> a battery fires its whole evening discharge in one large clip versus spreading it across the peak window. Which earns more?</p>
+    <div class="choices" data-reveal="covVwap" role="group" aria-label="Single clip versus spread execution">
+      <button class="choice" data-v="dump">One large clip</button>
+      <button class="choice" data-v="spread">Spread across the window</button>
+      <button class="choice" data-v="same">No difference</button>
+    </div>
+    <div class="verdict" data-for="covVwap"></div>
+    <div class="panel"><div class="stage"><div class="answer"><b>Spreading wins.</b> A single large sell into a thin book pushes the price down against itself &mdash; the battery eats its own slippage. Filling gradually across the window captures close to the peak&rsquo;s VWAP without moving it. That&rsquo;s why storage desks trade <i>to</i> VWAP: it&rsquo;s both the thing they&rsquo;re optimising (charge-VWAP vs discharge-VWAP) and the measure of whether they captured the spread cleanly.</div><div class="cover" id="covVwap"><div class="q">Make the call to reveal the answer.</div></div></div></div>
+  </section>
+
+  <section>
+    <div class="snum">08</div>
+    <h2>Beyond energy: the balancing link</h2>
+    <p>The interconnection runs through the balancing market too. Wind is the hardest technology to forecast, so when the wind lands far from plan, the system is short or long and imbalance prices move (Lessons 18&ndash;19). A battery&rsquo;s speed makes it ideal for selling that flexibility &mdash; fast frequency response and reserves &mdash; so wind&rsquo;s very unpredictability becomes a battery revenue stream, stacked on top of energy arbitrage (Lesson 13). Sun and wind make the volatility; the battery sells it twice, once as energy and once as balancing.</p>
+    <div class="panel"><svg viewBox="0 0 680 180" width="100%" id="dLoop" role="img" aria-label="A feedback loop: renewables widen spreads, storage builds and captures them, storage flattens the spread, which lifts renewable capture and enables more renewables"></svg>
+      <div class="cap">The loop: renewables widen the spread, storage captures and then flattens it, and the flatter, higher trough lets still more renewables onto the system.</div></div>
+  </section>
+
+  <section>
+    <div class="snum">09</div>
+    <div class="rule">
+      <h3>Sun and wind draw the shape; the battery trades it; trading it redraws it</h3>
+      <p>They are one system. Renewables manufacture the volatility &mdash; <span class="k">the troughs, the peaks, the negative hours</span> &mdash; that gives storage something to trade. Storage captures that spread and, in capturing it, flattens it, lifting the price solar earns and shrinking the gap for the next battery.</p>
+      <p>So their fortunes are joined: more renewables make the first batteries rich; more batteries make renewables more bankable; and both together compress the spread toward the cost of the storage that closes it.</p>
+      <p>Never read the battery, the sun and the wind apart. The value of each is written by the other two.</p>
+    </div>
+  </section>
+</main>
+<nav class="lessonseq" style="max-width:860px;margin:0 auto;padding:30px 24px 0;display:flex;justify-content:space-between;gap:16px;font-family:var(--mono);font-size:13px;border-top:1px solid var(--line)"><a href="25_capture_price.html" style="color:var(--volt-ink);text-decoration:none;max-width:48%">&larr; Builds on &middot; Capture price &amp; cannibalisation</a><a href="index.html" style="color:var(--volt-ink);text-decoration:none;max-width:48%;text-align:right">Curriculum &rarr;</a></nav>
+
+          <footer class="wrap">Nordic Power School · Lesson 27 — education only. No bids, no trades, no dispatch.</footer>
+
+<script>
+(function(){
+  "use strict";
+  const MONO="ui-monospace,monospace", SANS="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif";
+  const C={ink:"#13202E",slate:"#5A6A7A",line:"#D3DDE6",volt:"#10B5C9",voltink:"#0A7E8E",
+           ember:"#E0913A",emberink:"#B16A12",warm:"#A8472A",ok:"#2FA980",bad:"#DD6457",deep:"#0E1F33"};
+
+  function drawDance(id){
+    const el=document.getElementById(id); if(!el) return; let s="";
+    const X0=46,X1=652, PY0=14,PY1=78, DV=88, CY0=96,CY1=140, MID=(CY0+CY1)/2;
+    const P=[42,40,38,38,40,46,54,58,48,32,18,6,-2,0,10,26,46,66,82,88,74,60,50,44];
+    const B=[0,0,0,0,0,0,0,0,0,-0.5,-1,-1,-1,-0.8,-0.2,0,0,0.6,1,1,0.9,0.3,0,0];
+    const SoC=[.08,.08,.08,.08,.08,.08,.08,.08,.08,.22,.5,.78,.98,1,1,1,1,.74,.46,.18,.05,.05,.05,.05];
+    const n=P.length, xAt=i=>X0+i/(n-1)*(X1-X0);
+    let plo=Math.min(...P,0),phi=Math.max(...P),psp=(phi-plo)||1, py=v=>PY1-(v-plo)/psp*(PY1-PY0);
+    // price panel + zero line
+    s+=`<line x1="${X0}" y1="${PY0}" x2="${X1}" y2="${PY0}" stroke="${C.line}" opacity="0.5"/>`;
+    const yz=py(0);
+    s+=`<line x1="${X0}" y1="${yz.toFixed(1)}" x2="${X1}" y2="${yz.toFixed(1)}" stroke="${C.slate}" stroke-dasharray="4 3" opacity="0.6"/>`;
+    s+=`<text x="${X1}" y="${(yz-3).toFixed(1)}" text-anchor="end" font-family="${MONO}" font-size="9.5" fill="${C.slate}">€0</text>`;
+    s+=`<polyline points="${P.map((v,i)=>xAt(i).toFixed(1)+','+py(v).toFixed(1)).join(' ')}" fill="none" stroke="${C.ink}" stroke-width="2.4"/>`;
+    s+=`<text x="${xAt(12).toFixed(1)}" y="${(py(P[12])-7).toFixed(1)}" text-anchor="middle" font-family="${MONO}" font-size="10" fill="${C.voltink}">solar trough</text>`;
+    s+=`<text x="${xAt(19).toFixed(1)}" y="${(py(P[19])-6).toFixed(1)}" text-anchor="middle" font-family="${MONO}" font-size="10" fill="${C.emberink}">evening peak</text>`;
+    // battery panel
+    s+=`<line x1="${X0}" y1="${DV}" x2="${X1}" y2="${DV}" stroke="${C.line}"/>`;
+    s+=`<line x1="${X0}" y1="${MID}" x2="${X1}" y2="${MID}" stroke="${C.line}" opacity="0.7"/>`;
+    const bw=(X1-X0)/n*0.6, bmax=1, bscale=(MID-CY0-2);
+    B.forEach((v,i)=>{ if(v===0) return; const x=xAt(i)-bw/2, h=Math.abs(v)/bmax*bscale;
+      if(v<0) s+=`<rect x="${x.toFixed(1)}" y="${MID.toFixed(1)}" width="${bw.toFixed(1)}" height="${h.toFixed(1)}" fill="${C.volt}" opacity="0.85"/>`;
+      else s+=`<rect x="${x.toFixed(1)}" y="${(MID-h).toFixed(1)}" width="${bw.toFixed(1)}" height="${h.toFixed(1)}" fill="${C.ember}" opacity="0.85"/>`;
+    });
+    s+=`<polyline points="${SoC.map((v,i)=>xAt(i).toFixed(1)+','+(CY1-v*(CY1-CY0)).toFixed(1)).join(' ')}" fill="none" stroke="${C.slate}" stroke-width="1.6" stroke-dasharray="5 4"/>`;
+    s+=`<text x="${X0-4}" y="${(CY0+8).toFixed(1)}" text-anchor="end" font-family="${MONO}" font-size="9" fill="${C.slate}">MW</text>`;
+    el.innerHTML=s;
+  }
+
+  function drawSpread(id){
+    const el=document.getElementById(id); if(!el) return; let s="";
+    const X0=56,X1=636,Y0=20,Y1=104, floor=12, top=92;
+    const xAt=t=>X0+t*(X1-X0), yAt=v=>Y1-(v-0)/(top+8)*(Y1-Y0);
+    let pts=[]; for(let i=0;i<=40;i++){const t=i/40; const v=floor+(top-floor)*Math.exp(-2.6*t); pts.push(xAt(t).toFixed(1)+','+yAt(v).toFixed(1));}
+    // break-even floor
+    s+=`<line x1="${X0}" y1="${yAt(floor).toFixed(1)}" x2="${X1}" y2="${yAt(floor).toFixed(1)}" stroke="${C.bad}" stroke-width="1.4" stroke-dasharray="4 3"/>`;
+    s+=`<text x="${X1}" y="${(yAt(floor)+14).toFixed(1)}" text-anchor="end" font-family="${MONO}" font-size="10" fill="${C.bad}">break-even (losses + degradation)</text>`;
+    s+=`<polyline points="${pts.join(' ')}" fill="none" stroke="${C.volt}" stroke-width="2.6"/>`;
+    s+=`<text x="${X0}" y="${(Y0+2).toFixed(1)}" font-family="${MONO}" font-size="10.5" fill="${C.voltink}">arbitrage spread (€/MWh)</text>`;
+    s+=`<line x1="${X0}" y1="${Y1}" x2="${X1}" y2="${Y1}" stroke="${C.line}"/>`;
+    s+=`<text x="${X1}" y="${(Y1+18).toFixed(1)}" text-anchor="end" font-family="${MONO}" font-size="10" fill="${C.slate}">installed storage →</text>`;
+    el.innerHTML=s;
+  }
+
+  function drawLoop(id){
+    const el=document.getElementById(id); if(!el) return; let s="";
+    const nodes=[[340,30,"Solar &amp; wind grow",C.volt],[558,95,"Spreads widen",C.ember],[340,150,"Storage builds &amp; captures",C.voltink],[122,95,"Storage flattens the spread",C.warm]];
+    const w=190,h=34;
+    nodes.forEach(nd=>{ s+=`<rect x="${nd[0]-w/2}" y="${nd[1]-h/2}" width="${w}" height="${h}" rx="9" fill="#fff" stroke="${nd[3]}"/>`+
+      `<text x="${nd[0]}" y="${nd[1]+4}" text-anchor="middle" font-family="${SANS}" font-size="12.5" font-weight="700" fill="${C.ink}">${nd[2]}</text>`;});
+    function arc(a,b){ const A=nodes[a],B=nodes[b]; const mx=(A[0]+B[0])/2, my=(A[1]+B[1])/2;
+      return `<path d="M${A[0]} ${A[1]} Q ${mx+(my-90)*0.15} ${my+(A[0]-340)*0.0} ${B[0]} ${B[1]}" fill="none" stroke="${C.slate}" stroke-width="1.6" opacity="0.55"/>`;}
+    // clockwise straight-ish arrows between consecutive nodes
+    function arrow(a,b){ const A=nodes[a],B=nodes[b];
+      const dx=B[0]-A[0],dy=B[1]-A[1],L=Math.hypot(dx,dy),ux=dx/L,uy=dy/L;
+      const sx=A[0]+ux*(w/2-10), sy=A[1]+uy*(h/2+2), ex=B[0]-ux*(w/2-10), ey=B[1]-uy*(h/2+2);
+      return `<line x1="${sx.toFixed(1)}" y1="${sy.toFixed(1)}" x2="${ex.toFixed(1)}" y2="${ey.toFixed(1)}" stroke="${C.slate}" stroke-width="1.8"/>`+
+             `<path d="M${(ex-uy*4-ux*7).toFixed(1)} ${(ey+ux*4-uy*7).toFixed(1)} L${ex.toFixed(1)} ${ey.toFixed(1)} L${(ex+uy*4-ux*7).toFixed(1)} ${(ey-ux*4-uy*7).toFixed(1)} Z" fill="${C.slate}"/>`;}
+    s+=arrow(0,1)+arrow(1,2)+arrow(2,3)+arrow(3,0);
+    s+=`<text x="340" y="93" text-anchor="middle" font-family="${MONO}" font-size="10.5" fill="${C.voltink}">…and a higher trough</text>`;
+    s+=`<text x="340" y="107" text-anchor="middle" font-family="${MONO}" font-size="10.5" fill="${C.voltink}">lets more renewables on</text>`;
+    el.innerHTML=s;
+  }
+
+  drawDance("dDance");
+  drawSpread("dSpread");
+  drawLoop("dLoop");
+
+  const REVEAL={
+    covSolar:{correct:"up",
+      ok:"Right — more solar means a deeper midday trough and a sharper evening ramp, a wider spread to arbitrage. The resource that ruins solar's own capture price feeds the battery.",
+      bad:"It rises — a deeper trough and steeper peak widen the spread the battery captures. More renewables make the first batteries more valuable, not less."},
+    covBatt:{correct:"down",
+      ok:"Right — every battery lifts the trough and caps the peak, so the shared spread narrows until the marginal battery barely breaks even. Storage competes its own margin away.",
+      bad:"It shrinks — batteries draw from one common spread, each flattening it a little, until the next one only just covers its losses. Success compresses the opportunity."},
+    covVwap:{correct:"spread",
+      ok:"Spreading wins. A single large clip pushes a thin book against itself; filling across the window captures the peak's VWAP. A battery earns the VWAP of its window, not one print.",
+      bad:"Spread across the window — one big sell moves the price down on itself (slippage). Filling gradually captures the window's VWAP, which is exactly what the battery is after."}
+  };
+  document.querySelectorAll(".choices").forEach(function(g){
+    g.addEventListener("click",function(e){
+      const b=e.target.closest(".choice"); if(!b) return;
+      const cid=g.dataset.reveal, cfg=REVEAL[cid]; if(!cfg) return;
+      g.querySelectorAll(".choice").forEach(function(x){x.setAttribute("aria-pressed", x===b?"true":"false");});
+      const ok=b.dataset.v===cfg.correct;
+      const v=document.querySelector('.verdict[data-for="'+cid+'"]');
+      if(v){v.className="verdict "+(ok?"ok":"bad"); v.textContent=ok?cfg.ok:cfg.bad;}
+      const cov=document.getElementById(cid); if(cov) cov.classList.add("gone");
+    });
+  });
+})();
+</script>
+</body>
+</html>

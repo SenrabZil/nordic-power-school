@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lesson 18 — The intraday market · Nordic Power School</title>
+<style>
+  :root{
+    --frost:#EEF3F7; --panel:#FFFFFF; --ink:#13202E; --slate:#5A6A7A;
+    --line:#D3DDE6; --deep:#0E1F33; --volt:#10B5C9; --volt-ink:#0A7E8E;
+    --ember:#E0913A; --ember-ink:#B16A12; --warm:#C2603F; --ok:#2FA980; --bad:#DD6457;
+    --mono: ui-monospace,"SF Mono","Cascadia Code",Consolas,"Roboto Mono",monospace;
+    --sans: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--frost);color:var(--ink);font-family:var(--sans);font-size:17px;line-height:1.62;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:860px;margin:0 auto;padding:0 24px}
+  header{position:sticky;top:0;z-index:20;background:rgba(238,243,247,.9);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+  .bar{display:flex;justify-content:space-between;align-items:center;height:52px;font-size:13px;letter-spacing:.04em;text-transform:uppercase}
+  .bar b{font-weight:700} .bar .r{font-family:var(--mono);color:var(--slate)}
+  .hero{padding:60px 0 26px}
+  .eyebrow{font-family:var(--mono);font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--volt-ink);margin-bottom:16px}
+  h1{font-size:clamp(32px,5.6vw,54px);line-height:1.03;letter-spacing:-.02em;margin:0 0 16px;font-weight:780}
+  .lead{font-size:clamp(18px,2.4vw,22px);color:var(--slate);max-width:42ch;margin:0}
+  .byline{margin-top:20px;font-size:14px;color:var(--slate)} .byline b{color:var(--ink)}
+  section{padding:36px 0;border-top:1px solid var(--line)}
+  .snum{font-family:var(--mono);font-size:13px;color:var(--volt-ink);letter-spacing:.1em}
+  h2{font-size:clamp(23px,3.3vw,32px);line-height:1.12;letter-spacing:-.015em;margin:6px 0 12px;font-weight:740}
+  p{margin:0 0 16px} .muted{color:var(--slate)}
+  .say{border-left:2px solid var(--volt);padding:2px 0 2px 18px;margin:18px 0}
+  .caution{border-left:2px solid var(--ember);padding:2px 0 2px 18px;margin:18px 0;color:var(--ember-ink);font-size:15px}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px;margin:20px 0}
+  .stage{position:relative;border-radius:12px;overflow:hidden}
+  .cover{position:absolute;inset:0;background:linear-gradient(180deg,var(--deep),#0a1726);color:#cfe;display:flex;flex-direction:column;gap:14px;align-items:center;justify-content:center;text-align:center;padding:24px;transition:opacity .5s;z-index:4}
+  .cover.gone{opacity:0;pointer-events:none} .cover .q{font-size:16px;max-width:34ch;color:#dCEbF0}
+  .controls{display:flex;flex-wrap:wrap;gap:18px;align-items:center;margin-top:14px}
+  .ctl{display:flex;flex-direction:column;gap:6px;min-width:260px;flex:1}
+  .ctl label{font-family:var(--mono);font-size:12.5px;color:var(--slate);display:flex;justify-content:space-between} .ctl label b{color:var(--ink)}
+  #rev{accent-color:var(--volt)} input[type=range]{width:100%}
+  .readout{display:flex;flex-wrap:wrap;gap:8px 24px;align-items:baseline;margin-top:14px;border-top:1px dashed var(--line);padding-top:14px;font-family:var(--mono);font-size:13.5px;color:var(--slate)}
+  .readout b{color:var(--ink)} .readout .big{font-size:22px;font-weight:600}
+  .tag{font-family:var(--mono);font-size:11.5px;letter-spacing:.05em;text-transform:uppercase;border-radius:999px;padding:5px 11px}
+  .tag.up{background:#fbeae7;color:#b23a2c} .tag.dn{background:#e3f6ee;color:#1c7a59}
+  .choices{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0}
+  .choice{font-family:var(--mono);font-size:14px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 16px;cursor:pointer;color:var(--ink);transition:.15s}
+  .choice:hover{border-color:var(--volt)} .choice[aria-pressed=true]{background:var(--deep);color:#fff;border-color:var(--deep)}
+  .verdict{font-size:15px;margin-top:4px;min-height:1.4em} .verdict.ok{color:var(--ok)} .verdict.bad{color:var(--bad)}
+  .rule{background:var(--deep);color:#eaf6f8;border-radius:14px;padding:24px;margin-top:8px}
+  .rule h3{margin:0 0 10px;font-size:20px;color:#fff} .rule p{color:#bcd6dc;margin:0 0 10px} .rule p:last-child{margin:0} .rule .k{color:var(--volt);font-family:var(--mono)}
+  footer{padding:48px 0;color:var(--slate);font-size:13px;border-top:1px solid var(--line)}
+  :focus-visible{outline:2px solid var(--volt);outline-offset:2px}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header><div class="wrap bar"><b>Nordic Power School</b><span class="r">Lesson 18 · Bonus</span></div></header>
+
+<main class="wrap">
+  <div class="hero">
+    <div class="eyebrow">Lesson 18 · Intraday</div>
+    <h1>Trading<br>the change.</h1>
+    <p class="lead">The day-ahead auction clears once and freezes a plan. Then reality drifts &mdash; the wind comes in lighter, a unit trips &mdash; and the intraday market trades the difference.</p>
+    <p class="byline">with <b>Elizabeth Cecilia</b>. Day-ahead is the forecast; intraday is the correction.</p>
+  </div>
+
+  <section>
+    <div class="snum">01</div>
+    <h2>One auction, then continuous</h2>
+    <p>Around 13:00 CET the day-ahead auction sets a single price for every hour of tomorrow. But that price rests on <b>forecasts</b> &mdash; tomorrow&rsquo;s wind, demand, plant availability. As those forecasts update through the day, the plan no longer matches reality. The <b>intraday market</b> runs continuously after the auction, right up to gate closure near delivery, so participants can trade away the difference between what they scheduled and what they now expect.</p>
+    <p>So intraday doesn&rsquo;t re-price the whole day. It prices the <b>change</b>.</p>
+  </section>
+
+  <section>
+    <div class="snum">02</div>
+    <h2>The forecast moves</h2>
+    <p>The day-ahead has cleared on the curve below. Mid-afternoon, the wind forecast for the <b>evening hours</b> is revised &mdash; the front isn&rsquo;t arriving as strongly as thought.</p>
+    <p class="say"><b>Predict first:</b> the evening wind is revised <i>down</i> three gigawatts after the auction. What do the intraday prices for those hours do?</p>
+    <div class="choices" id="idChoices" role="group" aria-label="Intraday after a wind downgrade">
+      <button class="choice" data-v="up">Rise above day-ahead</button>
+      <button class="choice" data-v="flat">Don't move</button>
+      <button class="choice" data-v="down">Fall below day-ahead</button>
+    </div>
+    <div class="verdict" id="idVerdict"></div>
+
+    <div class="panel">
+      <div class="stage">
+        <svg viewBox="0 0 720 320" width="100%" id="idSvg" role="img" aria-label="Day-ahead and intraday prices after a wind forecast revision"></svg>
+        <div class="cover" id="idCover"><div class="q">Predict above to revise the forecast and see intraday move.</div></div>
+      </div>
+      <div class="controls">
+        <div class="ctl"><label>Evening wind revision <b><span id="revVal">−3</span> GW</b></label><input id="rev" type="range" min="-4" max="4" step="1" value="-3"></div>
+      </div>
+      <div class="readout">
+        <span class="tag up" id="idTag">system shorter</span>
+        <span><span class="muted">biggest move</span> <span class="big" id="idMax">+€18</span>/MWh</span>
+        <span class="muted">on the 16:00–21:00 hours</span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="snum">03</div>
+    <h2>Why it moves, and which way</h2>
+    <p>Less wind than the auction assumed means the system is suddenly <b>short</b> for those hours &mdash; something pricier has to cover the gap, so intraday prints <i>above</i> the day-ahead. Revise wind <i>up</i> and it&rsquo;s the reverse: longer system, cheaper units, intraday <i>below</i> day-ahead, and on an already-soft hour it can chase toward zero. The intraday price is simply the day-ahead plus the correction the latest forecast demands.</p>
+    <p class="muted">Wind error is the dominant driver in the Nordics and across Europe &mdash; which is why intraday liquidity clusters around the hours and zones where wind matters most.</p>
+  </section>
+
+  <section>
+    <div class="snum">04</div>
+    <h2>Gate closure and thinning liquidity</h2>
+    <p>Two things move together as delivery nears: the forecast gets <b>better</b> (less to correct) and the order book gets <b>thinner</b> (fewer participants left to trade). So the largest, most tradeable corrections tend to come earlier, after a big forecast revision, while the last minutes before gate closure are sharp but shallow. Read intraday as the market&rsquo;s running confession of how wrong yesterday&rsquo;s plan turned out to be.</p>
+    <p class="caution">This explains what drives the intraday move &mdash; not advice on placing intraday orders or timing them. When and whether to trade the change is a decision the school doesn&rsquo;t make.</p>
+  </section>
+
+  <section>
+    <div class="snum">05</div>
+    <h2>The rule, in one breath</h2>
+    <div class="rule">
+      <h3>Day-ahead prices the plan; intraday prices the change to it.</h3>
+      <p>When a forecast moves after the auction &mdash; wind above all &mdash; the system goes shorter or longer for those hours, and intraday steps away from the day-ahead by exactly the correction required. Less wind, prices up; more wind, prices down. Read the <span class="k">forecast revision</span> and you&rsquo;ve read the intraday move.</p>
+      <p class="muted" style="color:#9fc0cb">That closes the bonus track. Back to the dashboard whenever you want today&rsquo;s read.</p>
+    </div>
+  </section>
+<nav class="lessonseq" style="max-width:860px;margin:0 auto;padding:30px 24px 0;display:flex;justify-content:space-between;gap:16px;font-family:var(--mono);font-size:13px;border-top:1px solid var(--line)"><a href="26_baltic_dimension.html" style="color:var(--volt-ink);text-decoration:none;max-width:48%">&larr; Builds on &middot; The Baltic dimension</a><a href="28_intraday_interactive.html" style="color:var(--volt-ink);text-decoration:none;max-width:48%;text-align:right">Next &middot; Intraday: the auction &amp; the book &rarr;</a></nav>
+
+            <footer class="wrap">Nordic Power School · Lesson 18 — education only. No bids, no trades, no dispatch.</footer>
+</main>
+
+<script>
+(function(){
+  "use strict";
+  const $=s=>document.querySelector(s);
+  const C={da:"#5A6A7A",id:"#10B5C9",fill:"#10B5C9",line:"#D3DDE6",slate:"#5A6A7A",ink:"#13202E",ok:"#2FA980"};
+  const DA=[46,44,43,43,45,52,63,71,70,58,40,28,21,20,24,33,48,67,85,82,70,60,53,49];
+  const WIN0=16, WIN1=21, K=6;   // revised window (inclusive) and €/MWh per GW
+  const rev=$("#rev");
+  function intraday(r){return DA.map((p,h)=>(h>=WIN0&&h<=WIN1)?p + K*(-r):p);}
+
+  const svg=$("#idSvg"), X0=40,X1=706,Y0=18,Y1=262;
+  const xf=h=>X0+h/23*(X1-X0), yf=p=>Y1-p/110*(Y1-Y0);
+  function draw(){
+    const r=+rev.value, ID=intraday(r);
+    let s="";
+    [0,40,80].forEach(v=>{const y=yf(v);s+=`<line x1="${X0}" y1="${y}" x2="${X1}" y2="${y}" stroke="${C.line}" opacity="0.5"/><text x="${X0-6}" y="${y+3}" text-anchor="end" font-family="ui-monospace,monospace" font-size="10.5" fill="${C.slate}">${v}</text>`;});
+    s+=`<text x="${X0-6}" y="${Y0-4}" text-anchor="end" font-family="ui-monospace,monospace" font-size="10.5" fill="${C.slate}">€</text>`;
+    // revised window band
+    s+=`<rect x="${xf(WIN0-0.5)}" y="${Y0}" width="${xf(WIN1+0.5)-xf(WIN0-0.5)}" height="${Y1-Y0}" fill="${C.id}" opacity="0.07"/>`;
+    s+=`<text x="${(xf(WIN0)+xf(WIN1))/2}" y="${Y0+12}" text-anchor="middle" font-family="ui-monospace,monospace" font-size="10.5" fill="${C.slate}">revised hours</text>`;
+    [0,6,12,18,23].forEach(h=>{const x=xf(h);s+=`<text x="${x}" y="${Y1+18}" text-anchor="middle" font-family="ui-monospace,monospace" font-size="10.5" fill="${C.slate}">${String(h).padStart(2,'0')}</text>`;});
+    // day-ahead line
+    s+=`<polyline points="${DA.map((p,i)=>`${xf(i).toFixed(1)},${yf(p).toFixed(1)}`).join(" ")}" fill="none" stroke="${C.da}" stroke-width="2.2" stroke-dasharray="5 4"/>`;
+    s+=`<text x="${xf(11)}" y="${yf(DA[11])+16}" font-family="ui-monospace,monospace" font-size="11" fill="${C.da}">day-ahead</text>`;
+    // intraday line
+    s+=`<polyline points="${ID.map((p,i)=>`${xf(i).toFixed(1)},${yf(p).toFixed(1)}`).join(" ")}" fill="none" stroke="${C.id}" stroke-width="2.6"/>`;
+    s+=`<text x="${xf(WIN1)}" y="${yf(ID[WIN1])-8}" text-anchor="end" font-family="ui-monospace,monospace" font-size="11" fill="${C.id}">intraday</text>`;
+    svg.innerHTML=s;
+    // readout
+    const delta=K*(-r);
+    $("#revVal").textContent=(r>0?"+":"")+r;
+    const tag=$("#idTag");
+    if(r<0){tag.className="tag up";tag.textContent="system shorter";}
+    else if(r>0){tag.className="tag dn";tag.textContent="system longer";}
+    else{tag.className="tag dn";tag.textContent="no change";}
+    $("#idMax").textContent=(delta>=0?"+":"−")+"€"+Math.abs(delta);
+  }
+  rev.addEventListener("input",draw);
+  draw();
+
+  $("#idChoices").addEventListener("click",e=>{
+    const b=e.target.closest(".choice"); if(!b) return;
+    document.querySelectorAll("#idChoices .choice").forEach(x=>x.setAttribute("aria-pressed","false"));
+    b.setAttribute("aria-pressed","true");
+    const v=$("#idVerdict");
+    if(b.dataset.v==="up"){v.className="verdict ok";v.textContent="Right — less wind means the system is short for those hours, so pricier units step in and intraday rises above day-ahead.";}
+    else{v.className="verdict bad";v.textContent="Less wind leaves the system short for those hours — pricier units cover the gap, so intraday rises above day-ahead.";}
+    rev.value=-3; draw();
+    $("#idCover").classList.add("gone");
+  });
+})();
+</script>
+</body>
+</html>

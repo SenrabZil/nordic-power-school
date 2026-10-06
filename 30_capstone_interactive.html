@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Capstone — One Hour, End to End</title>
+<style>
+  :root{
+  --frost:#EEF3F7;--panel:#FFFFFF;--ink:#13202E;--slate:#5A6A7A;
+  --line:#D3DDE6;--deep:#0E1F33;--volt:#10B5C9;--volt-ink:#0A7E8E;
+  --ember:#E0913A;--ember-ink:#B16A12;--warm:#C2603F;--ok:#2FA980;--bad:#DD6457;
+  --mono: ui-monospace,"SF Mono","Cascadia Code",Consolas,"Roboto Mono",monospace;
+  --sans: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --bg:var(--frost);--surface:var(--panel);--surface-alt:#F2F7FA;
+  --primary:var(--volt);--primary-deep:var(--deep);--muted:var(--slate);
+  --accent:var(--ember-ink);--accent-soft:#FBEEDF;
+  --good:var(--ok);--warn:var(--bad);--bid:var(--volt-ink);--ask:var(--warm);
+  --font-body:var(--sans);--font-data:var(--mono);
+  --maxw:860px;--readw:720px;
+}
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 17px; line-height: 1.65; -webkit-font-smoothing: antialiased; }
+  .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 22px 96px; }
+  .readw { max-width: var(--readw); }
+
+  .eyebrow { font-family: var(--font-data); font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--primary-deep); margin: 0 0 10px; }
+
+  header.lesson { padding: 64px 0 30px; border-bottom: 1px solid var(--line); margin-bottom: 8px; }
+  header.lesson .kicker { font-family: var(--font-data); font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); margin: 0 0 14px; }
+  header.lesson h1 { font-size: clamp(30px, 5.2vw, 46px); line-height: 1.08; letter-spacing: -0.02em; font-weight: 800; margin: 0 0 16px; max-width: 15ch; }
+  header.lesson .standfirst { font-size: 19px; color: var(--muted); margin: 0; max-width: 58ch; }
+  .meta-row { display: flex; flex-wrap: wrap; gap: 8px 18px; margin-top: 26px; font-family: var(--font-data); font-size: 12px; letter-spacing: 0.04em; color: var(--muted); }
+  .meta-row span { white-space: nowrap; }
+
+  .banner { display: flex; gap: 12px; align-items: flex-start; background: var(--accent-soft); border: 1px solid #e7d2bf; border-left: 3px solid var(--accent); border-radius: 4px; padding: 14px 16px; margin: 28px 0 8px; font-size: 15px; color: #6b3f1c; }
+  .banner strong { color: #5a3415; }
+  .banner .tag { font-family: var(--font-data); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; background: var(--accent); color: #fff; padding: 3px 7px; border-radius: 3px; flex: 0 0 auto; margin-top: 2px; }
+
+  section { padding-top: 44px; }
+  h2 { font-size: clamp(22px, 3.4vw, 28px); line-height: 1.18; letter-spacing: -0.015em; font-weight: 750; margin: 0 0 4px; }
+  .beat-no { font-family: var(--font-data); font-size: 12px; letter-spacing: 0.14em; color: var(--accent); display: block; margin-bottom: 8px; }
+  p { margin: 0 0 18px; }
+  .readw p, .readw ul { max-width: var(--readw); }
+  ul { padding-left: 1.1em; margin: 0 0 18px; }
+  li { margin-bottom: 8px; }
+  strong { font-weight: 700; }
+  em.term { font-style: normal; font-weight: 650; color: var(--primary-deep); }
+
+  .predict { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 20px 22px; margin: 22px 0; box-shadow: 0 1px 2px rgba(22,33,43,0.04); }
+  .predict .q-label { font-family: var(--font-data); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--primary); margin: 0 0 8px; }
+  .predict .q { font-weight: 600; margin: 0 0 4px; }
+  .predict .nudge { color: var(--muted); font-size: 15px; margin: 6px 0 0; }
+
+  .choices { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+  .choice { font-family: var(--font-data); font-size: 13px; letter-spacing: 0.02em; background: var(--surface-alt); color: var(--ink); border: 1px solid var(--line); border-radius: 5px; padding: 10px 15px; cursor: pointer; transition: border-color .15s, background .15s, color .15s; }
+  .choice:hover { border-color: var(--primary); }
+  .choice:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  .choice.selected { background: var(--primary); color: #fff; border-color: var(--primary); }
+  .choice.selected.correct { background: var(--good); border-color: var(--good); }
+  .choice.selected.rethink { background: var(--accent); border-color: var(--accent); }
+  .verdict { margin: 16px 0 0; font-size: 15.5px; font-weight: 600; color: var(--ink); line-height: 1.55; }
+  .verdict[hidden] { display: none; }
+  .vchip { font-family: var(--font-data); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; padding: 3px 7px; border-radius: 3px; margin-right: 9px; color: #fff; white-space: nowrap; }
+  .vchip-good { background: var(--good); }
+  .vchip-rethink { background: var(--accent); }
+  .vchip-open { background: var(--primary); }
+
+  .answer { overflow: hidden; max-height: 0; opacity: 0; transition: max-height .35s ease, opacity .3s ease, margin .35s ease, padding .35s ease; margin-top: 0; padding-top: 0; border-top: 1px dashed var(--line); }
+  .answer.open { max-height: 1400px; opacity: 1; margin-top: 16px; padding-top: 16px; }
+  .answer .a-label { font-family: var(--font-data); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); margin: 0 0 8px; }
+  .answer p:last-child { margin-bottom: 0; }
+
+  .panel { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 22px; margin: 26px 0; }
+  .panel h3 { font-family: var(--font-data); font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin: 0 0 4px; font-weight: 600; }
+  .panel .scenario { font-size: 15px; color: var(--muted); margin: 0 0 18px; }
+
+  .controls { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 18px; align-items: center; }
+  button.ctrl { font-family: var(--font-data); font-size: 12px; letter-spacing: 0.06em; background: var(--surface-alt); color: var(--ink); border: 1px solid var(--line); border-radius: 4px; padding: 9px 15px; cursor: pointer; transition: border-color .15s, background .15s; }
+  button.ctrl:hover { border-color: var(--primary); }
+  button.ctrl:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  button.ctrl.primary { background: var(--primary); color: #fff; border-color: var(--primary); }
+  button.ctrl.primary:hover { background: var(--primary-deep); }
+  button.ctrl:disabled { opacity: 0.4; cursor: default; }
+
+  /* ---- Episode timeline widget ---- */
+  .timeline { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 20px; }
+  @media (max-width: 560px) { .timeline { grid-template-columns: 1fr 1fr; } }
+  .tl-chip { border: 1px solid var(--line); border-radius: 6px; padding: 10px 12px; background: var(--surface-alt); opacity: 0.45; transition: opacity .2s, border-color .2s, background .2s; }
+  .tl-chip.shown { opacity: 1; }
+  .tl-chip.current { border-color: var(--accent); background: #fff; box-shadow: 0 3px 10px rgba(192,105,44,0.12); }
+  .tl-chip .tl-step { font-family: var(--font-data); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin: 0 0 4px; }
+  .tl-chip .tl-name { font-family: var(--font-data); font-weight: 700; font-size: 13px; color: var(--primary-deep); margin: 0; }
+  .tl-chip.current .tl-name { color: var(--accent); }
+
+  .stage-card { border: 1px solid var(--line); border-left: 3px solid var(--accent); border-radius: 6px; padding: 16px 18px; background: var(--surface-alt); margin-bottom: 18px; }
+  .stage-card .sc-head { font-family: var(--font-data); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); margin: 0 0 8px; }
+  .stage-card p { margin: 0; font-size: 15.5px; }
+  .stage-card .sc-price { font-family: var(--font-data); font-weight: 700; color: var(--primary-deep); }
+
+  .cap-prompt { margin-bottom: 18px; }
+  .cap-prompt > p { font-size: 15px; font-weight: 600; margin: 0 0 10px; }
+  .choices-inline { display: flex; flex-wrap: wrap; gap: 10px; }
+  .capbtn { font-family: var(--font-data); font-size: 13px; background: var(--surface-alt); color: var(--ink); border: 1px solid var(--line); border-radius: 5px; padding: 10px 15px; cursor: pointer; transition: border-color .15s, background .15s, color .15s; }
+  .capbtn:hover { border-color: var(--primary); }
+  .capbtn:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  .capbtn.on { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+  .ledger { border-top: 1px solid var(--line); padding-top: 16px; }
+  .ledger h4 { font-family: var(--font-data); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin: 0 0 10px; }
+  .led-row { font-family: var(--font-data); font-size: 14px; display: flex; justify-content: space-between; padding: 7px 10px; border-radius: 3px; margin-bottom: 4px; background: var(--surface-alt); }
+  .led-row .led-amt.pos { color: var(--good); font-weight: 700; }
+  .led-row .led-amt.neg { color: var(--warn); font-weight: 700; }
+  .led-net { font-family: var(--font-data); display: flex; justify-content: space-between; padding: 10px; border-radius: 4px; margin-top: 8px; background: var(--primary-deep); color: #fff; font-weight: 700; font-size: 15px; }
+  .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
+  @media (max-width: 460px) { .compare { grid-template-columns: 1fr; } }
+  .cmp { border: 1px solid var(--line); border-radius: 6px; padding: 12px; background: var(--surface-alt); }
+  .cmp.win { border-color: var(--good); background: #fff; }
+  .cmp .cmp-name { font-family: var(--font-data); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); margin: 0 0 6px; }
+  .cmp .cmp-val { font-family: var(--font-data); font-size: 20px; font-weight: 800; color: var(--primary-deep); margin: 0; }
+  .cmp.win .cmp-val { color: var(--good); }
+  .cmp .cmp-tag { font-family: var(--font-data); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--good); margin: 4px 0 0; min-height: 12px; }
+
+  footer.lesson { margin-top: 60px; padding-top: 24px; border-top: 1px solid var(--line); font-family: var(--font-data); font-size: 12px; line-height: 1.7; color: var(--muted); letter-spacing: 0.02em; }
+  footer.lesson .provenance { display: grid; gap: 2px; }
+  hr.rule { border: 0; border-top: 1px solid var(--line); margin: 0; }
+
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+
+  /* ===== House theme overrides (Nordic Power School) ===== */
+  .topbar{position:sticky;top:0;z-index:50;background:rgba(238,243,247,.92);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+  .topbar .bar{display:flex;justify-content:space-between;align-items:center;height:52px;font-size:13px;letter-spacing:.04em;text-transform:uppercase;max-width:860px;margin:0 auto;padding:0 24px}
+  .topbar .bar b{font-weight:700}.topbar .bar .r{font-family:var(--mono);color:var(--slate)}
+  .topbar .bar a{color:var(--volt-ink);text-decoration:none}
+  .eyebrow{color:var(--volt-ink)}
+  .beat-no{color:var(--ember-ink)}
+  em.term{color:var(--volt-ink)}
+  .panel{border-radius:14px}
+  .choice{font-family:var(--mono);border-radius:10px}
+  .choice.selected,.choice[aria-pressed="true"]{background:var(--deep);color:#fff;border-color:var(--deep)}
+  .choice.selected.correct{background:var(--ok);border-color:var(--ok)}
+  .choice.selected.rethink{background:var(--ember);border-color:var(--ember)}
+  .vchip-good{background:var(--ok)}.vchip-rethink{background:var(--ember)}.vchip-open{background:var(--volt-ink)}
+  .answer{border-top:0}
+  .answer.open{background:var(--deep);color:#cfe0e6;border:0;border-radius:14px;padding:20px 22px;margin-top:18px;max-height:2200px;opacity:1}
+  .answer.open .a-label{color:var(--volt)}
+  .answer.open strong{color:#fff}.answer.open em.term{color:var(--volt)}
+  .answer.open .nudge{color:#9fbac9}
+</style>
+</head>
+<body>
+<header class="topbar"><div class="bar"><b>Nordic Power School</b><span class="r"><a href="index.html">← Curriculum</a> &nbsp;·&nbsp; Lesson 30 · Interactive · Capstone</span></div></header>
+<div class="wrap">
+
+  <header class="lesson">
+    <p class="kicker">Nordic Power School · Capstone</p>
+    <h1>One Hour, End to End</h1>
+    <p class="standfirst">You've learned each market on its own. Day-ahead, intraday, balancing, settlement. Now watch them be one thing: a single delivery hour, a single position, carried all the way through — and a final number that depends on every stage before it.</p>
+    <div class="meta-row">
+      <span>LEVEL · CAPSTONE</span>
+      <span>PREREQUISITES · ALL FOUR LESSONS</span>
+      <span>MENTOR · ELIZABETH CECILIA</span>
+      <span>~30 MIN</span>
+    </div>
+  </header>
+
+  <div class="banner">
+    <span class="tag">Education only</span>
+    <p style="margin:0">A teaching walk-through, not a strategy. The whole point of this episode is that the "right" choice depends on an outcome you couldn't know in advance — so nothing here is advice. Every figure is <strong>synthetic and deterministic</strong>.</p>
+  </div>
+
+  <div class="readw">
+
+  <section>
+    <p class="eyebrow">The setup</p>
+    <h2>One battery, one hour, the whole timeline</h2>
+    <p>You operate a 50&nbsp;MW battery in Finland. We're going to follow <strong>delivery hour 18 tomorrow</strong> from the moment the day-ahead auction clears to the moment the last cent is settled — making one decision along the way and watching it ripple all the way to the end.</p>
+    <p>Use the episode panel below as your spine: step it forward stage by stage as you work through each beat. Read the driver, commit, and see where your position lands.</p>
+  </section>
+
+  <hr class="rule" />
+
+  <section>
+    <span class="beat-no">STAGE 01 — DAY-AHEAD</span>
+    <h2>The plan clears, and a gap opens</h2>
+    <p>The day-ahead auction clears hour 18 at <strong>€48/MWh</strong>. You sell 50&nbsp;MWh into it, booking <strong>+€2,400</strong>. But when you check your battery's state of charge for that hour, you can only physically deliver <strong>30&nbsp;MWh</strong>. You're 20&nbsp;MWh short of what you just sold.</p>
+    <div class="predict">
+      <p class="q-label">Predict — pick one</p>
+      <p class="q">You sold 50 but can deliver 30. Is your day-ahead revenue at risk?</p>
+      <div class="choices" role="group" aria-label="Is your day-ahead revenue at risk?" data-target="rev1" data-correct="norisk">
+        <button class="choice" data-key="norisk" data-lead="Right — the €2,400 sale price is locked. What's open is the cost of sourcing the 20 MWh you can't deliver.">No — the €2,400 is locked</button>
+        <button class="choice" data-key="risk" data-lead="The revenue is already booked at €48. It's the sourcing cost of the shortfall that's still in play.">Yes — you'll lose on the sale</button>
+        <button class="choice" data-key="depends" data-lead="The €2,400 doesn't move with prices — but the cost to cover your 20 MWh short certainly does.">Only if prices rise</button>
+      </div>
+      <p class="verdict" id="rev1-verdict" hidden></p>
+      <div class="answer" id="rev1">
+        <p class="a-label">The reasoning</p>
+        <p>The day-ahead sale is <strong>done</strong> — €2,400 is yours at €48, whatever happens next. What's now open is a physical gap: 20&nbsp;MWh you're committed to deliver but can't. That shortfall has to be sourced somewhere downstream — and <em>where</em> you source it, and at what price, is the whole rest of this episode.</p>
+        <p>Step the panel to <strong>Intraday</strong> and let's price the first option.</p>
+      </div>
+    </div>
+  </section>
+
+  <hr class="rule" />
+
+  <section>
+    <span class="beat-no">STAGE 02 — INTRADAY</span>
+    <h2>News breaks. You can close the gap now — or not.</h2>
+    <p>At 13:00 the wind forecast for hour 18 drops 2&nbsp;GW. You've seen this film: intraday for that hour firms. It's now <strong>€58/MWh</strong>. You can buy your 20&nbsp;MWh short here and now for <strong>−€1,160</strong>, squaring your position — or carry the short into delivery and take whatever real time hands you.</p>
+    <div class="predict">
+      <p class="q-label">Predict — pick one</p>
+      <p class="q">After a 2 GW wind drop, which way did intraday for hour 18 move?</p>
+      <div class="choices" role="group" aria-label="Which way did intraday move?" data-target="rev2" data-correct="up">
+        <button class="choice" data-key="up" data-lead="Right — less wind, scarcer hour, shorts buying back. Covering now costs more than the day-ahead price.">It firmed — covering costs more</button>
+        <button class="choice" data-key="down" data-lead="Less wind means a scarcer hour — that pushes intraday up, not down.">It softened</button>
+        <button class="choice" data-key="flat" data-lead="A 2 GW supply shock moves the hour — intraday rarely shrugs it off.">Barely moved</button>
+      </div>
+      <p class="verdict" id="rev2-verdict" hidden></p>
+      <div class="answer" id="rev2">
+        <p class="a-label">The reasoning</p>
+        <p>It firmed to €58 — above your €48 sale. So covering the short now <em>locks a known cost</em> of €1,160, but at a worse price than you sold at. Carrying it leaves the cost open, to be set by whatever the balancing stage does. There's no free option here; there's a <strong>known cost now versus an unknown cost later</strong>.</p>
+        <p>Make your call in the panel — <em>cover</em> or <em>carry</em> — then step to <strong>Balancing</strong>.</p>
+      </div>
+    </div>
+  </section>
+
+  </div><!-- /readw -->
+
+  <hr class="rule" />
+
+  <section>
+    <div class="panel">
+      <h3>Walk the episode — Finland, hour 18 (synthetic)</h3>
+      <p class="scenario">Step through the four stages. At intraday, choose to cover or carry the 20&nbsp;MWh short. At settlement, the system ended short — but you can flip it to long to see how contingent the outcome is.</p>
+      <div class="timeline" id="cap-timeline"></div>
+      <div class="controls">
+        <button class="ctrl primary" id="cap-step">Step forward</button>
+        <button class="ctrl" id="cap-reset">Reset</button>
+        <span id="cap-hint" style="font-family:var(--font-data);font-size:12px;color:var(--muted)"></span>
+      </div>
+      <div class="stage-card" id="cap-stage"></div>
+      <div class="cap-prompt" id="cap-decision" hidden>
+        <p>Your move on the 20&nbsp;MWh short:</p>
+        <div class="choices-inline">
+          <button class="capbtn" data-d="cover">Cover now (−€1,160)</button>
+          <button class="capbtn" data-d="carry">Carry to delivery</button>
+        </div>
+      </div>
+      <div class="cap-prompt" id="cap-contingency" hidden>
+        <p>The system ended <strong>short</strong>. Explore the other outcome:</p>
+        <div class="choices-inline">
+          <button class="capbtn sys on" data-s="short">System short (as happened)</button>
+          <button class="capbtn sys" data-s="long">What if it ended long?</button>
+        </div>
+      </div>
+      <div class="ledger" id="cap-ledger"></div>
+    </div>
+  </section>
+
+  <hr class="rule" />
+
+  <div class="readw">
+
+  <section>
+    <span class="beat-no">STAGE 03 — BALANCING</span>
+    <h2>Real time decides the price you didn't lock</h2>
+    <p>Delivery arrives. Wind came in even lower than intraday had priced; the system is <strong>short</strong>, the TSO activates up-regulation, and the 15-minute imbalance price settles at <strong>€95/MWh</strong> — well above both your sale and the intraday level.</p>
+    <div class="predict">
+      <p class="q-label">Predict — pick one</p>
+      <p class="q">A short system on a low-wind evening — where does the imbalance price sit?</p>
+      <div class="choices" role="group" aria-label="Where does the imbalance price sit?" data-target="rev3" data-correct="high">
+        <button class="choice" data-key="high" data-lead="Right — up-regulation in a short system pushes the imbalance price above spot, here to €95.">Above spot — up-regulation</button>
+        <button class="choice" data-key="low" data-lead="A short system needs power up, not down — that lifts the price, not lowers it.">Below spot — down-regulation</button>
+        <button class="choice" data-key="spot" data-lead="Balancing rarely lands on spot — a tight system pulls it well above.">About the same as spot</button>
+      </div>
+      <p class="verdict" id="rev3-verdict" hidden></p>
+      <div class="answer" id="rev3">
+        <p class="a-label">The reasoning</p>
+        <p>Short system, up-regulation, €95. If you <em>carried</em> your 20&nbsp;MWh short, this is the price it now settles at — €1,900 out the door, far worse than the €1,160 covering would have cost. If you <em>covered</em>, you're square and this price never touches you. Step to <strong>Settlement</strong> and total it up.</p>
+      </div>
+    </div>
+  </section>
+
+  <hr class="rule" />
+
+  <section>
+    <span class="beat-no">STAGE 04 — SETTLEMENT</span>
+    <h2>The number — and why it nearly went the other way</h2>
+    <p>Now the tally. But before you read it, the real capstone question isn't <em>what</em> the number is — it's whether the choice that produced it was the right one, and whether it would be right again.</p>
+    <div class="predict">
+      <p class="q-label">Predict — pick one</p>
+      <p class="q">For <em>this</em> episode, which path nets more — and would it hold next time?</p>
+      <div class="choices" role="group" aria-label="Which path nets more for this episode?" data-target="rev4" data-correct="cover">
+        <button class="choice" data-key="cover" data-lead="Right for this episode (+€1,240 vs +€500) — now flip the system to long in the panel and watch it reverse.">Covering — this time</button>
+        <button class="choice" data-key="carry" data-lead="Not this time — carrying hit the €95 imbalance. But flip the system long and carrying wins.">Carrying — this time</button>
+        <button class="choice" data-key="same" data-lead="They differ by €740 here — and the gap swings the other way entirely if the system ends long.">About the same</button>
+      </div>
+      <p class="verdict" id="rev4-verdict" hidden></p>
+      <div class="answer" id="rev4">
+        <p class="a-label">The reasoning</p>
+        <p>For this episode, covering wins: <strong>+€1,240</strong> against carrying's <strong>+€500</strong>. But flip the contingency toggle in the panel — had the system ended <em>long</em>, the imbalance price would have fallen to around €10, and carrying would have netted <strong>+€2,200</strong>, beating covering handily.</p>
+        <p>Same hour, same position, same decision points — and the verdict reverses entirely on something you <strong>could not know when you had to choose</strong>: which way the system would end. That's the lesson the whole school has been building toward. There's no rule that says "always cover" or "always carry." There's only a connected system in which the price you don't lock rolls forward to the next stage, and the imbalance backstop prices whatever's left — at a level the system sets, not you.</p>
+      </div>
+    </div>
+  </section>
+
+  <hr class="rule" />
+
+  <section>
+    <p class="eyebrow">The whole arc</p>
+    <h2>What you've actually learned</h2>
+    <ul>
+      <li><strong>Day-ahead locks revenue; physics opens exposure.</strong> The sale was safe; the 20&nbsp;MWh you couldn't deliver was the real story.</li>
+      <li><strong>Every market reprices the same MWh.</strong> €48 day-ahead, €58 intraday, €95 (or €10) at the backstop — one position, valued four times.</li>
+      <li><strong>What you don't close rolls forward.</strong> The gap left open at each stage lands at the next, until the imbalance backstop catches whatever remains.</li>
+      <li><strong>Cover versus carry has no universal answer.</strong> This episode rewarded covering; a long system would have rewarded carrying. The choice is made under uncertainty, always.</li>
+      <li><strong>The four markets are one system.</strong> Every lesson in this school is a magnified view of a single stage of this one timeline.</li>
+    </ul>
+    <p>That's the arc — day-ahead to settlement, one hour, one position. You can run the episode again and make the other choice, or flip the system, and watch the whole chain rearrange itself. Then go back to any single lesson and you'll see it differently: not a market on its own, but one link in this.</p>
+  </section>
+
+  </div><!-- /readw -->
+<div class="wrap" style="max-width:860px;margin:0 auto;padding:8px 24px 0"><p style="border-left:2px solid var(--volt);padding:4px 0 4px 18px;margin:18px 0;font-weight:600"><span style="font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--volt-ink);display:block;margin-bottom:4px">The rule, in one breath</span>Day-ahead locks revenue, every later market reprices what’s left, and the imbalance backstop catches the rest — at a price the system sets, contingent on which way it broke.</p></div>
+<nav class="lessonseq" style="max-width:860px;margin:0 auto;padding:30px 24px 0;display:flex;justify-content:space-between;gap:16px;font-family:var(--mono);font-size:13px;border-top:1px solid var(--line)"><a href="14_virtual_power_plants.html" style="color:var(--volt-ink);text-decoration:none;max-width:48%">&larr; Builds on &middot; Virtual power plants</a><a href="12_ancillary_markets.html" style="color:var(--volt-ink);text-decoration:none;max-width:48%;text-align:right">Next &middot; Ancillary markets &rarr;</a></nav>
+
+            <footer class="wrap" style="max-width:860px;margin:0 auto;padding:40px 24px;color:var(--slate);font-size:13px;border-top:1px solid var(--line)">Nordic Power School · Lesson 30 — education only. No bids, no trades, no dispatch. <span style="font-family:var(--mono)">Synthetic data · deterministic.</span></footer>
+
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ---------- Committed predictions + tailored verdicts ---------- */
+  document.querySelectorAll(".choices").forEach(function (group) {
+    var targetId = group.dataset.target;
+    var correct = group.dataset.correct || null;
+    var verdictEl = document.getElementById(targetId + "-verdict");
+    var answerEl = document.getElementById(targetId);
+    var btns = group.querySelectorAll(".choice");
+    btns.forEach(function (btn) {
+      btn.setAttribute("aria-pressed", "false");
+      btn.addEventListener("click", function () {
+        btns.forEach(function (b) { b.classList.remove("selected", "correct", "rethink"); b.setAttribute("aria-pressed", "false"); });
+        btn.classList.add("selected");
+        btn.setAttribute("aria-pressed", "true");
+        var chip;
+        if (!correct) { chip = '<span class="vchip vchip-open">Your call</span>'; }
+        else if (btn.dataset.key === correct) { chip = '<span class="vchip vchip-good">On the money</span>'; btn.classList.add("correct"); }
+        else { chip = '<span class="vchip vchip-rethink">Worth a look</span>'; btn.classList.add("rethink"); }
+        verdictEl.innerHTML = chip + (btn.dataset.lead || "");
+        verdictEl.hidden = false;
+        answerEl.classList.add("open");
+      });
+    });
+  });
+
+  /* ---------- Episode timeline (synthetic, deterministic) ---------- */
+  var DA = 2400, ID_COVER = 1160, SHORT = 20;
+  var IMB = { short: 95, long: 10 };
+  var STAGES = [
+    { name: "Day-ahead", head: "Stage 1 · Day-ahead",
+      body: 'Hour 18 clears at <span class="sc-price">\u20ac48/MWh</span>. You sell 50 MWh \u2192 <span class="sc-price">+\u20ac2,400</span>. Deliverable: 30 MWh. You are <strong>20 MWh short</strong>.' },
+    { name: "Intraday", head: "Stage 2 · Intraday",
+      body: 'Wind forecast drops 2 GW. Hour 18 firms to <span class="sc-price">\u20ac58/MWh</span>. Cover the 20 MWh short now for <span class="sc-price">\u2212\u20ac1,160</span>, or carry it.' },
+    { name: "Balancing", head: "Stage 3 · Balancing",
+      body: 'Real time: wind came in low, the system is short. Up-regulation. Imbalance price <span class="sc-price">\u20ac95/MWh</span>.' },
+    { name: "Settlement", head: "Stage 4 · Settlement",
+      body: 'The period settles. Tally the day-ahead sale, any intraday cover, and any imbalance on the carried short.' }
+  ];
+
+  var stage = 0;          // 0 = not started; 1..4 = stage shown
+  var decision = null;    // 'cover' | 'carry'
+  var sysDir = "short";   // 'short' | 'long'
+
+  var timelineEl = document.getElementById("cap-timeline");
+  var stageEl = document.getElementById("cap-stage");
+  var decisionEl = document.getElementById("cap-decision");
+  var contingencyEl = document.getElementById("cap-contingency");
+  var ledgerEl = document.getElementById("cap-ledger");
+  var stepBtn = document.getElementById("cap-step");
+  var resetBtn = document.getElementById("cap-reset");
+  var hintEl = document.getElementById("cap-hint");
+
+  function euro(v) {
+    var s = Math.abs(v).toLocaleString("en-US");
+    return (v < 0 ? "\u2212\u20ac" : "\u20ac") + s;
+  }
+
+  function render() {
+    // timeline chips
+    timelineEl.innerHTML = STAGES.map(function (s, i) {
+      var shown = stage >= i + 1 ? " shown" : "";
+      var cur = stage === i + 1 ? " current" : "";
+      return '<div class="tl-chip' + shown + cur + '"><p class="tl-step">Step ' + (i + 1) + '</p><p class="tl-name">' + s.name + '</p></div>';
+    }).join("");
+
+    // current stage card
+    if (stage === 0) {
+      stageEl.innerHTML = '<p class="sc-head">Ready</p><p>Press <strong>Step forward</strong> to clear the day-ahead auction and begin the episode.</p>';
+    } else {
+      var s = STAGES[stage - 1];
+      stageEl.innerHTML = '<p class="sc-head">' + s.head + '</p><p>' + s.body + '</p>';
+    }
+
+    // decision prompt visible from intraday onward
+    decisionEl.hidden = stage < 2;
+    decisionEl.querySelectorAll(".capbtn").forEach(function (b) {
+      b.classList.toggle("on", b.dataset.d === decision);
+    });
+
+    // contingency prompt visible at settlement
+    contingencyEl.hidden = stage < 4;
+    contingencyEl.querySelectorAll(".capbtn").forEach(function (b) {
+      b.classList.toggle("on", b.dataset.s === sysDir);
+    });
+
+    // step button gating
+    if (stage === 2 && decision === null) {
+      stepBtn.disabled = true;
+      hintEl.textContent = "Choose cover or carry to continue.";
+    } else if (stage >= 4) {
+      stepBtn.disabled = true;
+      hintEl.textContent = "Episode complete \u2014 flip the system above, or reset.";
+    } else {
+      stepBtn.disabled = false;
+      hintEl.textContent = "";
+    }
+
+    renderLedger();
+  }
+
+  function renderLedger() {
+    if (stage < 1) { ledgerEl.innerHTML = ""; return; }
+    var rows = [];
+    rows.push({ label: "Day-ahead sale \u00b7 50 MWh @ \u20ac48", amt: DA });
+    if (stage >= 2 && decision === "cover") rows.push({ label: "Intraday cover \u00b7 20 MWh @ \u20ac58", amt: -ID_COVER });
+    if (stage >= 3 && decision === "carry") {
+      var imbP = IMB[sysDir];
+      rows.push({ label: "Imbalance \u00b7 20 MWh short @ " + euro(imbP), amt: -(SHORT * imbP) });
+    }
+    var html = '<h4>Ledger \u00b7 carried position</h4>';
+    html += rows.map(function (r) {
+      var cls = r.amt >= 0 ? "pos" : "neg";
+      return '<div class="led-row"><span>' + r.label + '</span><span class="led-amt ' + cls + '">' + euro(r.amt) + '</span></div>';
+    }).join("");
+
+    if (stage >= 4 && decision) {
+      var net = rows.reduce(function (a, r) { return a + r.amt; }, 0);
+      html += '<div class="led-net"><span>Net for this episode</span><span>' + euro(net) + '</span></div>';
+      // comparison of both paths under current system direction
+      var coverNet = DA - ID_COVER;
+      var carryNet = DA - SHORT * IMB[sysDir];
+      var coverWin = coverNet >= carryNet;
+      html += '<div class="compare">' +
+        '<div class="cmp' + (coverWin ? " win" : "") + '"><p class="cmp-name">Cover path</p><p class="cmp-val">' + euro(coverNet) + '</p><p class="cmp-tag">' + (coverWin ? "wins this outcome" : "") + '</p></div>' +
+        '<div class="cmp' + (!coverWin ? " win" : "") + '"><p class="cmp-name">Carry path \u00b7 system ' + sysDir + '</p><p class="cmp-val">' + euro(carryNet) + '</p><p class="cmp-tag">' + (!coverWin ? "wins this outcome" : "") + '</p></div>' +
+        '</div>';
+    }
+    ledgerEl.innerHTML = html;
+  }
+
+  stepBtn.addEventListener("click", function () { if (stage < 4) { stage++; render(); } });
+  resetBtn.addEventListener("click", function () { stage = 0; decision = null; sysDir = "short"; render(); });
+  decisionEl.querySelectorAll(".capbtn").forEach(function (b) {
+    b.addEventListener("click", function () { decision = b.dataset.d; render(); });
+  });
+  contingencyEl.querySelectorAll(".capbtn").forEach(function (b) {
+    b.addEventListener("click", function () { sysDir = b.dataset.s; render(); });
+  });
+
+  render();
+
+})();
+</script>
+</body>
+</html>

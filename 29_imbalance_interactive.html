@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Nordic Imbalance — When Real Time Takes Over</title>
+<style>
+  :root{
+  --frost:#EEF3F7;--panel:#FFFFFF;--ink:#13202E;--slate:#5A6A7A;
+  --line:#D3DDE6;--deep:#0E1F33;--volt:#10B5C9;--volt-ink:#0A7E8E;
+  --ember:#E0913A;--ember-ink:#B16A12;--warm:#C2603F;--ok:#2FA980;--bad:#DD6457;
+  --mono: ui-monospace,"SF Mono","Cascadia Code",Consolas,"Roboto Mono",monospace;
+  --sans: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --bg:var(--frost);--surface:var(--panel);--surface-alt:#F2F7FA;
+  --primary:var(--volt);--primary-deep:var(--deep);--muted:var(--slate);
+  --accent:var(--ember-ink);--accent-soft:#FBEEDF;
+  --good:var(--ok);--warn:var(--bad);--bid:var(--volt-ink);--ask:var(--warm);
+  --font-body:var(--sans);--font-data:var(--mono);
+  --maxw:860px;--readw:720px;
+}
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: var(--font-body); font-size: 17px; line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 22px 96px; }
+  .readw { max-width: var(--readw); }
+
+  .eyebrow {
+    font-family: var(--font-data); font-size: 12px; letter-spacing: 0.16em;
+    text-transform: uppercase; color: var(--primary-deep); margin: 0 0 10px;
+  }
+
+  header.lesson { padding: 64px 0 30px; border-bottom: 1px solid var(--line); margin-bottom: 8px; }
+  header.lesson h1 {
+    font-size: clamp(30px, 5.2vw, 46px); line-height: 1.08; letter-spacing: -0.02em;
+    font-weight: 800; margin: 0 0 16px; max-width: 16ch;
+  }
+  header.lesson .standfirst { font-size: 19px; color: var(--muted); margin: 0; max-width: 56ch; }
+  .meta-row {
+    display: flex; flex-wrap: wrap; gap: 8px 18px; margin-top: 26px;
+    font-family: var(--font-data); font-size: 12px; letter-spacing: 0.04em; color: var(--muted);
+  }
+  .meta-row span { white-space: nowrap; }
+
+  .banner {
+    display: flex; gap: 12px; align-items: flex-start;
+    background: var(--accent-soft); border: 1px solid #e7d2bf; border-left: 3px solid var(--accent);
+    border-radius: 4px; padding: 14px 16px; margin: 28px 0 8px; font-size: 15px; color: #6b3f1c;
+  }
+  .banner strong { color: #5a3415; }
+  .banner .tag {
+    font-family: var(--font-data); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;
+    background: var(--accent); color: #fff; padding: 3px 7px; border-radius: 3px; flex: 0 0 auto; margin-top: 2px;
+  }
+
+  section { padding-top: 44px; }
+  h2 { font-size: clamp(22px, 3.4vw, 28px); line-height: 1.18; letter-spacing: -0.015em; font-weight: 750; margin: 0 0 4px; }
+  .beat-no { font-family: var(--font-data); font-size: 12px; letter-spacing: 0.14em; color: var(--accent); display: block; margin-bottom: 8px; }
+  p { margin: 0 0 18px; }
+  .readw p, .readw ul { max-width: var(--readw); }
+  ul { padding-left: 1.1em; margin: 0 0 18px; }
+  li { margin-bottom: 8px; }
+  strong { font-weight: 700; }
+  em.term { font-style: normal; font-weight: 650; color: var(--primary-deep); }
+
+  .predict {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 6px;
+    padding: 20px 22px; margin: 22px 0; box-shadow: 0 1px 2px rgba(22,33,43,0.04);
+  }
+  .predict .q-label { font-family: var(--font-data); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--primary); margin: 0 0 8px; }
+  .predict .q { font-weight: 600; margin: 0 0 4px; }
+  .predict .nudge { color: var(--muted); font-size: 15px; margin: 6px 0 0; }
+
+  /* Interactive predictions */
+  .choices { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+  .choice {
+    font-family: var(--font-data); font-size: 13px; letter-spacing: 0.02em;
+    background: var(--surface-alt); color: var(--ink); border: 1px solid var(--line);
+    border-radius: 5px; padding: 10px 15px; cursor: pointer;
+    transition: border-color .15s, background .15s, color .15s;
+  }
+  .choice:hover { border-color: var(--primary); }
+  .choice:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  .choice.selected { background: var(--primary); color: #fff; border-color: var(--primary); }
+  .choice.selected.correct { background: var(--good); border-color: var(--good); }
+  .choice.selected.rethink { background: var(--accent); border-color: var(--accent); }
+  .verdict { margin: 16px 0 0; font-size: 15.5px; font-weight: 600; color: var(--ink); line-height: 1.55; }
+  .verdict[hidden] { display: none; }
+  .vchip { font-family: var(--font-data); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; padding: 3px 7px; border-radius: 3px; margin-right: 9px; color: #fff; white-space: nowrap; }
+  .vchip-good { background: var(--good); }
+  .vchip-rethink { background: var(--accent); }
+  .vchip-open { background: var(--primary); }
+
+  .answer {
+    overflow: hidden; max-height: 0; opacity: 0;
+    transition: max-height .35s ease, opacity .3s ease, margin .35s ease, padding .35s ease;
+    margin-top: 0; padding-top: 0; border-top: 1px dashed var(--line);
+  }
+  .answer.open { max-height: 1400px; opacity: 1; margin-top: 16px; padding-top: 16px; }
+  .answer .a-label { font-family: var(--font-data); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); margin: 0 0 8px; }
+  .answer p:last-child { margin-bottom: 0; }
+
+  .panel { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 22px; margin: 26px 0; }
+  .panel h3 { font-family: var(--font-data); font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin: 0 0 4px; font-weight: 600; }
+  .panel .scenario { font-size: 15px; color: var(--muted); margin: 0 0 18px; }
+
+  .controls { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 18px; align-items: center; }
+  button.ctrl { font-family: var(--font-data); font-size: 12px; letter-spacing: 0.06em; background: var(--surface-alt); color: var(--ink); border: 1px solid var(--line); border-radius: 4px; padding: 9px 15px; cursor: pointer; transition: border-color .15s, background .15s; }
+  button.ctrl:hover { border-color: var(--primary); }
+  button.ctrl:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  button.ctrl.primary { background: var(--primary); color: #fff; border-color: var(--primary); }
+  button.ctrl.primary:hover { background: var(--primary-deep); }
+
+  .measure { border: 1px solid var(--line); border-radius: 6px; padding: 14px; background: var(--surface-alt); }
+  .measure .m-name { font-family: var(--font-data); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin: 0 0 6px; }
+  .measure .m-val { font-family: var(--font-data); font-size: 22px; font-weight: 700; color: var(--primary-deep); margin: 0; }
+  .measure .m-sub { font-size: 12px; color: var(--muted); margin: 4px 0 0; }
+
+  /* ---- Reserve cascade ---- */
+  .casc-phase { font-family: var(--font-data); font-size: 12px; color: var(--muted); }
+  .casc-stage { display: grid; grid-template-columns: auto 1fr; gap: 18px; align-items: center; margin-bottom: 18px; }
+  @media (max-width: 560px) { .casc-stage { grid-template-columns: 1fr; } }
+  .freq-readout { font-family: var(--font-data); display: flex; align-items: baseline; gap: 4px; }
+  .freq-readout #casc-hz { font-size: 38px; font-weight: 800; color: var(--primary-deep); letter-spacing: -0.01em; }
+  .freq-readout.low #casc-hz { color: var(--warn); }
+  .freq-readout .hz-unit { font-size: 14px; color: var(--muted); }
+  .freq-svg { width: 100%; height: auto; background: var(--surface-alt); border-radius: 6px; }
+  .freq-svg .refline { stroke: var(--line); stroke-width: 1.5; stroke-dasharray: 4 4; }
+  .freq-svg .reflabel { fill: var(--muted); font-family: var(--font-data); font-size: 11px; }
+  .freq-svg .fcurve { fill: none; stroke: var(--accent); stroke-width: 2.5; }
+  .reserve-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+  @media (max-width: 640px) { .reserve-cards { grid-template-columns: 1fr 1fr; } }
+  .rcard { border: 1px solid var(--line); border-radius: 6px; padding: 12px; background: var(--surface-alt); transition: border-color .2s, background .2s, transform .2s; }
+  .rcard.active { border-color: var(--accent); background: #fff; transform: translateY(-2px); box-shadow: 0 3px 10px rgba(192,105,44,0.12); }
+  .rcard .rc-name { font-family: var(--font-data); font-weight: 700; font-size: 14px; color: var(--primary-deep); margin: 0 0 4px; }
+  .rcard.active .rc-name { color: var(--accent); }
+  .rcard .rc-meta { font-family: var(--font-data); font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); margin: 0 0 6px; }
+  .rcard .rc-desc { font-size: 12.5px; color: var(--muted); margin: 0; line-height: 1.45; }
+  .rc-role { display: inline-block; font-family: var(--font-data); font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; padding: 2px 5px; border-radius: 3px; color: #fff; }
+  .rc-role.contain { background: var(--warn); }
+  .rc-role.restore { background: var(--good); }
+
+  /* ---- Regulation merit walk ---- */
+  .range-control { margin-bottom: 20px; }
+  .range-control label { display: block; font-family: var(--font-data); font-size: 13px; color: var(--ink); margin-bottom: 10px; letter-spacing: 0.03em; }
+  .range-control output { color: var(--accent); font-weight: 700; }
+  .range-control input[type="range"] { width: 100%; accent-color: var(--accent); cursor: pointer; }
+  .range-control input[type="range"]:focus-visible { outline: 3px solid var(--accent); outline-offset: 4px; }
+  .range-ends { display: flex; justify-content: space-between; font-family: var(--font-data); font-size: 11px; color: var(--muted); margin-top: 6px; }
+  .merit-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media (max-width: 640px) { .merit-grid { grid-template-columns: 1fr; } }
+  .reg-stack h4 { font-family: var(--font-data); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; margin: 0 0 8px; color: var(--primary-deep); }
+  .reg-level { font-family: var(--font-data); font-size: 14px; border-radius: 3px; margin-bottom: 5px; overflow: hidden; position: relative; background: rgba(44,107,120,0.08); }
+  .reg-level .rl-bar { position: absolute; top: 0; bottom: 0; left: 0; background: var(--accent-soft); border-right: 2px solid var(--accent); z-index: 0; transition: width .18s ease; }
+  .reg-level .rl-text { position: relative; z-index: 1; display: flex; justify-content: space-between; padding: 6px 10px; }
+  .reg-level .rl-px { font-weight: 700; color: var(--primary-deep); }
+  .reg-level.fired .rl-px { color: var(--accent); }
+  .reg-level .rl-eaten { color: var(--accent); font-size: 12px; }
+  .result-trio { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+  .result-trio .measure { padding: 12px; }
+  .result-trio .m-val { font-size: 20px; }
+  .settle-box { border: 1px solid var(--line); border-radius: 6px; padding: 14px; background: var(--surface); }
+  .settle-box .m-name { font-family: var(--font-data); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin: 0 0 6px; }
+  .settle-val { font-family: var(--font-data); font-size: 24px; font-weight: 800; margin: 0; }
+  .settle-val.pay { color: var(--warn); }
+  .settle-val.receive { color: var(--good); }
+  .settle-box .m-sub { font-size: 12.5px; color: var(--muted); margin: 6px 0 0; line-height: 1.45; }
+
+  footer.lesson { margin-top: 60px; padding-top: 24px; border-top: 1px solid var(--line); font-family: var(--font-data); font-size: 12px; line-height: 1.7; color: var(--muted); letter-spacing: 0.02em; }
+  footer.lesson .provenance { display: grid; gap: 2px; }
+  hr.rule { border: 0; border-top: 1px solid var(--line); margin: 0; }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
+
+  /* ===== House theme overrides (Nordic Power School) ===== */
+  .topbar{position:sticky;top:0;z-index:50;background:rgba(238,243,247,.92);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+  .topbar .bar{display:flex;justify-content:space-between;align-items:center;height:52px;font-size:13px;letter-spacing:.04em;text-transform:uppercase;max-width:860px;margin:0 auto;padding:0 24px}
+  .topbar .bar b{font-weight:700}.topbar .bar .r{font-family:var(--mono);color:var(--slate)}
+  .topbar .bar a{color:var(--volt-ink);text-decoration:none}
+  .eyebrow{color:var(--volt-ink)}
+  .beat-no{color:var(--ember-ink)}
+  em.term{color:var(--volt-ink)}
+  .panel{border-radius:14px}
+  .choice{font-family:var(--mono);border-radius:10px}
+  .choice.selected,.choice[aria-pressed="true"]{background:var(--deep);color:#fff;border-color:var(--deep)}
+  .choice.selected.correct{background:var(--ok);border-color:var(--ok)}
+  .choice.selected.rethink{background:var(--ember);border-color:var(--ember)}
+  .vchip-good{background:var(--ok)}.vchip-rethink{background:var(--ember)}.vchip-open{background:var(--volt-ink)}
+  .answer{border-top:0}
+  .answer.open{background:var(--deep);color:#cfe0e6;border:0;border-radius:14px;padding:20px 22px;margin-top:18px;max-height:2200px;opacity:1}
+  .answer.open .a-label{color:var(--volt)}
+  .answer.open strong{color:#fff}.answer.open em.term{color:var(--volt)}
+  .answer.open .nudge{color:#9fbac9}
+</style>
+</head>
+<body>
+<header class="topbar"><div class="bar"><b>Nordic Power School</b><span class="r"><a href="index.html">← Curriculum</a> &nbsp;·&nbsp; Lesson 29 · Interactive</span></div></header>
+<div class="wrap">
+
+  <header class="lesson">
+    <p class="eyebrow">Nordic Power School · Balancing &amp; Settlement</p>
+    <h1>Nordic Imbalance: When Real Time Takes Over</h1>
+    <p class="standfirst">Every other market lets you choose whether to trade. This one doesn't. When the book finally closes and the grid has to balance second by second, the power you're still out of position on gets settled here — whether you meant to be in this market or not.</p>
+    <div class="meta-row">
+      <span>LEVEL · INTERMEDIATE</span>
+      <span>PREREQUISITE · INTRADAY</span>
+      <span>MENTOR · ELIZABETH CECILIA</span>
+      <span>~25 MIN</span>
+    </div>
+  </header>
+
+  <div class="banner">
+    <span class="tag">Education only</span>
+    <p style="margin:0">A teaching environment — nothing here is trading advice or a signal to act on. We read mechanisms and settlement, never what to do with them. Every figure is <strong>synthetic and deterministic</strong>, built to show structure, not any live market.</p>
+  </div>
+
+  <div class="readw">
+
+  <section>
+    <p class="eyebrow">Where we are</p>
+    <h2>After the book closes, the grid still has to balance</h2>
+    <p>Continuous intraday shut about an hour before delivery. But electricity is consumed the instant it's produced — supply and demand have to match every single second, or the grid frequency drifts off 50&nbsp;Hz. No market schedule can guarantee that. Forecasts are wrong, units trip, demand surprises.</p>
+    <p>So the <em class="term">TSO</em> — Fingrid, Svenska kraftnät, Statnett, Energinet — steps in and physically balances the system in real time by activating reserves. That costs money, and the cost flows back to whoever was out of position, as the <strong>imbalance price</strong>. This is the backstop sitting behind day-ahead, intraday, everything.</p>
+  </section>
+
+  <hr class="rule" />
+
+  <section>
+    <span class="beat-no">BEAT 01 — THE MARKET YOU CAN'T LEAVE</span>
+    <h2>Is your exposure over when intraday closes?</h2>
+    <p>You've traded all the way through day-ahead and intraday. The continuous book just closed for delivery hour 18. You step away from the desk.</p>
+    <div class="predict">
+      <p class="q-label">Predict — pick one</p>
+      <p class="q">After intraday closes, is your exposure to this hour over?</p>
+      <div class="choices" role="group" aria-label="Is your exposure over when intraday closes?" data-target="rev1" data-correct="settled">
+        <button class="choice" data-key="over" data-lead="Delivery isn't the end — the system still settles you on whatever position you're left holding.">Yes — delivery just happens</button>
+        <button class="choice" data-key="settled" data-lead="Exactly — any gap between your schedule and physical reality is your imbalance, and it's settled whether you act or not.">No — you're settled on any imbalance</button>
+        <button class="choice" data-key="trip" data-lead="Imbalance is constant, not just a failure event — even a small forecast miss settles here.">Only if a plant trips</button>
+      </div>
+      <p class="verdict" id="rev1-verdict" hidden></p>
+      <div class="answer" id="rev1">
+        <p class="a-label">The reasoning</p>
+        <p>Your exposure is never "over" — it just changes hands. Whatever gap remains between your final scheduled position and the power actually delivered <em>is</em> your imbalance, and <strong>eSett settles it automatically</strong> at the imbalance price for that 15-minute period. You don't opt in. If you're short, you effectively buy the shortfall here; if you're long, you sell the surplus here — at a price set by how expensive it was for the TSO to balance the whole system.</p>
+        <p>That's why this is the backstop behind every other market: every position you don't close in day-ahead or intraday lands here by default. Which makes the price it settles at worth understanding cold — so let's build it.</p>
+      </div>
+    </div>
+  </section>
+
+  </div><!-- /readw -->
+
+  <hr class="rule" />
+
+  <section>
+    <div class="readw">
+      <span class="beat-no">BEAT 02 — THE RESERVE CASCADE</span>
+      <h2>Reserves don't arrive all at once</h2>
+      <p>To hold 50&nbsp;Hz, the TSO keeps layers of reserves on standby, each with a different speed and a different job. When something breaks, they come in <em>in sequence</em>: the fast ones first, to <strong>contain</strong> the fall, then slower ones to <strong>restore</strong> the frequency and free the fast reserves back up.</p>
+      <div class="predict">
+        <p class="q-label">Predict — pick one</p>
+        <p class="q">A 500&nbsp;MW unit trips. What stops the frequency falling in the first <em>seconds</em>?</p>
+        <div class="choices" role="group" aria-label="What stops the frequency falling in the first seconds?" data-target="rev2" data-correct="auto">
+          <button class="choice" data-key="phone" data-lead="Far too slow for seconds — calling a plant is the manual layer, and it comes minutes later.">The TSO calls a power plant</button>
+          <button class="choice" data-key="auto" data-lead="Right — automatic reserves respond in under a second to a few seconds, with no human in the loop.">Automatic fast reserves</button>
+          <button class="choice" data-key="da" data-lead="The day-ahead auction cleared yesterday — it can't respond to a live trip at all.">The day-ahead market</button>
+        </div>
+        <p class="verdict" id="rev2-verdict" hidden></p>
+        <div class="answer" id="rev2">
+          <p class="a-label">The reasoning</p>
+          <p>The first response is <strong>automatic</strong>. FFR and FCR sense the frequency dropping and inject power within a second or two — no instruction, no phone call. They <em>contain</em> the fall and hold a steady (if slightly low) frequency. Only then do the slower restoration reserves, aFRR and mFRR, pull frequency back to 50&nbsp;Hz and release the fast reserves for the next event.</p>
+          <p>Watch it in the widget below, then note the last layer: <strong>mFRR</strong> is the manual workhorse — and its activation price is the one that flows straight into the imbalance price you'll settle against. That's Beat 03.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3>The reserve cascade — a unit trips (synthetic)</h3>
+      <p class="scenario">Trip a 500&nbsp;MW generator and watch the frequency. The reserves come in by speed: first to contain the fall, then to restore 50&nbsp;Hz.</p>
+      <div class="controls">
+        <button class="ctrl primary" id="casc-trip">Trip the unit</button>
+        <button class="ctrl" id="casc-reset">Reset</button>
+        <span class="casc-phase" id="casc-phase">System balanced &middot; 50.00 Hz</span>
+      </div>
+      <div class="casc-stage">
+        <div class="freq-readout" id="casc-readout"><span id="casc-hz">50.00</span><span class="hz-unit">Hz</span></div>
+        <svg class="freq-svg" id="casc-svg" viewBox="0 0 600 180" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Grid frequency over time during a unit trip">
+          <line class="refline" x1="30" y1="54" x2="580" y2="54"></line>
+          <text class="reflabel" x="34" y="48">50.00 Hz</text>
+          <text class="reflabel" x="34" y="140">49.85 Hz nadir</text>
+          <path class="fcurve" id="casc-path" d="M40,54 L120,54 L150,88 L180,121 L210,126 L250,112 L320,107 L390,82 L460,64 L540,54"></path>
+        </svg>
+      </div>
+      <div class="reserve-cards">
+        <div class="rcard" id="rc-ffr">
+          <p class="rc-name">FFR</p>
+          <p class="rc-meta">sub-second &middot; <span class="rc-role contain">contain</span></p>
+          <p class="rc-desc">Fast Frequency Reserve. Injects in under a second for low-inertia moments.</p>
+        </div>
+        <div class="rcard" id="rc-fcr">
+          <p class="rc-name">FCR-N / FCR-D</p>
+          <p class="rc-meta">seconds &middot; <span class="rc-role contain">contain</span></p>
+          <p class="rc-desc">Frequency Containment. FCR-N holds the normal band; FCR-D arrests disturbances. Stops the fall.</p>
+        </div>
+        <div class="rcard" id="rc-afrr">
+          <p class="rc-name">aFRR</p>
+          <p class="rc-meta">tens of seconds &middot; <span class="rc-role restore">restore</span></p>
+          <p class="rc-desc">Automatic Frequency Restoration. Pulls frequency back toward 50&nbsp;Hz on its own.</p>
+        </div>
+        <div class="rcard" id="rc-mfrr">
+          <p class="rc-name">mFRR</p>
+          <p class="rc-meta">minutes &middot; <span class="rc-role restore">restore</span></p>
+          <p class="rc-desc">Manual Restoration — the workhorse. Frees the fast reserves, and its marginal price sets the imbalance price.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="rule" />
+
+  <section>
+    <div class="readw">
+      <span class="beat-no">BEAT 03 — HOW THE PRICE FORMS</span>
+      <h2>The marginal bid sets the price</h2>
+      <p>That mFRR activation isn't free. Providers submit <em class="term">regulating bids</em>, and the TSO activates them in <strong>merit order</strong> to cover the system's imbalance — cheapest first when the system is short and needs power <em>up</em>, most attractive first when it's long and needs power <em>down</em>. The last bid it has to activate — the marginal one — sets the balancing price, which becomes the 15-minute imbalance price.</p>
+      <div class="predict">
+        <p class="q-label">Predict — pick one</p>
+        <p class="q">The system is short by 300&nbsp;MW. Which bids fire, and what sets the price?</p>
+        <div class="choices" role="group" aria-label="Which bids fire and what sets the price?" data-target="rev3" data-correct="marginal">
+          <button class="choice" data-key="marginal" data-lead="Right — cheapest up-reg bids first, and the marginal one sets a single price for all. Like an auction.">Cheapest up-reg bids; the marginal one sets it</button>
+          <button class="choice" data-key="own" data-lead="That's the continuous-book model — balancing isn't priced trade-by-trade.">Every activated bid at its own price</button>
+          <button class="choice" data-key="spot" data-lead="Spot is the reference point, not the balancing price — balancing can sit far above or below it.">The day-ahead spot price</button>
+        </div>
+        <p class="verdict" id="rev3-verdict" hidden></p>
+        <div class="answer" id="rev3">
+          <p class="a-label">The reasoning</p>
+          <p>Cheapest first, and the <strong>marginal activated bid sets a single price</strong> for everyone. Notice the echo: this is the <em>auction</em> logic from the intraday lesson — one marginal clearing price — not the fragmented, every-trade-its-own-price continuous book. When the system is short, up-regulation pushes the price <strong>above spot</strong>; when it's long, down-regulation drags it <strong>below spot, sometimes negative</strong>.</p>
+          <p>Drag the slider below from short to long and watch the price swing right through spot and out the other side.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3>Set the system imbalance (synthetic)</h3>
+      <p class="scenario">Drag the system imbalance. Short &rarr; the TSO activates up-regulation bids cheapest first; long &rarr; down-regulation. The marginal activated bid sets the single 15-minute imbalance price. Spot reference: &euro;50/MWh.</p>
+      <div class="range-control">
+        <label for="imb-slider">System is <output id="imb-out">short 300 MW</output></label>
+        <input type="range" id="imb-slider" min="-400" max="400" value="-300" step="50" aria-label="System imbalance in MW, negative is short" />
+        <div class="range-ends"><span>&larr; short 400</span><span>balanced</span><span>long 400 &rarr;</span></div>
+      </div>
+      <div class="merit-grid">
+        <div class="reg-stack">
+          <h4 id="stack-title">Up-regulation bids &#9656; cheapest first</h4>
+          <div id="reg-bids"></div>
+        </div>
+        <div class="merit-out">
+          <div class="result-trio">
+            <div class="measure"><p class="m-name">Regulation</p><p class="m-val" id="reg-dir">UP</p><p class="m-sub" id="reg-need">covering 300 MW</p></div>
+            <div class="measure"><p class="m-name">Imbalance price</p><p class="m-val" id="reg-price" style="color:var(--accent)">—</p><p class="m-sub" id="reg-vs">vs spot &euro;50</p></div>
+          </div>
+          <div class="settle-box">
+            <p class="m-name">Your settlement &middot; 50 MWh short</p>
+            <p class="settle-val" id="settle-val">—</p>
+            <p class="m-sub" id="settle-note"></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="rule" />
+
+  <div class="readw">
+
+  <section>
+    <span class="beat-no">BEAT 04 — SINGLE PRICE, SINGLE POSITION</span>
+    <h2>The same shortfall, two completely different bills</h2>
+    <p>The Nordic model settles you on a <strong>single price</strong> and a <strong>single position</strong>: your production and consumption net to one imbalance figure, settled at one price regardless of which way you were off. So the question isn't just how far out you were — it's whether you were out the <em>same</em> way as the whole system, or the opposite.</p>
+    <div class="predict">
+      <p class="q-label">Predict — pick one</p>
+      <p class="q">You end the period 50&nbsp;MWh short. Does it matter whether the <em>system</em> was short or long?</p>
+      <div class="choices" role="group" aria-label="Does it matter whether the system was short or long?" data-target="rev4" data-correct="yes">
+        <button class="choice" data-key="no" data-lead="The volume is identical — but the price you're settled at is not, and that's the whole story.">No — short is short</button>
+        <button class="choice" data-key="yes" data-lead="Right — same 50 MWh, opposite outcomes. Try it on the slider above.">Yes — enormously</button>
+        <button class="choice" data-key="vol" data-lead="Volume sets the size; system direction sets the price, and can even flip its sign.">Only the volume matters</button>
+      </div>
+      <p class="verdict" id="rev4-verdict" hidden></p>
+      <div class="answer" id="rev4">
+        <p class="a-label">The reasoning</p>
+        <p>Take the slider above. With the system <strong>short</strong>, your 50&nbsp;MWh shortfall settles at a high up-regulation price — you might <strong>pay &euro;7,000</strong>. Now drag it to system <strong>long</strong>: the same 50&nbsp;MWh short settles at a low or negative price, and you might <strong>receive &euro;1,500</strong>. Identical position, opposite result.</p>
+        <p>Why? Because being short while the whole system was <em>long</em> means you actually <strong>helped balance it</strong> — you consumed less than planned exactly when there was a surplus. The single-price design rewards that alignment. The old two-price model used to split helpful and harmful imbalances; the single price folds it into one number, so the lesson is blunt: <strong>the imbalance price pays you for being on the system's side, not just for your volume.</strong></p>
+      </div>
+    </div>
+  </section>
+
+  <hr class="rule" />
+
+  <section>
+    <span class="beat-no">BEAT 05 — WHOSE HOME TURF THIS IS</span>
+    <h2>The battery, all the way down the stack</h2>
+    <p>Remember the battery that walked the intraday book? This is where it really lives. A grid-scale BESS plays two roles at once: as a <em class="term">BSP</em> (Balancing Service Provider) it <em>sells</em> reserve into the very cascade from Beat 02 — FCR-N, FCR-D, FFR, aFRR, mFRR — and as a <em class="term">BRP</em> it arbitrages the imbalance price you just built.</p>
+    <div class="predict">
+      <p class="q-label">Predict — pick one</p>
+      <p class="q">Where does a grid battery earn the most?</p>
+      <div class="choices" role="group" aria-label="Where does a grid battery earn the most?" data-target="rev5" data-correct="stack">
+        <button class="choice" data-key="one" data-lead="A battery rarely commits to one market — it moves between them minute to minute.">One market — whichever pays best</button>
+        <button class="choice" data-key="stack" data-lead="Right — the stack is the business model: capacity plus activation plus imbalance.">Stacked across reserves, activation and imbalance</button>
+        <button class="choice" data-key="da" data-lead="That's where storage economics started; the reserve and balancing stack is where the margin is now.">Day-ahead arbitrage alone</button>
+      </div>
+      <p class="verdict" id="rev5-verdict" hidden></p>
+      <div class="answer" id="rev5">
+        <p class="a-label">The reasoning</p>
+        <p>The economics are a <strong>stack</strong>: capacity payments for holding reserve available (FCR-N/D, FFR, aFRR, mFRR), energy payments when that reserve is activated, and imbalance arbitrage on top — the battery shifts each MW and MWh to wherever it earns most at that moment. Reading the live system state — Fingrid publishes frequency and system imbalance on a 3-minute cadence — is how an operator anticipates whether the next period regulates up or down.</p>
+        <p>And one honest note to close on. Unlike the intraday continuous prices, which are commercial, <strong>this data is open</strong>: Fingrid publishes imbalance prices and real-time system state, and eSett publishes settlement. A learner could fetch the real series tomorrow. We used synthetic numbers only to keep the structure clean — and as ever, we've described how a battery's economics meet these mechanisms, not a strategy to run.</p>
+      </div>
+    </div>
+  </section>
+
+  <hr class="rule" />
+
+  <section>
+    <p class="eyebrow">Carry this forward</p>
+    <h2>What to take with you</h2>
+    <ul>
+      <li><strong>Imbalance is the market you can't opt out of.</strong> Any gap between your schedule and physical delivery is settled, automatically, every period.</li>
+      <li><strong>Reserves cascade by speed.</strong> FFR and FCR contain the fall in seconds; aFRR and mFRR restore 50&nbsp;Hz over tens of seconds to minutes.</li>
+      <li><strong>The marginal mFRR bid sets one imbalance price.</strong> Up-regulation lifts it above spot; down-regulation drags it below, sometimes negative.</li>
+      <li><strong>Single price, single position.</strong> The same imbalance settles very differently by system direction — alignment with the system is what pays, not volume alone.</li>
+      <li><strong>The battery lives across the whole stack</strong> — a BSP selling reserve, a BRP arbitraging imbalance.</li>
+    </ul>
+    <p>You've now walked the full timeline: day-ahead clears the plan, intraday adjusts it, balancing holds it in real time, and settlement prices whatever's left. The capstone puts a single real episode through all four at once.</p>
+  </section>
+
+  </div><!-- /readw -->
+<div class="wrap" style="max-width:860px;margin:0 auto;padding:8px 24px 0"><p style="border-left:2px solid var(--volt);padding:4px 0 4px 18px;margin:18px 0;font-weight:600"><span style="font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--volt-ink);display:block;margin-bottom:4px">The rule, in one breath</span>The marginal mFRR bid sets one imbalance price, and the single-price model pays you for being on the system’s side — not for your volume.</p></div>
+<nav class="lessonseq" style="max-width:860px;margin:0 auto;padding:30px 24px 0;display:flex;justify-content:space-between;gap:16px;font-family:var(--mono);font-size:13px;border-top:1px solid var(--line)"><a href="19_imbalance_settlement.html" style="color:var(--volt-ink);text-decoration:none;max-width:48%">&larr; Builds on &middot; Imbalance settlement: who pays whom</a><a href="09_forward_curve.html" style="color:var(--volt-ink);text-decoration:none;max-width:48%;text-align:right">Next &middot; The forward curve &rarr;</a></nav>
+
+            <footer class="wrap" style="max-width:860px;margin:0 auto;padding:40px 24px;color:var(--slate);font-size:13px;border-top:1px solid var(--line)">Nordic Power School · Lesson 29 — education only. No bids, no trades, no dispatch. <span style="font-family:var(--mono)">Synthetic data · deterministic.</span></footer>
+
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ---------- Committed predictions + tailored verdicts ---------- */
+  document.querySelectorAll(".choices").forEach(function (group) {
+    var targetId = group.dataset.target;
+    var correct = group.dataset.correct || null;
+    var verdictEl = document.getElementById(targetId + "-verdict");
+    var answerEl = document.getElementById(targetId);
+    var btns = group.querySelectorAll(".choice");
+    btns.forEach(function (btn) {
+      btn.setAttribute("aria-pressed", "false");
+      btn.addEventListener("click", function () {
+        btns.forEach(function (b) { b.classList.remove("selected", "correct", "rethink"); b.setAttribute("aria-pressed", "false"); });
+        btn.classList.add("selected");
+        btn.setAttribute("aria-pressed", "true");
+        var chip;
+        if (!correct) { chip = '<span class="vchip vchip-open">Your call</span>'; }
+        else if (btn.dataset.key === correct) { chip = '<span class="vchip vchip-good">On the money</span>'; btn.classList.add("correct"); }
+        else { chip = '<span class="vchip vchip-rethink">Worth a look</span>'; btn.classList.add("rethink"); }
+        verdictEl.innerHTML = chip + (btn.dataset.lead || "");
+        verdictEl.hidden = false;
+        answerEl.classList.add("open");
+      });
+    });
+  });
+
+  /* ---------- Reserve cascade ---------- */
+  var cascTimers = [];
+  var cards = {
+    ffr: document.getElementById("rc-ffr"),
+    fcr: document.getElementById("rc-fcr"),
+    afrr: document.getElementById("rc-afrr"),
+    mfrr: document.getElementById("rc-mfrr")
+  };
+  var phaseEl = document.getElementById("casc-phase");
+  var hzEl = document.getElementById("casc-hz");
+  var readoutEl = document.getElementById("casc-readout");
+  var pathEl = document.getElementById("casc-path");
+  var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  function clearCasc() {
+    cascTimers.forEach(clearTimeout); cascTimers = [];
+    Object.keys(cards).forEach(function (k) { cards[k].classList.remove("active"); });
+  }
+  function resetCasc() {
+    clearCasc();
+    phaseEl.textContent = "System balanced \u00b7 50.00 Hz";
+    hzEl.textContent = "50.00";
+    readoutEl.classList.remove("low");
+    if (pathEl) { pathEl.style.transition = "none"; pathEl.style.strokeDashoffset = "0"; }
+  }
+  function setPhase(txt, hz, low) {
+    phaseEl.textContent = txt;
+    if (hz != null) hzEl.textContent = hz;
+    readoutEl.classList.toggle("low", !!low);
+  }
+  function tripUnit() {
+    clearCasc();
+    var len = pathEl.getTotalLength ? pathEl.getTotalLength() : 700;
+    if (reduce) {
+      pathEl.style.transition = "none"; pathEl.style.strokeDashoffset = "0";
+      Object.keys(cards).forEach(function (k) { cards[k].classList.add("active"); });
+      setPhase("Balanced \u00b7 50.00 Hz \u00b7 fast reserves released", "50.00", false);
+      return;
+    }
+    pathEl.style.strokeDasharray = len;
+    pathEl.style.strokeDashoffset = len;
+    // force reflow then animate the draw
+    void pathEl.getBoundingClientRect();
+    pathEl.style.transition = "stroke-dashoffset 5s linear";
+    pathEl.style.strokeDashoffset = "0";
+
+    setPhase("Unit tripped \u2014 frequency falling", "49.97", true);
+    cards.ffr.classList.add("active");
+    cascTimers.push(setTimeout(function () { cards.fcr.classList.add("active"); setPhase("FFR + FCR \u2014 containing the fall", "49.85", true); }, 700));
+    cascTimers.push(setTimeout(function () { cards.afrr.classList.add("active"); setPhase("aFRR \u2014 restoring frequency", "49.90", true); }, 2200));
+    cascTimers.push(setTimeout(function () { cards.mfrr.classList.add("active"); setPhase("mFRR \u2014 restoring & freeing reserves", "49.96", true); }, 3600));
+    cascTimers.push(setTimeout(function () { setPhase("Balanced \u00b7 50.00 Hz \u00b7 fast reserves released", "50.00", false); }, 5000));
+  }
+  document.getElementById("casc-trip").addEventListener("click", tripUnit);
+  document.getElementById("casc-reset").addEventListener("click", resetCasc);
+  resetCasc();
+
+  /* ---------- Regulation merit walk (synthetic) ---------- */
+  var SPOT = 50;
+  var UP   = [ {p:52,q:80}, {p:58,q:90}, {p:70,q:100}, {p:95,q:120}, {p:140,q:150} ]; // asc
+  var DOWN = [ {p:46,q:80}, {p:38,q:90}, {p:20,q:100}, {p:0,q:120}, {p:-30,q:150} ];   // desc
+  var SHORTFALL = 50; // MWh short, fixed example
+  var slider = document.getElementById("imb-slider");
+
+  function eur(v) {
+    var s = Math.abs(v).toLocaleString("en-US");
+    return (v < 0 ? "\u2212\u20ac" : "\u20ac") + s;
+  }
+
+  function renderMerit() {
+    var imb = parseInt(slider.value, 10);
+    var out = document.getElementById("imb-out");
+    var stackTitle = document.getElementById("stack-title");
+    var bidsEl = document.getElementById("reg-bids");
+
+    var stack, dir, need, price, label;
+    if (imb === 0) {
+      out.textContent = "balanced"; dir = "\u2014"; price = SPOT; need = 0; stack = []; label = "No regulation needed";
+    } else if (imb < 0) {
+      need = -imb; out.textContent = "short " + need + " MW"; dir = "UP"; stack = UP; label = "Up-regulation bids \u25b8 cheapest first";
+    } else {
+      need = imb; out.textContent = "long " + need + " MW"; dir = "DOWN"; stack = DOWN; label = "Down-regulation bids \u25b8 most attractive first";
+    }
+    stackTitle.textContent = label;
+
+    // walk the stack
+    var consumed = [], rem = need, marg = (imb === 0 ? SPOT : stack[0].p);
+    for (var i = 0; i < stack.length; i++) {
+      var take = rem > 0 ? Math.min(rem, stack[i].q) : 0;
+      consumed.push(take);
+      if (take > 0) marg = stack[i].p;
+      rem -= take;
+    }
+    if (imb !== 0) price = marg;
+
+    // render bid ladder (or balanced placeholder)
+    if (imb === 0) {
+      bidsEl.innerHTML = '<p style="font-family:var(--font-data);font-size:13px;color:var(--muted);padding:6px 0">System is balanced — no bids activated. Imbalance price tracks spot, \u20ac50/MWh.</p>';
+    } else {
+      bidsEl.innerHTML = stack.map(function (lvl, i) {
+        var eaten = consumed[i] || 0;
+        var pct = Math.round((eaten / lvl.q) * 100);
+        var fired = eaten > 0 ? " fired" : "";
+        return '<div class="reg-level' + fired + '">' +
+          '<div class="rl-bar" style="width:' + pct + '%"></div>' +
+          '<div class="rl-text"><span class="rl-px">' + eur(lvl.p) + '</span>' +
+          '<span>' + lvl.q + ' MW' + (eaten > 0 ? ' <span class="rl-eaten">(' + eaten + ' fired)</span>' : '') +
+          '</span></div></div>';
+      }).join("");
+    }
+
+    document.getElementById("reg-dir").textContent = dir;
+    document.getElementById("reg-need").textContent = imb === 0 ? "system balanced" : "covering " + need + " MW";
+    document.getElementById("reg-price").textContent = eur(price);
+    var diff = price - SPOT;
+    document.getElementById("reg-vs").textContent =
+      diff === 0 ? "= spot \u20ac50" : (diff > 0 ? "+\u20ac" + diff : "\u2212\u20ac" + Math.abs(diff)) + " vs spot";
+
+    // settlement of a 50 MWh short position at this price
+    var settle = SHORTFALL * price; // >0 means pay, <0 means receive
+    var valEl = document.getElementById("settle-val");
+    var noteEl = document.getElementById("settle-note");
+    if (settle >= 0) {
+      valEl.textContent = "pay " + eur(settle);
+      valEl.className = "settle-val pay";
+    } else {
+      valEl.textContent = "receive " + eur(-settle);
+      valEl.className = "settle-val receive";
+    }
+    if (imb < 0) {
+      noteEl.textContent = "You were short while the system was short — you worsened the shortage, and pay the up-regulation price.";
+    } else if (imb > 0) {
+      noteEl.textContent = settle < 0
+        ? "You were short while the system was long — you helped balance it, and the single price pays you."
+        : "You were short while the system was long — your shortfall helped, so settlement is mild or in your favour.";
+    } else {
+      noteEl.textContent = "System balanced — your shortfall simply settles at spot.";
+    }
+  }
+  slider.addEventListener("input", renderMerit);
+  renderMerit();
+
+})();
+</script>
+</body>
+</html>

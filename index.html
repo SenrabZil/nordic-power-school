@@ -1,0 +1,623 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nordic Power School — learn what sets every Nordic price</title>
+<style>
+  :root{
+    --frost:#EEF3F7; --panel:#FFFFFF; --ink:#13202E; --slate:#5A6A7A;
+    --line:#D3DDE6; --deep:#0E1F33; --deep-2:#16314E; --edge:#1d3b54;
+    --volt:#10B5C9; --volt-ink:#0A7E8E; --ember:#E0913A; --ok:#2FA980;
+    --mono: ui-monospace,"SF Mono","Cascadia Code",Consolas,"Roboto Mono",monospace;
+    --sans: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--frost);color:var(--ink);font-family:var(--sans);font-size:17px;line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 28px}
+  a{color:inherit;text-decoration:none}
+
+  /* nav */
+  nav{position:absolute;top:0;left:0;right:0;z-index:10}
+  .navbar{display:flex;align-items:center;justify-content:space-between;height:68px}
+  .brand{display:flex;align-items:center;gap:11px;color:#fff}
+  .brand .mark{width:26px;height:26px}
+  .brand b{font-weight:760;letter-spacing:-.01em;font-size:16px}
+  .pill{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;
+    border:1px solid rgba(255,255,255,.28);color:#bfe3ea;border-radius:999px;padding:6px 12px}
+
+  /* hero */
+  .hero{position:relative;background:radial-gradient(125% 95% at 80% 16%, #163a54 0%, #0c2236 44%, #07121d 100%);overflow:hidden}
+  .gridbg{position:absolute;inset:0;width:100%;height:100%}
+  .gridbg svg{width:100%;height:100%;display:block}
+  .scrim{position:absolute;inset:0;background:
+     linear-gradient(90deg, rgba(11,24,38,.96) 0%, rgba(11,24,38,.7) 38%, rgba(11,24,38,.12) 72%, rgba(11,24,38,0) 100%);}
+  .scrim-b{position:absolute;left:0;right:0;bottom:0;height:120px;background:linear-gradient(180deg,transparent,rgba(238,243,247,.0) 30%, var(--frost));}
+  .herocontent{position:relative;z-index:5;padding:128px 0 104px;max-width:620px}
+  .eyebrow{font-family:var(--mono);font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--volt);margin-bottom:20px}
+  h1{font-size:clamp(38px,6.4vw,68px);line-height:1.0;letter-spacing:-.025em;margin:0 0 20px;color:#fff;font-weight:800}
+  .sub{font-size:clamp(18px,2.2vw,21px);color:#b9cdda;max-width:44ch;margin:0 0 30px}
+  .cta{display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+  .btn{display:inline-flex;align-items:center;gap:9px;font-weight:650;font-size:16px;border-radius:11px;
+    padding:13px 22px;cursor:pointer;border:0}
+  .btn-primary{background:var(--volt);color:#04222a}
+  .btn-primary:hover{filter:brightness(1.06)}
+  .btn-ghost{background:transparent;color:#cfe3ea;border:1px solid rgba(255,255,255,.25)}
+  .btn-ghost:hover{border-color:var(--volt);color:#fff}
+  .btn svg{width:18px;height:18px}
+
+  /* grid graphic elements */
+  .edge{stroke:var(--edge);stroke-width:1.4;fill:none}
+  .flow{stroke:var(--volt);stroke-width:1.7;fill:none;stroke-linecap:round;stroke-dasharray:5 95;opacity:.9;
+    animation:flow 3.4s linear infinite}
+  @keyframes flow{to{stroke-dashoffset:-100}}
+  .node{fill:#0e2738;stroke:var(--volt);stroke-width:1.5}
+  .node-c{fill:var(--volt)}
+  .ring{fill:none;stroke:var(--volt);animation:ring 3.6s ease-out infinite}
+  @keyframes ring{0%{r:5;opacity:.55}100%{r:22;opacity:0}}
+  .zlabel{font-family:var(--mono);font-size:12px;fill:#7fb6c4;letter-spacing:.04em}
+
+  /* sections */
+  section{padding:72px 0}
+  .kicker{font-family:var(--mono);font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--volt-ink);margin-bottom:10px}
+  h2{font-size:clamp(26px,3.6vw,38px);line-height:1.08;letter-spacing:-.02em;margin:0 0 8px;font-weight:760}
+  .secsub{color:var(--slate);margin:0 0 34px;max-width:54ch}
+
+  /* lesson grid */
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+  .lesson{display:flex;flex-direction:column;background:var(--panel);border:1px solid var(--line);
+    border-radius:16px;padding:22px;transition:transform .18s ease, box-shadow .18s ease, border-color .18s}
+  a.lesson:hover{transform:translateY(-3px);box-shadow:0 14px 34px rgba(14,31,51,.10);border-color:var(--volt)}
+  .lesson .top{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+  .ico{width:42px;height:42px;border-radius:11px;display:grid;place-items:center;background:#e7f5f8;color:var(--volt-ink)}
+  .ico svg{width:23px;height:23px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+  .lnum{font-family:var(--mono);font-size:13px;color:var(--slate)}
+  .lesson h3{margin:0 0 6px;font-size:19px;letter-spacing:-.01em}
+  .lesson p{margin:0 0 18px;font-size:14.5px;color:var(--slate);flex:1}
+  .status{align-self:flex-start;font-family:var(--mono);font-size:11.5px;letter-spacing:.05em;text-transform:uppercase;
+    border-radius:999px;padding:5px 11px}
+  .status.ready{background:#e3f6ee;color:#1c7a59}
+  .status.soon{background:#eef2f6;color:#7a8a99}
+  .lesson.locked{opacity:.86}
+  .open{display:inline-flex;align-items:center;gap:6px;color:var(--volt-ink);font-weight:650;font-size:14px;margin-top:14px}
+  .open svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2}
+
+  /* roadmap */
+  .road{background:var(--deep);border-radius:20px;padding:40px;color:#dCEbF0;position:relative;overflow:hidden}
+  .road h2{color:#fff} .road .secsub{color:#9fbac9}
+  .phases{display:grid;grid-template-columns:1fr auto 1fr;gap:22px;align-items:stretch;margin-top:26px}
+  .phase{background:#13314a;border:1px solid #21465f;border-radius:14px;padding:22px}
+  .phase.now{border-color:var(--volt);box-shadow:0 0 0 1px var(--volt) inset}
+  .phase .ph{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--volt);margin-bottom:8px}
+  .phase h4{margin:0 0 8px;font-size:18px;color:#fff}
+  .phase p{margin:0;font-size:14px;color:#a9c4d2}
+  .arrow{display:grid;place-items:center;color:var(--volt)}
+  .arrow svg{width:34px;height:34px;stroke:currentColor;fill:none;stroke-width:1.6}
+
+  /* pillars */
+  .pillars{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+  .pillar{padding:6px 4px}
+  .pillar .pico{width:40px;height:40px;color:var(--volt-ink);margin-bottom:12px}
+  .pillar .pico svg{width:40px;height:40px;stroke:currentColor;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+  .pillar h4{margin:0 0 5px;font-size:16px}
+  .pillar p{margin:0;font-size:14px;color:var(--slate)}
+
+  footer{border-top:1px solid var(--line);padding:34px 0;color:var(--slate);font-size:13px;
+    display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
+  footer .mono{font-family:var(--mono)}
+
+  :focus-visible{outline:2px solid var(--volt);outline-offset:2px}
+  @media (max-width:860px){ .grid{grid-template-columns:1fr 1fr} .pillars{grid-template-columns:1fr 1fr}
+    .phases{grid-template-columns:1fr} .arrow{transform:rotate(90deg)} }
+  @media (max-width:560px){ .grid{grid-template-columns:1fr} .pillars{grid-template-columns:1fr} }
+  @media (prefers-reduced-motion:reduce){.flow,.ring{animation:none} .flow{opacity:.5}}
+
+  /* hero v3 — cinematic: accurate interconnector network (right), asset silhouettes, left scrim */
+  .heromap{position:absolute;top:0;right:0;width:66%;height:100%;z-index:1}
+  .heromap svg{width:100%;height:100%;display:block;overflow:visible}
+  .assets{position:absolute;left:0;right:0;bottom:0;height:44%;z-index:2;opacity:.55;pointer-events:none}
+  .assets svg{width:100%;height:100%;display:block}
+  .hubglow{fill:var(--volt);opacity:.13}
+  .edge.ext{stroke:#214a64;stroke-dasharray:4 6;opacity:.85}
+  .zlabel.ext{fill:#5f93a6}
+  .asil{fill:#0a1d2c;stroke:#1b425b;stroke-width:1}
+  .ablade{stroke:#27536e;stroke-width:2;fill:none;stroke-linecap:round}
+  .scrim{z-index:3} .scrim-b{z-index:4}
+  @media (max-width:860px){ .heromap{width:112%;right:-10%;opacity:.40} .assets{opacity:.30} .herocontent{max-width:100%}
+    .scrim{background:linear-gradient(90deg,rgba(9,20,33,.96),rgba(9,20,33,.6) 72%,rgba(9,20,33,.3))} }
+  /* curriculum tiers */
+  .tierlegend{grid-column:1/-1;display:flex;gap:22px;flex-wrap:wrap;align-items:center;font-size:13.5px;color:var(--slate);padding-bottom:8px;margin-bottom:2px}
+  .tierlegend i{display:inline-flex;align-items:center;gap:8px;font-style:normal}
+  .tierlegend .d{width:10px;height:10px;border-radius:50%}
+  .tierlegend .d.core{background:var(--volt)}
+  .tierlegend .d.lab{background:transparent;border:1.6px solid var(--volt-ink)}
+  .tierlegend .d.ext{background:transparent;border:1.6px solid var(--slate)}
+  .lesson.tier-ext{opacity:.82}
+  .lesson.tier-ext:hover{opacity:1}
+  .lesson.tier-lab{border-style:dashed;border-color:var(--volt-ink)}
+</style>
+</head>
+<body>
+
+<nav><div class="wrap navbar">
+  <div class="brand">
+    <svg class="mark" viewBox="0 0 24 24" fill="none"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z" stroke="#10B5C9" stroke-width="1.6" stroke-linejoin="round"/></svg>
+    <b>Nordic Power School</b>
+  </div>
+  <span style="display:flex;align-items:center;gap:18px">
+    <a href="#curriculum" style="font-family:var(--mono);font-size:13px;color:#bfe3ea">Curriculum</a>
+    <a href="survey.html" style="font-family:var(--mono);font-size:13px;color:#bfe3ea">Survey</a>
+    <span class="pill"><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-1px;margin-right:5px"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>Education only</span>
+  </span>
+</div></nav>
+
+<header class="hero">
+  <div class="heromap" aria-hidden="true"><svg viewBox="0 0 1200 560" preserveAspectRatio="xMidYMid meet"><line class="edge" x1="776" y1="356" x2="800" y2="426"/><line class="edge ext" x1="776" y1="356" x2="672" y2="500"/><line class="edge ext" x1="776" y1="356" x2="760" y2="526"/><line class="edge ext" x1="776" y1="356" x2="886" y2="536"/><line class="edge ext" x1="800" y1="426" x2="672" y2="500"/><line class="edge ext" x1="800" y1="426" x2="760" y2="526"/><line class="edge ext" x1="800" y1="426" x2="886" y2="536"/><line class="edge ext" x1="886" y1="430" x2="886" y2="536"/><line class="edge ext" x1="962" y1="360" x2="886" y2="536"/><line class="edge ext" x1="962" y1="360" x2="1076" y2="510"/><line class="edge ext" x1="1140" y1="430" x2="1076" y2="510"/><line class="edge" x1="840" y1="300" x2="776" y2="356"/><line class="edge" x1="840" y1="300" x2="786" y2="176"/><line class="edge" x1="840" y1="300" x2="728" y2="250"/><line class="edge" x1="840" y1="300" x2="952" y2="286"/><line class="edge" x1="776" y1="356" x2="728" y2="250"/><line class="edge" x1="786" y1="176" x2="820" y2="72"/><line class="edge" x1="786" y1="176" x2="728" y2="250"/><line class="edge" x1="786" y1="176" x2="910" y2="190"/><line class="edge" x1="820" y1="72" x2="930" y2="96"/><line class="edge" x1="820" y1="72" x2="910" y2="190"/><line class="edge" x1="930" y1="96" x2="910" y2="190"/><line class="edge" x1="930" y1="96" x2="1076" y2="176"/><line class="edge" x1="910" y1="190" x2="952" y2="286"/><line class="edge" x1="952" y1="286" x2="962" y2="360"/><line class="edge" x1="952" y1="286" x2="1076" y2="176"/><line class="edge" x1="952" y1="286" x2="800" y2="426"/><line class="edge" x1="962" y1="360" x2="886" y2="430"/><line class="edge" x1="962" y1="360" x2="1140" y2="430"/><line class="edge" x1="800" y1="426" x2="886" y2="430"/><line class="edge" x1="1076" y1="176" x2="1136" y2="300"/><line class="edge" x1="1136" y1="300" x2="1158" y2="366"/><line class="edge" x1="1158" y1="366" x2="1140" y2="430"/><line class="flow" style="animation-duration:3s" x1="910" y1="190" x2="952" y2="286"/><line class="flow" style="animation-duration:3.6s" x1="952" y1="286" x2="1076" y2="176"/><line class="flow" style="animation-duration:3.3s" x1="1076" y1="176" x2="1136" y2="300"/><line class="flow" style="animation-duration:4s" x1="962" y1="360" x2="1140" y2="430"/><line class="flow" style="animation-duration:3.8s" x1="776" y1="356" x2="886" y2="536"/><line class="flow" style="animation-duration:3.4s" x1="800" y1="426" x2="672" y2="500"/><line class="flow" style="animation-duration:3.1s" x1="840" y1="300" x2="952" y2="286"/><circle class="hubglow" cx="776" cy="356" r="17"/><circle class="hubglow" cx="1076" cy="176" r="17"/><circle class="hubglow" cx="962" cy="360" r="17"/><circle class="hubglow" cx="952" cy="286" r="17"/><circle cx="672" cy="500" r="5" fill="#0e2738" stroke="#2c5670" stroke-width="1.4"/><circle cx="760" cy="526" r="5" fill="#0e2738" stroke="#2c5670" stroke-width="1.4"/><circle cx="886" cy="536" r="5" fill="#0e2738" stroke="#2c5670" stroke-width="1.4"/><circle cx="1076" cy="510" r="5" fill="#0e2738" stroke="#2c5670" stroke-width="1.4"/><circle class="node" cx="820" cy="72" r="6"/><circle class="node-c" cx="820" cy="72" r="2.4"/><circle class="node" cx="786" cy="176" r="6"/><circle class="node-c" cx="786" cy="176" r="2.4"/><circle class="node" cx="728" cy="250" r="6"/><circle class="node-c" cx="728" cy="250" r="2.4"/><circle class="node" cx="840" cy="300" r="6"/><circle class="node-c" cx="840" cy="300" r="2.4"/><circle class="node" cx="776" cy="356" r="7.5"/><circle class="node-c" cx="776" cy="356" r="3"/><circle class="node" cx="930" cy="96" r="6"/><circle class="node-c" cx="930" cy="96" r="2.4"/><circle class="node" cx="910" cy="190" r="6"/><circle class="node-c" cx="910" cy="190" r="2.4"/><circle class="node" cx="952" cy="286" r="7.5"/><circle class="node-c" cx="952" cy="286" r="3"/><circle class="node" cx="962" cy="360" r="7.5"/><circle class="node-c" cx="962" cy="360" r="3"/><circle class="node" cx="1076" cy="176" r="7.5"/><circle class="node-c" cx="1076" cy="176" r="3"/><circle class="node" cx="800" cy="426" r="6"/><circle class="node-c" cx="800" cy="426" r="2.4"/><circle class="node" cx="886" cy="430" r="6"/><circle class="node-c" cx="886" cy="430" r="2.4"/><circle class="node" cx="1136" cy="300" r="6"/><circle class="node-c" cx="1136" cy="300" r="2.4"/><circle class="node" cx="1158" cy="366" r="6"/><circle class="node-c" cx="1158" cy="366" r="2.4"/><circle class="node" cx="1140" cy="430" r="6"/><circle class="node-c" cx="1140" cy="430" r="2.4"/><circle class="ring" cx="952" cy="286" r="5"/><circle class="ring" cx="1076" cy="176" r="5"/><text class="zlabel" x="820" y="59" text-anchor="middle">NO4</text><text class="zlabel" x="773" y="180" text-anchor="end">NO3</text><text class="zlabel" x="715" y="254" text-anchor="end">NO5</text><text class="zlabel" x="855" y="304" text-anchor="start">NO1</text><text class="zlabel" x="763" y="360" text-anchor="end">NO2</text><text class="zlabel" x="930" y="83" text-anchor="middle">SE1</text><text class="zlabel" x="925" y="194" text-anchor="start">SE2</text><text class="zlabel" x="967" y="290" text-anchor="start">SE3</text><text class="zlabel" x="977" y="364" text-anchor="start">SE4</text><text class="zlabel" x="1091" y="180" text-anchor="start">FI</text><text class="zlabel" x="787" y="430" text-anchor="end">DK1</text><text class="zlabel" x="893" y="449" text-anchor="middle">DK2</text><text class="zlabel" x="1151" y="304" text-anchor="start">EE</text><text class="zlabel" x="1173" y="370" text-anchor="start">LV</text><text class="zlabel" x="1155" y="434" text-anchor="start">LT</text><text class="zlabel ext" x="659" y="504" text-anchor="end">GB</text><text class="zlabel ext" x="760" y="545" text-anchor="middle">NL</text><text class="zlabel ext" x="886" y="556" text-anchor="middle">DE</text><text class="zlabel ext" x="1091" y="514" text-anchor="start">PL</text></svg></div>
+  <div class="assets" aria-hidden="true"><svg viewBox="0 0 1200 200" preserveAspectRatio="xMidYMax slice"><g><rect class="asil" x="24" y="150" width="120" height="48" rx="5"/><path class="ablade" d="M82 160 l-10 18 h10 l-8 16" /><rect class="asil" x="194" y="150" width="4" height="50"/><circle class="asil" cx="196" cy="150" r="3"/><line class="ablade" x1="196" y1="150" x2="196" y2="120"/><line class="ablade" x1="196" y1="150" x2="170.019" y2="165"/><line class="ablade" x1="196" y1="150" x2="221.981" y2="165"/><rect class="asil" x="284" y="138" width="4" height="62"/><circle class="asil" cx="286" cy="138" r="3"/><line class="ablade" x1="286" y1="138" x2="286" y2="108"/><line class="ablade" x1="286" y1="138" x2="260.019" y2="153"/><line class="ablade" x1="286" y1="138" x2="311.981" y2="153"/><rect class="asil" x="370" y="150" width="4" height="50"/><circle class="asil" cx="372" cy="150" r="3"/><line class="ablade" x1="372" y1="150" x2="372" y2="120"/><line class="ablade" x1="372" y1="150" x2="346.019" y2="165"/><line class="ablade" x1="372" y1="150" x2="397.981" y2="165"/><polygon class="asil" points="470,200 560,168 720,168 660,200"/><line class="ablade" x1="592" y1="168" x2="508" y2="200" /><line class="ablade" x1="624" y1="168" x2="546" y2="200" /><line class="ablade" x1="656" y1="168" x2="584" y2="200" /><line class="ablade" x1="688" y1="168" x2="622" y2="200" /><line class="ablade" x1="500" y1="184" x2="700" y2="184"/><polygon class="asil" points="1050,200 1066,150 1180,150 1200,200"/><line class="ablade" x1="1086" y1="156" x2="1086" y2="200"/><line class="ablade" x1="1110" y1="156" x2="1110" y2="200"/><line class="ablade" x1="1134" y1="156" x2="1134" y2="200"/><line class="ablade" x1="1158" y1="156" x2="1158" y2="200"/></g></svg></div>
+  <div class="scrim"></div>
+  <div class="scrim-b"></div>
+  <div class="wrap herocontent">
+    <div class="eyebrow">Nordic &amp; Baltic power markets · education-only</div>
+    <h1>Learn what sets<br>every Nordic price.</h1>
+    <p class="sub">Understand Nordic and Baltic power markets &mdash; price formation, zones and borders, balancing, and the data that drives decisions.</p>
+    <div class="cta">
+      <a class="btn btn-primary" href="02_time_zones_and_dst.html">Start with Lesson 02
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+      <a class="btn btn-ghost" href="#curriculum">Browse the curriculum</a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section id="curriculum" class="wrap">
+    <div class="kicker">The curriculum</div>
+    <h2>Built lesson by lesson</h2>
+    <p class="secsub">Each lesson is a single page you open in a browser — no install, works offline. Predict, then reveal. The core path runs in order; labs and professional extensions are optional.</p>
+    <div class="grid">
+      <div class="tierlegend">
+        <i><span class="d core"></span> Core path &mdash; follow in order</i>
+        <i><span class="d lab"></span> Labs &mdash; optional, hands-on</i>
+        <i><span class="d ext"></span> Professional extensions &mdash; any time</i>
+      </div>
+      <div style="grid-column:1/-1;font-family:var(--mono);font-size:12.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--volt-ink)">Foundations: the market map</div>
+
+      <a class="lesson" href="02_time_zones_and_dst.html">
+        <div class="top">
+          <div class="ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
+          <span class="lnum">02</span>
+        </div>
+        <h3>Time &amp; zones</h3>
+        <p>UTC, CET, EET — and the days that aren&rsquo;t 24 hours long. Where most data bugs hide.</p>
+        <span class="status ready">Ready</span>
+        <span class="open">Open lesson <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      </a>
+
+      <a class="lesson" href="31_market_structure.html">
+        <div class="top">
+          <div class="ico"><svg viewBox="0 0 24 24"><path d="M12 3 3 7.5 12 12l9-4.5L12 3zM3 12l9 4.5L21 12M3 16.5 12 21l9-4.5"/></svg></div>
+          <span class="lnum">31</span>
+        </div>
+        <h3>Who does what</h3>
+        <p>The roles behind every price &mdash; TSO, BRP, BSP, exchange, supplier &mdash; and who answers for what.</p>
+        <span class="status ready">Ready</span>
+        <span class="open">Open lesson <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      </a>
+
+      <a class="lesson" href="32_market_map.html">
+        <div class="top">
+          <div class="ico"><svg viewBox="0 0 24 24"><path d="M9 4 3 7v13l6-3 6 3 6-3V4l-6 3-6-3zM9 4v13M15 7v13"/></svg></div>
+          <span class="lnum">32</span>
+        </div>
+        <h3>The Nordic/Baltic map</h3>
+        <p>Fifteen bidding zones, their TSOs, Nord Pool and eSett, and the wires that link them.</p>
+        <span class="status ready">Ready</span>
+        <span class="open">Open lesson <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      </a>
+
+      <a class="lesson" href="33_delivery_lifecycle.html">
+        <div class="top">
+          <div class="ico"><svg viewBox="0 0 24 24"><path d="M3 12h6M15 12h6M12 9a3 3 0 100 6 3 3 0 100-6z"/></svg></div>
+          <span class="lnum">33</span>
+        </div>
+        <h3>The delivery-hour lifecycle</h3>
+        <p>One hour, decided in layers &mdash; forecast, day-ahead, intraday, balancing, settlement.</p>
+        <span class="status ready">Ready</span>
+        <span class="open">Open lesson <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      </a>
+
+      <div style="grid-column:1/-1;font-family:var(--mono);font-size:12.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--volt-ink);border-top:1px solid var(--line);padding-top:20px;margin-top:6px">The price engine</div>
+
+      <a class="lesson" href="03_price_formation.html">
+        <div class="top">
+          <div class="ico"><svg viewBox="0 0 24 24"><path d="M3 20h18M6 20V10M11 20V5M16 20v-8M21 20V8"/></svg></div>
+          <span class="lnum">03</span>
+        </div>
+        <h3>Price formation</h3>
+        <p>Merit order, the marginal unit, and why wind floods the midday curve.</p>
+        <span class="status ready">Ready</span>
+        <span class="open">Open lesson <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      </a>
+
+      <a class="lesson" href="16_hydro_water_value.html">
+        <div class="top">
+          <div class="ico"><svg viewBox="0 0 24 24"><path d="M4 14c2 0 2-2 4-2s2 2 4 2 2-2 4-2 2 2 4 2M4 18c2 0 2-2 4-2s2 2 4 2 2-2 4-2 2 2 4 2M12 3v6M9 6l3-3 3 3"/></svg></div>
+          <span class="lnum">16</span>
+        </div>
+        <h3>Hydro &amp; the water value <span style="font-family:var(--mono);font-size:11px;color:var(--volt-ink)">· Nordic foundation</span></h3>
+        <p>Reservoirs as a battery, and the price of holding water — the hand behind half the curve.</p>
+        <span class="status ready">Ready</span>
+        <span class="open">Open lesson <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      </a>
+
+      <a class="lesson" href="20_negative_prices.html">
+        <div class="top">
+          <div class="ico"><svg viewBox="0 0 24 24"><path d="M3 9h18M12 4v4M7 13h10M9 17h6M5 21h14"/><path d="M8 6l-2-2M16 6l2-2"/></svg></div>
+          <span class="lnum">20</span>
+        </div>
+        <h3>Negative prices <span style="font-family:var(--mono);font-size:11px;color:var(--volt-ink)">· core pattern</span></h3>
+        <p>When subsidised, inflexible supply outruns demand and the price falls below zero.</p>
+        <span class="status ready">Ready</span>
+        <span class="open">Open lesson <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      </a>
+
+      <div style="grid-column:1/-1;font-family:var(--mono);font-size:12.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--volt-ink);border-top:1px solid var(--line);padding-top:20px;margin-top:6px">Reading the market</div>
+
+      <a class="lesson" href="06_reading_the_replay.html">
+        <div class="top">
+          <div class="ico"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/><circle cx="19" cy="18" r="2"/></svg></div>
+          <span class="lnum">06</span>
+        </div>
+        <h3>Reading the replay</h3>
+        <p>Step through historical days — predict the next print before it reveals.</p>
+        <span class="status ready">Ready</span>
+        <span class="open">Open lesson <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      </a>
+
+      <a class="lesson" href="07_reading_curves.html">
+        <div class="top">
+          <div class="ico"><svg viewBox="0 0 24 24"><path d="M3 15c3-8 6-8 9 0s6 8 9 0"/><path d="M3 9c3 6 6 6 9 0s6-6 9 0"/></svg></div>
+          <span class="lnum">07</span>
+        </div>
+        <h3>Reading curves together</h3>
+        <p>Overlay price, demand and wind — and find the one relationship that drives the rest.</p>
+        <span class="status ready">Ready</span>
+        <span class="open">Open lesson <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      </a>
+
+      <a class="lesson" href="08_spreads_duration.html">
+        <div class="top">
+          <div class="ico"><svg viewBox="0 0 24 24"><path d="M3 7h5v4h5v4h5v3M3 18h18"/></svg></div>
+          <span class="lnum">08</span>
+        </div>
+        <h3>Spreads &amp; the duration curve</h3>
+        <p>The spread is the prize — sort the day and read how many hours of it you can reach.</p>
+        <span class="status ready">Ready</span>
+        <span class="open">Open lesson <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      </a>
+
+      <a class="lesson" href="15_capstone.html">
+        <div class="top">
+          <div class="ico"><svg viewBox="0 0 24 24"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M18 6l-2.5 2.5M8.5 15.5 6 18"/><circle cx="12" cy="12" r="3"/></svg></div>
+          <span class="lnum">15</span>
+        </div>
+        <h3>Market reading checkpoint</h3>
+        <p>Read one recorded day end to end: demand, wind, hydro and price shape.</p>
+        <span class="status ready">Ready</span>
+        <span class="open">Open lesson <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      </a>
+
+      <div style="grid-column:1/-1;font-family:var(--mono);font-size:12.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--volt-ink);border-top:1px solid var(--line);padding-top:20px;margin-top:6px">Grid, zones & borders</div>
+
+      <a class="lesson" href="04_zonal_pricing.html">
+        <div class="top">
+          <div class="ico"><svg viewBox="0 0 24 24"><circle cx="5" cy="6" r="2.4"/><circle cx="19" cy="18" r="2.4"/><path d="M7 8l3.2 3.2M13.8 14.8 17 18"/></svg></div>
+          <span class="lnum">04</span>
+        </div>
+        <h3>Zonal pricing <span style="font-family:var(--mono);font-size:11px;color:var(--volt-ink)">· grid foundation</span></h3>
+        <p>Market coupling, interconnectors, and how one price splits into two when a wire congests.</p>
+        <span class="status ready">Ready</span>
+        <span class="open">Open lesson <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      </a>
+
+      <a class="lesson" href="17_cross_zonal_spreads.html">
+        <div class="top">
+          <div class="ico"><svg viewBox="0 0 24 24"><circle cx="6" cy="7" r="2.5"/><circle cx="18" cy="17" r="2.5"/><path d="M8 8l8 8M6 10v4M18 10v4"/></svg></div>
+          <span class="lnum">17</span>
+        </div>
+        <h3>Cross-zonal spreads <span style="font-family:var(--mono);font-size:11px;color:var(--volt-ink)">· border pattern</span></h3>
+        <p>Two zones, one wire — when the border splits and a spread opens you can read.</p>
+        <span class="status ready">Ready</span>
+        <span class="open">Open lesson <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      </a>
+
+      <a class="lesson" href="21_interconnectors_coupling.html">
+        <div class="top">
+          <div class="ico"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="2.5"/><circle cx="19" cy="12" r="2.5"/><path d="M7.5 12h9M13 8.5l3.5 3.5-3.5 3.5"/></svg></div>
+          <span class="lnum">21</span>
+        </div>
+        <h3>Interconnectors &amp; coupling <span style="font-family:var(--mono);font-size:11px;color:var(--volt-ink)">· grid foundation</span></h3>
+        <p>How the auction allocates the cable implicitly, congestion rent, NTC vs flow-based, and outages.</p>
+        <span class="status ready">Ready</span>
+        <span class="open">Open lesson <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      </a>
+
+      <a class="lesson" href="26_baltic_dimension.html">
+        <div class="top">
+          <div class="ico"><svg viewBox="0 0 24 24"><circle cx="6" cy="6" r="2"/><circle cx="18" cy="6" r="2"/><circle cx="12" cy="18" r="2"/><path d="M8 6h8M7.6 7.6l3.4 8.8M16.4 7.6l-3.4 8.8"/></svg></div>
+          <span class="lnum">26</span>
+        </div>
+        <h3>The Baltic dimension <span style="font-family:var(--mono);font-size:11px;color:var(--volt-ink)">· regional focus</span></h3>
+        <p>The 2025 break from BRELL and join to continental Europe, the cables to the Nordics, and why this small, thin-linked corner decouples so readily.</p>
+        <span class="status ready">Ready</span>
+        <span class="open">Open lesson <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      </a>
+
+      <div style="grid-column:1/-1;font-family:var(--mono);font-size:12.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--volt-ink);border-top:1px solid var(--line);padding-top:20px;margin-top:6px">From schedule to real time</div>
+
+      <a class="lesson" href="18_intraday_market.html">
+        <div class="top">
+          <div class="ico"><svg viewBox="0 0 24 24"><path d="M3 16l4-5 3 3 5-7 4 5M3 20h18"/></svg></div>
+          <span class="lnum">18</span>
+        </div>
+        <h3>The intraday market <span style="font-family:var(--mono);font-size:11px;color:var(--volt-ink)">· bonus</span></h3>
+        <p>Day-ahead freezes a plan; intraday trades the change when the forecast moves.</p>
+        <span class="status ready">Ready</span>
+        <span class="open">Open lesson <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      </a>
+
+      <a class="lesson tier-lab" href="28_intraday_interactive.html">
+        <div class="top">
+          <div class="ico"><svg viewBox="0 0 24 24"><path d="M4 18V9M9 18V5M14 18v-6M19 18v-9M3 21h18"/></svg></div>
+          <span class="lnum">28</span>
+        </div>
+        <h3>Intraday: the auction &amp; the book <span style="font-family:var(--mono);font-size:11px;color:var(--volt-ink)">&middot; interactive</span></h3>
+        <p>Auctions versus the continuous order book &mdash; step a live synthetic book and watch a short position walk it.</p>
+        <span class="status ready">Ready</span>
+        <span class="open">Open lesson <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      </a>
+
+      <a class="lesson" href="05_balancing_imbalance.html">
+        <div class="top">
+          <div class="ico"><svg viewBox="0 0 24 24"><path d="M3 14c3-6 6-6 9 0s6 6 9 0M3 9h.01"/></svg></div>
+          <span class="lnum">05</span>
+        </div>
+        <h3>Balancing: when real time takes over</h3>
+        <p>What Fingrid&rsquo;s prices mean, and how the system settles after the gate.</p>
+        <span class="status ready">Ready</span>
+        <span class="open">Open lesson <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      </a>
+
+      <a class="lesson" href="11_ancillary_services.html">
+        <div class="top">
+          <div class="ico"><svg viewBox="0 0 24 24"><path d="M3 12h4l2 6 3-12 2 9 2-3h5"/></svg></div>
+          <span class="lnum">11</span>
+        </div>
+        <h3>Ancillary services</h3>
+        <p>Holding 50 Hz — inertia, the reserve ladder (FFR, FCR, aFRR, mFRR), and why batteries fit.</p>
+        <span class="status ready">Ready</span>
+        <span class="open">Open lesson <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      </a>
+
+      <a class="lesson" href="19_imbalance_settlement.html">
+        <div class="top">
+          <div class="ico"><svg viewBox="0 0 24 24"><path d="M12 3v18M7 21h10M5 7h14M5 7l-2.5 5.5a3 3 0 0 0 5 0L5 7M19 7l-2.5 5.5a3 3 0 0 0 5 0L19 7"/></svg></div>
+          <span class="lnum">19</span>
+        </div>
+        <h3>Imbalance settlement: who pays whom</h3>
+        <p>Where the single imbalance price comes from, and who settles it — the machinery under Lesson 05.</p>
+        <span class="status ready">Ready</span>
+        <span class="open">Open lesson <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      </a>
+
+      <a class="lesson tier-lab" href="29_imbalance_interactive.html">
+        <div class="top">
+          <div class="ico"><svg viewBox="0 0 24 24"><path d="M12 3v18M5 7h14M5 7l-2.5 5.5a3 3 0 0 0 5 0L5 7M19 7l-2.5 5.5a3 3 0 0 0 5 0L19 7M8 21h8"/></svg></div>
+          <span class="lnum">29</span>
+        </div>
+        <h3>Imbalance lab: long system, short system <span style="font-family:var(--mono);font-size:11px;color:var(--volt-ink)">&middot; interactive</span></h3>
+        <p>The reserve cascade, and a single-price settlement you can drag from a short system to a long one.</p>
+        <span class="status ready">Ready</span>
+        <span class="open">Open lesson <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      </a>
+
+      <div style="grid-column:1/-1;font-family:var(--mono);font-size:12.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--volt-ink);border-top:1px solid var(--line);padding-top:20px;margin-top:6px">Trading & assets</div>
+
+      <a class="lesson" href="09_forward_curve.html">
+        <div class="top">
+          <div class="ico"><svg viewBox="0 0 24 24"><path d="M3 14c3-7 6-7 9 0s6 7 9 0M3 19h18"/></svg></div>
+          <span class="lnum">09</span>
+        </div>
+        <h3>The forward curve</h3>
+        <p>Spot vs futures, the seasonal wave, and the reservoir level that sets its height.</p>
+        <span class="status ready">Ready</span>
+        <span class="open">Open lesson <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      </a>
+
+      <a class="lesson" href="10_arbitrage.html">
+        <div class="top">
+          <div class="ico"><svg viewBox="0 0 24 24"><path d="M7 17V7l-3 3M7 7l3 3M17 7v10l3-3M17 17l-3-3"/></svg></div>
+          <span class="lnum">10</span>
+        </div>
+        <h3>Arbitrage</h3>
+        <p>Turning a spread into a captured margin, once losses and costs are honest.</p>
+        <span class="status ready">Ready</span>
+        <span class="open">Open lesson <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      </a>
+
+      <a class="lesson" href="13_bess_value_stacking.html">
+        <div class="top">
+          <div class="ico"><svg viewBox="0 0 24 24"><rect x="3" y="7" width="15" height="11" rx="2"/><path d="M18 10h2v5h-2M6 11h9M6 14h9"/></svg></div>
+          <span class="lnum">13</span>
+        </div>
+        <h3>BESS value stacking</h3>
+        <p>One battery, several markets — energy, balancing, capacity — earning at once.</p>
+        <span class="status ready">Ready</span>
+        <span class="open">Open lesson <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      </a>
+
+      <a class="lesson" href="14_virtual_power_plants.html">
+        <div class="top">
+          <div class="ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="2.5"/><circle cx="5" cy="6" r="1.5"/><circle cx="19" cy="6" r="1.5"/><circle cx="5" cy="18" r="1.5"/><circle cx="19" cy="18" r="1.5"/><path d="M12 12 5 6M12 12l7-6M12 12l-7 6M12 12l7 6"/></svg></div>
+          <span class="lnum">14</span>
+        </div>
+        <h3>Virtual power plants</h3>
+        <p>Aggregating thousands of small assets into one firm, market-ready plant — the portfolio effect.</p>
+        <span class="status ready">Ready</span>
+        <span class="open">Open lesson <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      </a>
+
+      <div style="grid-column:1/-1;font-family:var(--mono);font-size:12.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--volt-ink);border-top:1px solid var(--line);padding-top:20px;margin-top:6px">Final capstone</div>
+
+      <a class="lesson" href="30_capstone_interactive.html">
+        <div class="top">
+          <div class="ico"><svg viewBox="0 0 24 24"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M6 6l2 2M16 16l2 2M18 6l-2 2M8 16l-2 2"/><circle cx="12" cy="12" r="3.2"/></svg></div>
+          <span class="lnum">30</span>
+        </div>
+        <h3>Final capstone: one hour, end to end <span style="font-family:var(--mono);font-size:11px;color:var(--volt-ink)">&middot; interactive</span></h3>
+        <p>Carry a delivery hour from day-ahead through intraday, balancing and settlement.</p>
+        <span class="status ready">Ready</span>
+        <span class="open">Open lesson <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      </a>
+
+      <div style="grid-column:1/-1;font-family:var(--mono);font-size:12.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--volt-ink);border-top:1px solid var(--line);padding-top:20px;margin-top:6px">Professional extensions</div>
+
+      <a class="lesson tier-ext" href="12_ancillary_markets.html">
+        <div class="top">
+          <div class="ico"><svg viewBox="0 0 24 24"><path d="M3 7l9-4 9 4-9 4-9-4ZM3 12l9 4 9-4M3 17l9 4 9-4"/></svg></div>
+          <span class="lnum">12</span>
+        </div>
+        <h3>Ancillary markets</h3>
+        <p>How reserves are procured and priced — and why you can't sell the same megawatt twice.</p>
+        <span class="status ready">Ready</span>
+        <span class="open">Open lesson <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      </a>
+
+      <a class="lesson tier-ext" href="22_edge_cases.html">
+        <div class="top">
+          <div class="ico"><svg viewBox="0 0 24 24"><path d="M3 17l4-6 3 4 4-10 3 8 4-4"/></svg></div>
+          <span class="lnum">22</span>
+        </div>
+        <h3>Edge cases <span style="font-family:var(--mono);font-size:11px;color:var(--volt-ink)">· deep dive</span></h3>
+        <p>Twelve days the canonical shape doesn&rsquo;t cover: negative floors, Dunkelflaute, decoupling, hydro floods, solar-led dips, scarcity spikes, unit trips, flow reversals and more.</p>
+        <span class="status ready">Ready</span>
+        <span class="open">Open lesson <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      </a>
+
+      <a class="lesson tier-ext" href="23_algo_trading.html">
+        <div class="top">
+          <div class="ico"><svg viewBox="0 0 24 24"><rect x="7" y="7" width="10" height="10" rx="1.5"/><path d="M9 2v3M15 2v3M9 19v3M15 19v3M2 9h3M2 15h3M19 9h3M19 15h3"/></svg></div>
+          <span class="lnum">23</span>
+        </div>
+        <h3>Algorithmic trading <span style="font-family:var(--mono);font-size:11px;color:var(--volt-ink)">· deep dive</span></h3>
+        <p>What trading algorithms are, where they live across day-ahead, intraday and balancing, and how they move liquidity, efficiency and volatility &mdash; under REMIT&nbsp;II.</p>
+        <span class="status ready">Ready</span>
+        <span class="open">Open lesson <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      </a>
+
+      <a class="lesson tier-ext" href="24_carbon_ets.html">
+        <div class="top">
+          <div class="ico"><svg viewBox="0 0 24 24"><path d="M6 16a4 4 0 0 1 0-8 5 5 0 0 1 9.6-1.5A3.5 3.5 0 0 1 18 16Z"/><path d="M9 20h7M11 20v-3"/></svg></div>
+          <span class="lnum">24</span>
+        </div>
+        <h3>Carbon: the price under the price <span style="font-family:var(--mono);font-size:11px;color:var(--volt-ink)">· deep dive</span></h3>
+        <p>The EU&nbsp;ETS, how a carbon cost enters the power price through the marginal plant, why the Nordics feel it less, and what moves the allowance price.</p>
+        <span class="status ready">Ready</span>
+        <span class="open">Open lesson <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      </a>
+
+      <a class="lesson tier-ext" href="25_capture_price.html">
+        <div class="top">
+          <div class="ico"><svg viewBox="0 0 24 24"><path d="M3 4v16h18"/><path d="M7 9l4 4 3-3 5 6" stroke-dasharray="0"/><path d="M7 14l4-1 3-2 5-3"/></svg></div>
+          <span class="lnum">25</span>
+        </div>
+        <h3>Capture price &amp; cannibalisation <span style="font-family:var(--mono);font-size:11px;color:var(--volt-ink)">· deep dive</span></h3>
+        <p>The price a plant actually earns versus the average, the capture rate, and why variable renewables eat their own value as they grow.</p>
+        <span class="status ready">Ready</span>
+        <span class="open">Open lesson <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      </a>
+
+      <a class="lesson tier-ext" href="27_storage_sun_wind.html">
+        <div class="top">
+          <div class="ico"><svg viewBox="0 0 24 24"><circle cx="6" cy="7" r="2.5"/><path d="M6 1v2M6 11v2M1 7h2M11 7h2M2.8 3.8l1.4 1.4M9.8 3.8l-1.4 1.4"/><path d="M14 16a3 3 0 0 1 0-6 4 4 0 0 1 7.5-1A2.5 2.5 0 0 1 21 16Z"/><rect x="5" y="17" width="6" height="5" rx="1"/></svg></div>
+          <span class="lnum">27</span>
+        </div>
+        <h3>Storage, sun &amp; wind <span style="font-family:var(--mono);font-size:11px;color:var(--volt-ink)">· deep dive</span></h3>
+        <p>How renewables manufacture the spread a battery lives on, how storage flattens the spread it captures, and how the whole thing is traded to VWAP.</p>
+        <span class="status ready">Ready</span>
+        <span class="open">Open lesson <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      </a>
+
+      <div style="grid-column:1/-1;font-family:var(--mono);font-size:12.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--volt-ink);border-top:1px solid var(--line);padding-top:20px;margin-top:6px">For testers</div>
+
+      <a class="lesson" href="survey.html" style="background:var(--deep);border-color:var(--deep)">
+        <div class="top">
+          <div class="ico" style="background:rgba(16,181,201,.16);color:var(--volt)"><svg viewBox="0 0 24 24"><path d="M9 4h6a1 1 0 0 1 1 1v1h2v15H6V6h2V5a1 1 0 0 1 1-1Z"/><path d="M9 4v2h6V4M9.5 12l1.5 1.5L14 10"/></svg></div>
+          <span class="lnum" style="color:#7fb6c4">&#9733;</span>
+        </div>
+        <h3 style="color:#fff">Take the survey</h3>
+        <p style="color:#a9c4d2">Tried the interactive lessons? Tell us whether the level and style land &mdash; two minutes, no account, nothing sent automatically.</p>
+        <span class="status" style="background:rgba(16,181,201,.16);color:var(--volt)">For testers</span>
+        <span class="open" style="color:var(--volt)">Open survey <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      </a>
+
+    </div>
+  </section>
+
+  <section class="wrap">
+    <div class="road">
+      <div class="kicker" style="color:var(--volt)">The arc</div>
+      <h2>Offline first. Then live.</h2>
+      <p class="secsub">The curriculum is built and rehearsed on recorded history, where you can predict without consequence. Once the offline lessons are complete, the same engine points at live publications.</p>
+      <div class="phases">
+        <div class="phase now">
+          <div class="ph">Phase 1 · now</div>
+          <h4>Offline lessons</h4>
+          <p>Recorded data, replayed. Predict-then-reveal, full provenance, zero risk. The place to build instinct.</p>
+        </div>
+        <div class="arrow"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="phase">
+          <div class="ph">Phase 2 · next</div>
+          <h4>Live data</h4>
+          <p>The same readers, pointed at fresh publications — re-fetching when the market prints, never streaming for its own sake.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="wrap">
+    <div class="kicker">Why it&rsquo;s built this way</div>
+    <h2>Four principles</h2>
+    <p class="secsub">The school has a spine. Every lesson honours it.</p>
+    <div class="pillars">
+      <div class="pillar">
+        <div class="pico"><svg viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></div>
+        <h4>Predict, then reveal</h4>
+        <p>You commit to a read before the answer uncovers. Guessing then checking is how instinct forms.</p>
+      </div>
+      <div class="pillar">
+        <div class="pico"><svg viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></div>
+        <h4>Offline &amp; private</h4>
+        <p>Lessons run on your machine. Nothing leaves it, and there&rsquo;s nothing to log in to.</p>
+      </div>
+      <div class="pillar">
+        <div class="pico"><svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/><path d="M12 3l7 3v5c0 5-3.5 8-7 9-3.5-1-7-4-7-9V6l7-3Z"/></svg></div>
+        <h4>Provenance always</h4>
+        <p>Every number carries where it came from — feed, fetch time, code version. You can always trace it.</p>
+      </div>
+      <div class="pillar">
+        <div class="pico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M5.6 5.6 18.4 18.4"/></svg></div>
+        <h4>No trade advice</h4>
+        <p>This teaches you to read the market. It never tells you what to bid, trade, or dispatch.</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="wrap">
+  <span>Nordic Power School — education only. No bids, no trades, no dispatch.</span>
+  <span class="mono">UTC in · convert at the edge</span>
+</footer>
+
+</body>
+</html>
