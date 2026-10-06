@@ -152,19 +152,8 @@
     </div>
   </div>
 
-  <div class="q" data-q="voice" data-type="single">
-    <p class="qn">08 &middot; Voice</p>
-    <p class="qt">The mentor voice (Elizabeth Cecilia) felt&hellip;</p>
-    <div class="opts">
-      <button class="opt" data-v="Right tone">Right tone</button>
-      <button class="opt" data-v="Too much personality">Too much</button>
-      <button class="opt" data-v="Too flat">Too flat</button>
-      <button class="opt" data-v="Didn't notice it">Didn't notice</button>
-    </div>
-  </div>
-
   <div class="q" data-q="accuracy" data-type="text">
-    <p class="qn">09 &middot; Accuracy</p>
+    <p class="qn">08 &middot; Accuracy</p>
     <p class="qt">Anything that struck you as wrong, dated, or oversimplified?</p>
     <textarea placeholder="Specifics are gold here &mdash; lesson number and what's off."></textarea>
   </div>
@@ -175,7 +164,7 @@
   </div>
 
   <div class="q" data-q="next" data-type="multi">
-    <p class="qn">10 &middot; What next</p>
+    <p class="qn">09 &middot; What next</p>
     <p class="qt">If we built more, what would be most useful to you?</p>
     <div class="opts">
       <button class="opt" data-v="More lessons">More lessons</button>
@@ -241,10 +230,10 @@
   var LABELS = {
     background:"Background", lessons:"Lessons tried", level:"Level", pace:"Pace",
     clarity:"Clarity (1-5)", predict:"Predict-then-reveal", widgets:"Interactives",
-    voice:"Mentor voice", accuracy:"Accuracy notes", missing:"Missing / would change",
+    accuracy:"Accuracy notes", missing:"Missing / would change",
     next:"What next", other:"Anything else"
   };
-  var ORDER = ["background","lessons","level","pace","clarity","predict","widgets","voice","accuracy","missing","next","other"];
+  var ORDER = ["background","lessons","level","pace","clarity","predict","widgets","accuracy","missing","next","other"];
 
   function compile(){
     var lines = ["Nordic Power School \u2014 tester feedback", "Date: " + new Date().toISOString().slice(0,10), ""];
